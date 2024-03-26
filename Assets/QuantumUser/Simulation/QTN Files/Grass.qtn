@@ -1,0 +1,12 @@
+component Grass
+{
+}
+
+event OnPlayerEnteredGrass
+{
+    EntityRef player;
+}
+event OnPlayerExitGrass
+{
+    EntityRef player;
+}

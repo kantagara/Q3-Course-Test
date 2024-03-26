@@ -1,0 +1,1578 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Quantum.Simulation</name>
+    </assembly>
+    <members>
+        <member name="M:Quantum.NavMeshBaker.BakeNavMesh(Quantum.Map,Quantum.NavMeshBakeData,Quantum.IProgressBar)">
+            <summary>
+            Bake navmesh intermediate date (bake data) into a Quantum navmesh asset.
+            </summary>
+            <param name="map">Map asset that the navmesh belongs to</param>
+            <param name="navmeshBakeData">Bake data</param>
+            <param name="IProgressBar">Progress bar instance, can be null</param>
+            <returns>Baked navmesh asset</returns>
+        </member>
+        <member name="F:Quantum.ShutdownCause.Ok">
+            <summary>
+            Expected shutdown
+            </summary>
+        </member>
+        <member name="F:Quantum.ShutdownCause.StartFailed">
+            <summary>
+            Start timed out or cancelled
+            </summary>
+        </member>
+        <member name="F:Quantum.ShutdownCause.SessionError">
+            <summary>
+            The session threw an exception.
+            </summary>
+        </member>
+        <member name="F:Quantum.ShutdownCause.NetworkError">
+            <summary>
+            Not used.
+            </summary>
+        </member>
+        <member name="F:Quantum.ShutdownCause.SimulationStopped">
+            <summary>
+            Simulation stopped. Could also be a network error.
+            </summary>
+        </member>
+        <member name="T:Quantum.DotNetSessionRunner">
+            <summary>
+            This class implements the <see cref="T:Photon.Deterministic.IDeterministicSessionRunner"/> interface and contains code to glue together the Quantum server and Quantum session runner.
+            This was formerly part of the Quantum Server SDK.
+            </summary>
+        </member>
+        <member name="P:Quantum.DotNetSessionRunner.AssetSerializer">
+            <summary>
+            Get and set the AssetSerializer directly after <see cref="T:Photon.Deterministic.IDeterministicSessionRunner"/> creation, until it is possible to pass it internally.
+            </summary>
+        </member>
+        <member name="P:Quantum.DotNetSessionRunner.Runner">
+            <summary>
+            Grants access to the Quantum session runner.
+            </summary>
+        </member>
+        <member name="M:Quantum.DotNetSessionRunner.Init(Photon.Deterministic.DeterministicSessionRunnerInitArguments)">
+            <summary>
+            Initialized the server simulation. It initilizes static classes like FPLut, Native.Utils and instantiates a static resource manager that is shared over multiple server simulations.
+            This method throws exceptions on errors.
+            </summary>
+        </member>
+        <member name="M:Quantum.DotNetSessionRunner.Shutdown">
+            <summary>
+            Disposes the Quantum runner.
+            </summary>
+        </member>
+        <member name="M:Quantum.DotNetSessionRunner.Start(Photon.Deterministic.DeterministicSessionRunnerStartArguments)">
+            <summary>
+            Implements the start of the Quantum online session. Instantiates a Quantum runner.
+            </summary>
+            <param name="args">Start arguments</param>
+        </member>
+        <member name="M:Quantum.DotNetSessionRunner.Service(System.Double)">
+            <summary>
+            Implements the server update callback.
+            </summary>
+            <param name="gameTime">Game time in seconds</param>
+        </member>
+        <member name="M:Quantum.DotNetSessionRunner.TryCreateSnapshot(System.Int32@,System.Byte[]@)">
+            <summary>
+            Implements the server snapshot requested callback. 
+            This will use the most recent simulated frame on the server to use as a snapshot for late-joining clients.
+            Which will bypass requesting buddy snapshots from other clients.
+            </summary>
+            <param name="tick">The tick of the snapshot.</param>
+            <param name="data">DeterministicFrame object serialized.</param>
+            <returns>True, if the snapshot was set.</returns>
+        </member>
+        <member name="T:Quantum.Core.CullingSystem2D">
+            <summary>
+            During Predicted frames, culls all <see cref="M:Quantum.Core.FrameBase.SetCullable(Quantum.EntityRef,System.Boolean)">cullable</see> entities with
+            <see cref="T:Quantum.Transform2D"/> that are positioned out of the
+            <see cref="M:Quantum.Core.FrameContext.SetPredictionArea(Photon.Deterministic.FPVector3,Photon.Deterministic.FP)">prediction area</see>.
+            </summary>
+            \ingroup Culling
+        </member>
+        <member name="T:Quantum.Core.CullingSystem3D">
+            <summary>
+            During Predicted frames, culls all <see cref="M:Quantum.Core.FrameBase.SetCullable(Quantum.EntityRef,System.Boolean)">cullable</see> entities with
+            <see cref="T:Quantum.Transform3D"/> that are positioned out of the
+            <see cref="M:Quantum.Core.FrameContext.SetPredictionArea(Photon.Deterministic.FPVector3,Photon.Deterministic.FP)">prediction area</see>.
+            </summary>
+            \ingroup Culling
+        </member>
+        <member name="T:Quantum.QuantumGame">
+            <summary>
+            QuantumGame acts as an interface to the simulation from the client code's perspective.
+            </summary>
+            Access and method to this class is always safe from the clients point of view.
+        </member>
+        <member name="T:Quantum.QuantumGame.FramesContainer">
+            <summary>
+            Stores the different frames the simulation uses during one tick.
+            </summary>
+        </member>
+        <member name="P:Quantum.QuantumGame.Frames">
+            <summary> Access the frames of various times available during one tick. </summary>
+        </member>
+        <member name="P:Quantum.QuantumGame.Configurations">
+            <summary> Access the configurations that the simulation is running with. </summary>
+        </member>
+        <member name="P:Quantum.QuantumGame.Session">
+            <summary> Access the Deterministic session object to query more internals. </summary>
+        </member>
+        <member name="P:Quantum.QuantumGame.InterpolationFactor">
+            <summary> Used for position interpolation on the client for smoother interpolation results. </summary>
+        </member>
+        <member name="P:Quantum.QuantumGame.InstantReplayConfig">
+            <summary> </summary>
+        </member>
+        <member name="P:Quantum.QuantumGame.AssetSerializer">
+            <summary> </summary>
+        </member>
+        <member name="P:Quantum.QuantumGame.HeapExtraCount">
+            <summary> Extra heaps to allocate for a session in case you need to create 'auxiliary' frames than actually required for the simulation itself. </summary>
+        </member>
+        <member name="M:Quantum.QuantumGame.GetLocalPlayers">
+            <summary>
+            Returns an array that is unique on every client and represents the global player indices that the local client controls in the Quantum simulation.
+            </summary>
+            <returns>Array of global players this client controls.</returns>
+        </member>
+        <member name="M:Quantum.QuantumGame.GetLocalPlayerSlots">
+            <summary>
+            Returns an array that is unique on every client and represents the player slots that the local client controls in the Quantum simulation.
+            </summary>
+            <returns>Array of local player slots  this client controls.</returns>
+        </member>
+        <member name="M:Quantum.QuantumGame.PlayerIsLocal(Quantum.PlayerRef)">
+            <summary>
+             Helps to decide if a PlayerRef is associated with the local player.
+            </summary>
+            <param name="playerRef">Player reference</param>
+            <returns>True if the player is the local player</returns>
+        </member>
+        <member name="M:Quantum.QuantumGame.SendCommand(Photon.Deterministic.DeterministicCommand)">
+            <summary>
+            Sends a command to the server.
+            </summary>
+            <param name="command">Command to send</param>
+            Commands are similar to input, they drive the simulation, but do not have to be sent regularly.
+            <example><code>
+            RemoveUnitCommand command = new RemoveUnitCommand();
+            command.CellIndex = 42;
+            QuantumRunner.Default.Game.SendCommand(command);
+            </code></example>
+        </member>
+        <member name="M:Quantum.QuantumGame.SendCommand(System.Int32,Photon.Deterministic.DeterministicCommand)">
+            <summary>
+            Sends a command to the server.
+            </summary>
+            <param name="playerSlot">Specify the local player index when you have multiple players controlled from the same machine.</param>
+            <param name="command">Command to send</param>
+            <para>See <see cref="M:Quantum.QuantumGame.SendCommand(Photon.Deterministic.DeterministicCommand)"/></para>
+            <para>Games that only have one local player can ignore the player index field.</para>
+        </member>
+        <member name="M:Quantum.QuantumGame.AddPlayer(Quantum.RuntimePlayer)">
+            <summary>
+            Send data for the local player to join the online match.
+            If the client has multiple local players, the data will be sent for the first player set.
+            </summary>
+            <param name="data">Player data</param>
+            After starting, joining the Quantum Game and after the OnGameStart signal has been fired each player needs to call the AddPlayer method to be added as a player in every ones simulation.\n
+            The reason this needs to be called explicitly is that it greatly simplifies late-joining players.
+        </member>
+        <member name="M:Quantum.QuantumGame.AddPlayer(System.Int32,Quantum.RuntimePlayer)">
+            <summary>
+            Send data for one local player to join the online match.
+            </summary>
+            <param name="playerSlot">Local player index</param>
+            <param name="data">Player data</param>
+            After starting, joining the Quantum Game and after the OnGameStart signal has been fired each player needs to call the AddPlayer method to be added as a player in every ones simulation.\n
+            The reason this needs to be called explicitly is that it greatly simplifies late-joining players.
+        </member>
+        <member name="M:Quantum.QuantumGame.RemovePlayer">
+            <summary>
+            Remove the player. Assuming there is only one local player that this client controls.
+            </summary>
+        </member>
+        <member name="M:Quantum.QuantumGame.RemovePlayer(System.Int32)">
+            <summary>
+            Remove a player slot from the game.
+            </summary>
+            <param name="playerSlot">Local player</param>
+        </member>
+        <member name="M:Quantum.QuantumGame.RemoveAllPlayers">
+            <summary>
+            Removes all players from the game and acts as a spectator.
+            </summary>
+        </member>
+        <member name="P:Quantum.QuantumGame.GameFlags">
+            <summary>
+            <see cref="T:Quantum.QuantumGameFlags"/>
+            </summary>
+        </member>
+        <member name="M:Quantum.QuantumGame.SetPredictionArea(Photon.Deterministic.FPVector3,Photon.Deterministic.FP)">
+            <summary>
+            Set the prediction area.
+            </summary>
+            <param name="position">Center of the prediction area</param>
+            <param name="radius">Radius of the prediction area</param>
+            <para>The Prediction Culling feature must be explicitly enabled in <see cref="!:SimulationConfig.UsePredictionArea"/>.</para>
+            <para>This can be safely called from the main-thread.</para>
+            <para>Prediction Culling allows developers to save CPU time in games where the player has only a partial view of the game scene.
+            Quantum prediction and rollbacks, which are time consuming, will only run for important entities that are visible to the local player(s). Leaving anything outside that area to be simulated only once per tick with no rollbacks as soon as the inputs are confirmed from server.
+            It is safe and simple to activate and, depending on the game, the performance difference can be quite large.Imagine a 30Hz game to constantly rollback ten ticks for every confirmed input (with more players, the predictor eventually misses at least for one of them). This requires the game simulation to be lightweight to be able to run at almost 300Hz(because of the rollbacks). With Prediction Culling enabled the full frames will be simulated at the expected 30Hz all the time while the much smaller prediction area is the only one running within the prediction buffer.</para>
+        </member>
+        <member name="M:Quantum.QuantumGame.SetPredictionArea(Photon.Deterministic.FPVector2,Photon.Deterministic.FP)">
+            <summary>
+            See <see cref="M:Quantum.QuantumGame.SetPredictionArea(Photon.Deterministic.FPVector3,Photon.Deterministic.FP)"/>.
+            </summary>
+            <param name="position"></param>
+            <param name="radius"></param>
+        </member>
+        <member name="T:Quantum.RuntimeConfig">
+            <summary>
+            In contrast to the <see cref="F:Quantum.RuntimeConfig.SimulationConfig"/>, which has only static configuration data, the RuntimeConfig holds information that can be different from game to game.
+            </summary>
+            By default is defines for example what map to load and the random start seed. It is assembled from scratch each time starting a game.
+            <para>Developers can add custom data to quantum_code/quantum.state/RuntimeConfig.User.cs (don't forget to fill out the serialization methods).</para>
+            <para>Like the <see cref="T:Photon.Deterministic.DeterministicSessionConfig"/> this config is distributed to every other client after the first player connected and joined the Quantum plugin.</para>
+        </member>
+        <member name="F:Quantum.RuntimeConfig.Seed">
+            <summary> 
+            Seed to initialize the randomization session under <see cref="P:Quantum.Frame.RNG"/>. 
+            </summary>
+        </member>
+        <member name="F:Quantum.RuntimeConfig.Map">
+            <summary> 
+            Asset reference of the Quantum map used with the upcoming game session. 
+            </summary>
+        </member>
+        <member name="F:Quantum.RuntimeConfig.SimulationConfig">
+            <summary> Asset reference to the SimulationConfig used with the upcoming game session. </summary>
+        </member>
+        <member name="F:Quantum.RuntimeConfig.SystemsConfig">
+            <summary> 
+            Asset reference to the Quantum systems configuration.
+            If no config is assigned then a default selection of build-in systems is used (<see cref="M:Quantum.DeterministicSystemSetup.CreateSystems(Quantum.RuntimeConfig,Quantum.SimulationConfig,Quantum.SystemsConfig)"/>.
+            The systems to be used can always be changed by code inside <see cref="M:Quantum.DeterministicSystemSetup.AddSystemsUser(System.Collections.Generic.ICollection{Quantum.SystemBase},Quantum.RuntimeConfig,Quantum.SimulationConfig,Quantum.SystemsConfig)"/>.
+            </summary>
+        </member>
+        <member name="M:Quantum.RuntimeConfig.Dump">
+            <summary>
+            Dump the content into a human readable form.
+            </summary>
+            <returns>String representation</returns>
+        </member>
+        <member name="T:Quantum.Frame">
+            <summary>
+            The user implementation of <see cref="T:Quantum.Core.FrameBase"/> that resides in the project quantum_state and has access to all user relevant classes.
+            </summary>
+            \ingroup FrameClass
+        </member>
+        <member name="P:Quantum.Frame.Global">
+            <summary>
+            Access the global struct with generated values from the DSL.
+            </summary>
+        </member>
+        <member name="P:Quantum.Frame.GlobalsCore">
+            <summary>
+            Whether this is safe is verified at the codegen stage.
+            </summary>
+        </member>
+        <member name="P:Quantum.Frame.RNG">
+            <summary>
+            The randomization session started with the seed from the <see cref="P:Quantum.Frame.RuntimeConfig"/> used to start the simulation with.
+            </summary>
+            <para>Supports determinism under roll-backs.</para>
+            <para>If random is used in conjunction with the prediction area feature the session needs to be stored on the entities themselves.</para>
+        </member>
+        <member name="P:Quantum.Frame.PlayerCount">
+            <summary>
+            Defines the amount of player in this Quantum session.
+            </summary>
+            The value is takes from the Deterministic session config.
+        </member>
+        <member name="F:Quantum.Frame.Signals">
+            <summary>
+            Access the signal API.\n
+            Signals are function signatures used as a decoupled inter-system communication API (a bit like a publisher/subscriber API or observer pattern).
+            </summary>
+            Custom signals are defined in the DSL.
+        </member>
+        <member name="F:Quantum.Frame.Events">
+            <summary>
+            Access the event API.\n
+            Events are a fine-grained solution to communicate things that happen inside the simulation to the rendering engine (they should never be used to modify/update part of the game state).
+            </summary>
+            Custom events are defined in the DSL.
+        </member>
+        <member name="P:Quantum.Frame.Context">
+            <summary>
+            The frame user context
+            </summary>
+        </member>
+        <member name="P:Quantum.Frame.RuntimeConfig">
+            <summary>
+            The <see cref="P:Quantum.Frame.RuntimeConfig"/> used for this session.
+            </summary>
+        </member>
+        <member name="P:Quantum.Frame.SimulationConfig">
+            <summary>
+            The <see cref="P:Quantum.Frame.SimulationConfig"/> used for this session.
+            </summary>
+        </member>
+        <member name="P:Quantum.Frame.SessionConfig">
+            <summary>
+            The <see cref="T:Photon.Deterministic.DeterministicSessionConfig"/> used for this session.
+            </summary>
+        </member>
+        <member name="P:Quantum.Frame.SystemsAll">
+            <summary>
+            All systems running in the session.
+            </summary>
+        </member>
+        <member name="P:Quantum.Frame.UpdateRate">
+            <summary>
+            See <see cref="P:Photon.Deterministic.DeterministicSession.SimulationRate"/>. This getter acquires the value from the <see cref="P:Quantum.Frame.SessionConfig"/> though.
+            </summary>
+        </member>
+        <member name="P:Quantum.Frame.PhysicsSceneSettings">
+            <summary>
+            Globally access the physics settings which are taken from the <see cref="P:Quantum.Frame.SimulationConfig"/> during the Frame constructor.
+            </summary>
+        </member>
+        <member name="P:Quantum.Frame.DeltaTime">
+            <summary>
+            Delta time in seconds. Can be set during run-time.
+            </summary>
+        </member>
+        <member name="P:Quantum.Frame.Map">
+            <summary>
+            Retrieves the Quantum map asset. Can be set during run-time.
+            </summary>
+            If assigned value is different than the current one, signal <see cref="T:Quantum.ISignalOnMapChanged"/> is raised.
+        </member>
+        <member name="M:Quantum.Frame.SetPredictionArea(Photon.Deterministic.FPVector3,Photon.Deterministic.FP)">
+            <summary>
+            Set the prediction area.
+            </summary>
+            <param name="position">Center of the prediction area</param>
+            <param name="radius">Radius of the prediction area</param>
+            <para>The Prediction Culling feature must be explicitly enabled in <see cref="!:SimulationConfig.UsePredictionArea"/>.</para>
+            <para>This can be safely called from the main-thread.</para>
+            <para>Prediction Culling allows developers to save CPU time in games where the player has only a partial view of the game scene.
+            Quantum prediction and rollbacks, which are time consuming, will only run for important entities that are visible to the local player(s). Leaving anything outside that area to be simulated only once per tick with no rollbacks as soon as the inputs are confirmed from server.
+            It is safe and simple to activate and, depending on the game, the performance difference can be quite large.Imagine a 30Hz game to constantly rollback ten ticks for every confirmed input (with more players, the predictor eventually misses at least for one of them). This requires the game simulation to be lightweight to be able to run at almost 300Hz(because of the rollbacks). With Prediction Culling enabled the full frames will be simulated at the expected 30Hz all the time while the much smaller prediction area is the only one running within the prediction buffer.</para>
+        </member>
+        <member name="M:Quantum.Frame.SetPredictionArea(Photon.Deterministic.FPVector2,Photon.Deterministic.FP)">
+            <summary>
+            See <see cref="M:Quantum.Frame.SetPredictionArea(Photon.Deterministic.FPVector3,Photon.Deterministic.FP)"/>.
+            </summary>
+            <param name="position"></param>
+            <param name="radius"></param>
+        </member>
+        <member name="M:Quantum.Frame.InPredictionArea(Photon.Deterministic.FPVector3)">
+            <summary>
+            Test is a position is inside the prediction area.
+            </summary>
+            <param name="position">Position</param>
+            <returns>True if the position is inside the prediction area.</returns>
+        </member>
+        <member name="M:Quantum.Frame.InPredictionArea(Photon.Deterministic.FPVector2)">
+            <summary>
+            See <see cref="M:Quantum.Frame.InPredictionArea(Photon.Deterministic.FPVector3)"/>.
+            </summary>
+            <param name="position"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Quantum.Frame.Serialize(Photon.Deterministic.DeterministicFrameSerializeMode)">
+            <summary>
+            Serializes the frame using a temporary buffer (20MB).
+            </summary>
+            <param name="mode"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Quantum.Frame.Serialize(Photon.Deterministic.DeterministicFrameSerializeMode,System.Byte[],System.Int32,System.Boolean)">
+            <summary>
+            Serializes the frame using <paramref name="buffer"/> as a buffer for temporary data. 
+            
+            If <paramref name="allocOutput"/> is set to false, then <paramref name="buffer"/> is also used for the final data - use offset and count from the result to access
+            the part of <paramref name="buffer"/> where serialized frame is stored.
+            
+            If <paramref name="allocOutput"/> is set to true then a new array is allocated for the result.
+            
+            Despite accepting a buffer, this method still allocates a few small temporary objects. 
+            <see cref="!:IAssetSerializer.SerializeAssets(System.Collections.Generic.IEnumerable&lt;AssetObject&gt;)"/> is also going
+            to allocate when serializing DynamicAssetDB, but how much depends on the serializer itself and the number of dynamic assets.
+            </summary>
+            <param name="mode"></param>
+            <param name="buffer"></param>
+            <param name="offset"></param>
+            <param name="allocOutput"></param>
+            <returns>Segment of <paramref name="buffer"/> where the serialized frame is stored</returns>
+            <remarks>Do not serialize during GameStart callback because systems have not been initialized, yet. Rather use CallbackSimulateFinished to wait for the first update.</remarks>
+        </member>
+        <member name="M:Quantum.Frame.DumpFrame(System.Int32)">
+            <summary>
+            Dump the frame in human readable form into a string.
+            </summary>
+            <returns>Frame representation</returns>
+        </member>
+        <member name="M:Quantum.Frame.CalculateChecksum">
+            <summary>
+            Calculates a checksum for the current game state. If the game is not started with <see cref="F:Quantum.QuantumGameFlags.DisableSharedChecksumSerializer"/> 
+            flag, this method is not thread-safe, i.e. calling it from multiple threads for frames from the same simulation is going to break.
+            </summary>
+        </member>
+        <member name="M:Quantum.Frame.CalculateChecksum(System.Boolean)">
+            <summary>
+            Calculates a checksum for the current game state.
+            </summary>
+            <param name="useSharedSerializer">True - use shared checksum serializer to avoid allocs (not thread-safe).</param>
+            <returns></returns>
+        </member>
+        <member name="M:Quantum.Frame.Copy(Photon.Deterministic.DeterministicFrame)">
+            <summary>
+            Copies the complete frame memory.
+            </summary>
+            <param name="frame">Input frame object</param>
+        </member>
+        <member name="M:Quantum.Frame.SystemIsEnabledSelf``1">
+            <summary>
+            Test if a system is enabled.
+            </summary>
+            <typeparam name="T">System type</typeparam>
+            <returns>True if the system is enabled</returns>
+            Logs an error if the system type is not found.
+        </member>
+        <member name="M:Quantum.Frame.SystemEnable``1">
+            <summary>
+            Enable a system.
+            </summary>
+            <typeparam name="T">System type</typeparam>
+            Logs an error if the system type is not found.
+        </member>
+        <member name="M:Quantum.Frame.SystemDisable``1">
+            <summary>
+            Disables a system.
+            </summary>
+            <typeparam name="T">System type</typeparam>
+            Logs an error if the system type is not found.
+            <example><code>
+            // test for a certain asset and disable the system during its OnInit method
+            public override void OnInit(Frame f) {
+              var testSettings = f.FindAsset&lt;NavMeshAgentsSettings&gt;(f.Map.UserAsset.Id);
+              if (testSettings == null) {
+                f.SystemDisable&lt;NavMeshAgentTestSystem&gt;();
+                return;
+               }
+               //..
+             }
+            </code></example>
+        </member>
+        <member name="M:Quantum.Frame.GetPlayerData(Quantum.PlayerRef)">
+            <summary>
+            Gets the runtime player configuration data for a certain player.
+            </summary>
+            <param name="player">Player ref</param>
+            <returns>Player config or null if player was not found</returns>
+        </member>
+        <member name="M:Quantum.Frame.PlayerToActorId(Quantum.PlayerRef)">
+            <summary>
+            Converts a Quantum PlayerRef to an ActorId (Photon client id).
+            </summary>
+            <param name="player">Player reference</param>
+            <returns>ActorId or null if payer was not found</returns>
+        </member>
+        <member name="M:Quantum.Frame.ActorIdToFirstPlayer(System.Int32)">
+            <summary>
+            Returns the first player that is using a certain ActorId (Photon client id).
+            </summary>
+            <param name="actorId">Actor id</param>
+            <returns>Player reference or null if actor id was not found</returns>
+            The first player because multiple players from the same Photon client can join.
+        </member>
+        <member name="M:Quantum.Frame.ActorIdToAllPlayers(System.Int32)">
+            <summary>
+            Returns all players with a certain ActorId (Photon client id).
+            </summary>
+            <param name="actorId">Actor id</param>
+            <returns>Array of player references</returns>
+        </member>
+        <member name="T:Quantum.SessionRunner">
+            <summary>
+            The SessionRunner helps to start, run and shutdown a Quantum simulation.
+            It should never be reused for multiple simulations of multiple runs of the same game session. Always recrate the runner.
+            It has an extensive list of starting <see cref="T:Quantum.SessionRunner.Arguments"/> that make it startable for a variaty of use cases: Local, Multiplayer, Replay, Server etc
+            It extracts platform dependent code into the <see cref="T:Quantum.IRunnerFactory"/> parameter.
+            It offers asynchronous methods to start and stop the runner but although it uses the TPL syntax for convenience it is not considered to be run in a multi-threaded enviroment. 
+            Use the non-async versions of the methods or use a <see cref="P:System.Threading.Tasks.ConcurrentExclusiveSchedulerPair.ExclusiveScheduler"/> for unit tests and console applications.
+            Also never use the async methods from the Quantum server plugin, parallelization is done by the Photon-Server.
+            This class is delivered in source code to enable developers to create custom runner code.
+            </summary>
+        </member>
+        <member name="P:Quantum.SessionRunner.Session">
+            <summary>
+            Access the Quantum session. Will be created during the start sequence.
+            </summary>
+        </member>
+        <member name="P:Quantum.SessionRunner.DeterministicGame">
+            <summary>
+            Access the Quantum game. Will be created during the start sequence. 
+            </summary>
+        </member>
+        <member name="P:Quantum.SessionRunner.Id">
+            <summary>
+            Runner id, is set by <see cref="F:Quantum.SessionRunner.Arguments.RunnerId"/>.
+            </summary>
+        </member>
+        <member name="P:Quantum.SessionRunner.IsRunning">
+            <summary>
+            Returns if the SessionRunner is running a simulation.
+            </summary>
+        </member>
+        <member name="P:Quantum.SessionRunner.Communicator">
+            <summary>
+            Access the comunicator object.
+            </summary>
+        </member>
+        <member name="P:Quantum.SessionRunner.State">
+            <summary>
+            Get the current state of the runner.
+            </summary>
+        </member>
+        <member name="P:Quantum.SessionRunner.DeltaTimeType">
+            <summary>
+            Will be used by the Unity runner to update the Quantum simulation with different delta time settings.
+            </summary>
+        </member>
+        <member name="P:Quantum.SessionRunner.RecordingFlags">
+            <summary>
+            Access the recording flags that the runner was started with.
+            </summary>
+        </member>
+        <member name="M:Quantum.SessionRunner.op_Implicit(Quantum.SessionRunner)~System.Boolean">
+            <summary>
+            Support Unity null checks.
+            </summary>
+            <param name="v"></param>
+        </member>
+        <member name="M:Quantum.SessionRunner.Dispose">
+            <summary>
+            Implements disposeable interface. Calls Shutdown internally. 
+            This is also called from inside Session.Destroy() to signal shutdown by the simulation.
+            </summary>
+        </member>
+        <member name="M:Quantum.SessionRunner.Destroy">
+            <summary>
+            Calls shutdown. Backwards compatibility.
+            </summary>
+        </member>
+        <member name="M:Quantum.SessionRunner.OnShutdown(Quantum.ShutdownCause)">
+            <summary>
+            Can be overridden in a subclass not be notified on shutdowns.
+            Is called right after tje <see cref="F:Quantum.SessionRunner.Arguments.OnShutdown"/> callback.
+            </summary>
+            <param name="cause">The shutdown cause</param>
+        </member>
+        <member name="M:Quantum.SessionRunner.Service(System.Nullable{System.Double})">
+            <summary>
+            To update the Quantum simulation this needs to be run from the outside.
+            From Unity is would be a MonoBehaviour, on the plugin it would be from OnDeterministicUpdate() 
+            and the spectator has an extra service task to tick this.
+            </summary>
+            <param name="deltaTime">If null the internal stopclock is used to update, otherwise pass in the desired delte time to progress the simulation.</param>
+        </member>
+        <member name="M:Quantum.SessionRunner.Start(Quantum.SessionRunner.Arguments)">
+            <summary>
+            Create a runner object and initiates the start procedure.
+            This method returns right away and will not wait until the actual simulation is started after the start protocol and potentially waiting for a snapshot.
+            Use <see cref="M:Quantum.SessionRunner.WaitForStartAsync(System.Threading.CancellationToken)"/> to get notified about the actual local game start.
+            </summary>
+            <param name="arguments">Start runner arguments.</param>
+            <returns>Session runner object</returns>
+            <exception cref="T:System.ArgumentException">Arguments were invalid, check exception message.</exception>
+        </member>
+        <member name="M:Quantum.SessionRunner.StartAsync(Quantum.SessionRunner.Arguments)">
+            <summary>
+            Async version of the start sequence. Will return the runner object once the connection is complete.
+            <see cref="F:Quantum.SessionRunner.Arguments.StartGameTimeoutInSeconds"/> must be greater than 0.
+            Set explicit <see cref="F:Quantum.SessionRunner.Arguments.TaskRunner"/> or the default Task.Factory is used.
+            Use <see cref="F:Quantum.SessionRunner.Arguments.CancellationToken"/> to cancel this task.
+            Make sure to run this from a Unity "async void" method to not lose the unhandled exceptions.
+            </summary>
+            <param name="arguments">Start runner arguments.</param>
+            <returns>Session runner object</returns>
+            <exception cref="T:System.ArgumentException">Arguments were invalid, check exception message.</exception>
+            <exception cref="T:Quantum.SessionRunnerException">Session failed to start.</exception>
+        </member>
+        <member name="M:Quantum.SessionRunner.Shutdown(Quantum.ShutdownCause)">
+            <summary>
+            Shutdown the runner. 
+            Can be called from inside the simulation (during a simulation callback), the shutdown will commence during the next <see cref="M:Quantum.SessionRunner.Service(System.Nullable{System.Double})"/> call.
+            </summary>
+            <param name="cause">Shutdown cause</param>
+        </member>
+        <member name="M:Quantum.SessionRunner.ShutdownAsync(Quantum.ShutdownCause)">
+            <summary>
+            Shutdown the runner asynchronously. 
+            Can be called from a simualtion callback.
+            Will also wait for the connection to be properly disconnected.
+            </summary>
+            <param name="cause">Shutdown cause</param>
+            <returns>Once the complete shutdown is completed.</returns>
+            <exception cref="T:Quantum.SessionRunnerException">TaskFactory was never set.</exception>
+        </member>
+        <member name="M:Quantum.SessionRunner.WaitForStartAsync(System.Single)">
+            <summary>
+            When starting the runner synchronously this Task can be used to wait for success, error or timeout.
+            </summary>
+            <param name="timeoutInSeconds">Wait for game start timeout.</param>
+            <returns>Returns when the start has completed or failed.</returns>
+        </member>
+        <member name="M:Quantum.SessionRunner.WaitForStartAsync(System.Threading.CancellationToken)">
+            <summary>
+            When starting the runner synchronously this Task can be used to wait for success, error or timeout.
+            </summary>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Returns when the start has completed or failed.</returns>
+        </member>
+        <member name="M:Quantum.SessionRunner.WaitForShutdownAsync(System.Threading.CancellationToken)">
+            <summary>
+            Wait for the simulation shutdown is signaled. This is an alternative way to listen for the <see cref="F:Quantum.SessionRunner.Arguments.OnShutdown"/> callback.
+            </summary>
+            <param name="cancellationToken">Token to cancel this task</param>
+            <returns>After the runner shut down.</returns>
+        </member>
+        <member name="M:Quantum.SessionRunner.WaitForShutdownAsync">
+            <summary>
+            Wait for the simulation shutdown is signaled. This is an alternative way to listen for the <see cref="F:Quantum.SessionRunner.Arguments.OnShutdown"/> callback.
+            </summary>
+            <returns>After the runner shut down.</returns>
+        </member>
+        <member name="T:Quantum.SessionRunner.Arguments">
+            <summary>
+            Arguments to start an online or offline Quantum simulation.
+            </summary>
+        </member>
+        <member name="F:Quantum.SessionRunner.Arguments.DefaultStartGameTimeoutInSeconds">
+            <summary>
+            The default start game timeout. Overwrite by setting explicit StartGameTimeoutInSeconds.
+            </summary>
+        </member>
+        <member name="F:Quantum.SessionRunner.Arguments.ClientId">
+            <summary>
+            The Quantum ClientId is a secret between the client and the server and is used when reconnecting into a running simulation to preseve the player index.
+            </summary>
+        </member>
+        <member name="F:Quantum.SessionRunner.Arguments.RuntimeConfig">
+            <summary>
+            The runtime config the Quantum game should use. Every client needs to set it, the server selects the first one send to it.
+            </summary>
+        </member>
+        <member name="F:Quantum.SessionRunner.Arguments.SessionConfig">
+            <summary>
+            The deterministic config the Quantum game should use. Every client needs to set it, the server selects the first one send to it.
+            </summary>
+        </member>
+        <member name="F:Quantum.SessionRunner.Arguments.ReplayProvider">
+            <summary>
+            The replay provider injects recorded inputs and rpcs into the game which is required to run the game as a replay. InputProvider is an implementation of the replay provider. See useages of QuantumGame.RecordedInputs and WuantumRunnerLocalReplay.InputProvider.
+            </summary>
+        </member>
+        <member name="F:Quantum.SessionRunner.Arguments.GameMode">
+            <summary>
+            The game mode (default is Multiplayer). 
+            Local mode is for testing only, the simulation is not connected online. It does not go into prediction nor does it perform rollbacks.
+            Replay mode will also run offline and requires the ReplayProvider to be set to process the input.
+            Spectating mode will run the simulation without a player and without the ability to input.
+            </summary>
+        </member>
+        <member name="F:Quantum.SessionRunner.Arguments.InitialFrame">
+            <summary>
+            The initial tick to start the simulation from as set in FrameData (only set this when FrameData is set as well). The initial frame is also encoded in the data, but required deserilization first.
+            </summary>
+        </member>
+        <member name="F:Quantum.SessionRunner.Arguments.FrameData">
+            <summary>
+            Serialized frame to start the simulation from. Requires InitialFrame to be set as well. This can be a reconnect or an instant replay where we already have a frame snapshot locally (QuantumInstantReplay).
+            </summary>
+        </member>
+        <member name="F:Quantum.SessionRunner.Arguments.RunnerId">
+            <summary>
+            Optionally name the runner to access it from by id. This is useful when multiple runners are active on the client (for example an instant replay).
+            </summary>
+        </member>
+        <member name="F:Quantum.SessionRunner.Arguments.PlayerCount">
+            <summary>
+            Setting a player count here will overwrite the <see cref="F:Quantum.SessionRunner.Arguments.SessionConfig"/>.PlayerCount during runner creation.
+            Either SessionConfig.Player or this PlayerCount needs to be > 0.
+            </summary>
+        </member>
+        <member name="F:Quantum.SessionRunner.Arguments.StartGameTimeoutInSeconds">
+            <summary>
+            If set it defines the timeout in seconds to wait for StartGame() to commence the online game. This includes for example sending configrations and waiting for a snapshot.
+            If not set the default timeout is used defined by <see cref="F:Quantum.SessionRunner.Arguments.DefaultStartGameTimeoutInSeconds"/>.
+            This value is not related to <see cref="F:Photon.Deterministic.DeterministicSessionConfig.SessionStartTimeout"/>, but it's affected by it. The SessionStartTimeout should not be larger than this value.
+            Use WaitForGameStart() to manually wait for the start. Be sure to Shutdown() the runner in case of exceptions.
+            </summary>
+        </member>
+        <member name="F:Quantum.SessionRunner.Arguments.OnShutdown">
+            <summary>
+            The LoadBalancingClient object needs to be connected to game sever (joined a room) when handed to Quantum. Is not required for Replay or Local game modes.
+            </summary>
+        </member>
+        <member name="F:Quantum.SessionRunner.Arguments.Communicator">
+            <summary>
+            Quantum communicator which encapsulates the connection object (from Photon Realtime).
+            </summary>
+        </member>
+        <member name="F:Quantum.SessionRunner.Arguments.RunnerFactory">
+            <summary>
+            Runner factory to create platform dependent objects.
+            </summary>
+        </member>
+        <member name="F:Quantum.SessionRunner.Arguments.TaskRunner">
+            <summary>
+            The Quantum internal task runner.
+            </summary>
+        </member>
+        <member name="F:Quantum.SessionRunner.Arguments.CancellationToken">
+            <summary>
+            A cancellation token to stop all async tasks (only used during StartAsync()).
+            </summary>
+        </member>
+        <member name="F:Quantum.SessionRunner.Arguments.GameParameters">
+            <summary>
+            Encapsulated QuantumGameStartParameters.
+            </summary>
+        </member>
+        <member name="F:Quantum.SessionRunner.Arguments.DeltaTimeType">
+            <summary>
+            Will be used by the Unity runner to update the Quantum simulation with different delta time settings.
+            </summary>
+        </member>
+        <member name="F:Quantum.SessionRunner.Arguments.RecordingFlags">
+            <summary>
+            The recording flags will enable the recording of input and checksums (requires memory and allocations).
+            When enabled QuantumGame.GetRecordedReplay can be used access the replay data.
+            </summary>
+        </member>
+        <member name="M:Quantum.SessionRunner.Arguments.CreateDefault">
+            <summary>
+            Initializes struct with default values.
+            </summary>
+        </member>
+        <member name="P:Quantum.SessionRunner.Arguments.ResourceManager">
+            <summary>
+            Optionally override the resource manager for example from deserialized Quantum assets (as showcased in QuantumRunnerLocalReplay).
+            Will set <see cref="!:GameParameters.ResourceManager"/>
+            </summary>
+        </member>
+        <member name="P:Quantum.SessionRunner.Arguments.AssetSerializer">
+            <summary>
+            Will set <see cref="!:GameParameters.AssetSerializer"/>
+            </summary>
+        </member>
+        <member name="P:Quantum.SessionRunner.Arguments.CallbackDispatcher">
+            <summary>
+            Will set <see cref="!:GameParameters.CallbackDispatcher"/>
+            </summary>
+        </member>
+        <member name="P:Quantum.SessionRunner.Arguments.EventDispatcher">
+            <summary>
+            Will set <see cref="!:GameParameters.EventDispatcher"/>
+            </summary>
+        </member>
+        <member name="P:Quantum.SessionRunner.Arguments.InstantReplaySettings">
+            <summary>
+            The instant replay feature requires this setup data for snapshot recording.
+            </summary>
+        </member>
+        <member name="P:Quantum.SessionRunner.Arguments.HeapExtraCount">
+            <summary>
+             Extra heaps to allocate for a session in case you need to create 'auxiliary' frames than actually required for the simulation itself.
+             Will set <see cref="F:Quantum.QuantumGameStartParameters.HeapExtraCount"/>
+            </summary>
+        </member>
+        <member name="P:Quantum.SessionRunner.Arguments.InitialDynamicAssets">
+            <summary>
+            Optionally provide assets to be added to the dynamic asset db. This can be used to introduce procedurally generated assets into the simulation from the start.
+            Will set <see cref="F:Quantum.QuantumGameStartParameters.InitialDynamicAssets"/>
+            </summary>
+        </member>
+        <member name="P:Quantum.SessionRunner.Arguments.GameFlags">
+            <summary>
+            GameFlags from <see cref="T:Quantum.QuantumGameFlags"/>.
+            Will set <see cref="F:Quantum.QuantumGameStartParameters.GameFlags"/>.
+            </summary>
+        </member>
+        <member name="T:Quantum.SessionRunner.SessionState">
+            <summary>
+            The session runner has a state machine.
+            </summary>
+        </member>
+        <member name="F:Quantum.SessionRunner.SessionState.NotStarted">
+            <summary>
+            Freshly created state.
+            </summary>
+        </member>
+        <member name="F:Quantum.SessionRunner.SessionState.Starting">
+            <summary>
+            The runner is starting and waiting for the start protocol to complete.
+            </summary>
+        </member>
+        <member name="F:Quantum.SessionRunner.SessionState.Running">
+            <summary>
+            The simulation is running.
+            </summary>
+        </member>
+        <member name="F:Quantum.SessionRunner.SessionState.ShuttingDown">
+            <summary>
+            The runner is shutting down and waiting to complete shutdown sequence.
+            </summary>
+        </member>
+        <member name="F:Quantum.SessionRunner.SessionState.Shutdown">
+            <summary>
+            The runner is shutdown.
+            </summary>
+        </member>
+        <member name="P:Quantum.SessionContainer.HasGameStartTimedOut">
+            <summary>
+            Check this when the container reconnects into a running game and handle accordingly.
+            </summary>
+        </member>
+        <member name="P:Quantum.SessionContainer.GameStartTimeoutInMiliseconds">
+            <summary>
+            Default is infinity (-1). Set this when the you expect to connect to a running game and wait for a snapshot.
+            </summary>
+        </member>
+        <member name="M:Quantum.SessionContainer.StartReplay(Quantum.QuantumGame.StartParameters,Photon.Deterministic.IDeterministicReplayProvider,System.String,System.Boolean,Photon.Deterministic.IDeterministicPlatformTaskRunner)">
+            <summary>
+            Start the simulation as a replay by providing an input provider.
+            </summary>
+            <param name="startParams">Game start parameters</param>
+            <param name="provider">Input provider</param>
+            <param name="clientId">Optional client id</param>
+            <param name="logInitForConsole">Optionally disable setting up the console as log output (required on the Quantum plugin)</param>
+        </member>
+        <member name="M:Quantum.SessionContainer.StartSpectator(Quantum.QuantumGame.StartParameters,Photon.Deterministic.ICommunicator,System.Byte[],System.Int32,System.String,System.Boolean,Photon.Deterministic.IDeterministicPlatformTaskRunner)">
+            <summary>
+            Start the simulation as a spectator.
+            </summary>
+            <param name="startParams">Game start parameters</param>
+            <param name="networkCommunicator">Quantum network comunicator (has to have a peer that is connected to a room</param>
+            <param name="frameData">Optionally the frame to start from</param>
+            <param name="initialTick">The tick that the frame data is based on</param>
+            <param name="clientId">Optional client id</param>
+            <param name="logInitForConsole">Optionally disable setting up the console as log output (required on the Quantum plugin)</param>
+        </member>
+        <member name="M:Quantum.SessionContainer.Start(Quantum.QuantumGame.StartParameters,Photon.Deterministic.DeterministicSessionArgs,System.String,System.Boolean,Photon.Deterministic.IDeterministicPlatformTaskRunner)">
+            <summary>
+            Start the simulation in a custom way.
+            </summary>
+            <param name="startParams">Game start parameters</param>
+            <param name="sessionArgs">Game session args</param>
+            <param name="playerSlots">Number of player slots</param>
+            <param name="clientId">Optional client id</param>
+            <param name="logInitForConsole">Optionally disable setting up the console as log output (required on the Quantum plugin)</param>
+        </member>
+        <member name="M:Quantum.SessionContainer.Service(System.Nullable{System.Double})">
+            <summary>
+            Update the session.
+            </summary>
+            <param name="dt">Optionally provide a custom delta time</param>
+        </member>
+        <member name="M:Quantum.SessionContainer.Destroy">
+            <summary>
+            Destroy the session.
+            </summary>
+        </member>
+        <member name="M:Quantum.SessionContainer.#ctor">
+            <summary>
+            Use other constructors that provide the session and runtime config.
+            </summary>
+        </member>
+        <member name="T:Quantum.ShutdownConnectionOptions">
+            <summary>
+            The shutdown connection options define what to do with the client Photon connection during runner shutdown.
+            </summary>
+        </member>
+        <member name="F:Quantum.ShutdownConnectionOptions.Disconnect">
+            <summary>
+            Disconnect
+            </summary>
+        </member>
+        <member name="F:Quantum.ShutdownConnectionOptions.LeaveRoom">
+            <summary>
+            Leave the room and connect to master server.
+            </summary>
+        </member>
+        <member name="F:Quantum.ShutdownConnectionOptions.LeaveRoomAndBecomeInactive">
+            <summary>
+            Leave the room and connect to master server, but keep inactive in the room.
+            </summary>
+        </member>
+        <member name="F:Quantum.ShutdownConnectionOptions.None">
+            <summary>
+            Do do anything to the connection during runner shutdown.
+            </summary>
+        </member>
+        <member name="T:Quantum.DotNetRunnerFactory">
+            <summary>
+            Platform dependent information and factory methods for the <see cref="T:Quantum.SessionRunner"/>.
+            This factory is created to be used on the Quantum server plugin.
+            </summary>
+        </member>
+        <member name="T:Quantum.SessionRunnerException">
+            <summary>
+            Runner specific exceptions.
+            </summary>
+        </member>
+        <member name="F:Quantum.RuntimePlayer.PlayerAvatar">
+            <summary>
+            This is a proposal how to let players select an avatar prototype using RuntimePlayer. Can be removed.
+            </summary>
+        </member>
+        <member name="F:Quantum.RuntimePlayer.PlayerNickname">
+            <summary>
+            This is a proposal how to assign a nickname to players using RuntimePlayer. Can be removed.
+            </summary>
+        </member>
+        <member name="P:Quantum.Constants.FPConst">
+            <summary>3.14</summary>
+        </member>
+        <member name="F:Quantum.Constants.Raw.FPConst">
+            <summary>3.14</summary>
+        </member>
+        <member name="T:Quantum.DeterministicSystemSetup">
+            <summary>
+            Responsible for instantiating Quantum systems on simualtion start.
+            User systems can be added by adding a <see cref="T:Quantum.SystemsConfig"/> to the <see cref="T:Quantum.RuntimeConfig"/>.
+            Or adding them in the user callback <see cref="M:Quantum.DeterministicSystemSetup.AddSystemsUser(System.Collections.Generic.ICollection{Quantum.SystemBase},Quantum.RuntimeConfig,Quantum.SimulationConfig,Quantum.SystemsConfig)"/>.
+            </summary>
+        </member>
+        <member name="M:Quantum.ISignalOnPlayerDataSet.OnPlayerDataSet(Quantum.Frame,Quantum.PlayerRef)">
+            <summary>
+            Is called when a player and his RuntimePlayer was added to the simulation.
+            </summary>
+            <param name="f">Frame</param>
+            <param name="player">Player</param>
+        </member>
+        <member name="M:Quantum.ISignalOnPlayerAdded.OnPlayerAdded(Quantum.Frame,Quantum.PlayerRef,System.Boolean)">
+            <summary>
+            Is called when a player and his RuntimePlayer was added to the simulation.
+            </summary>
+            <param name="f">Frame</param>
+            <param name="player">Player</param>
+            <param name="firstTime">The first time that this player ref was assigned to a player at all. When firstTime is false the player ref is being reused by a different player. See documentation.</param>
+        </member>
+        <member name="M:Quantum.ISignalOnPlayerRemoved.OnPlayerRemoved(Quantum.Frame,Quantum.PlayerRef)">
+            <summary>
+            Is called when a player was removed from the simulation.
+            </summary>
+            <param name="f">Frame</param>
+            <param name="player">Player</param>
+        </member>
+        <member name="T:Quantum.CallbackPollInput">
+            <summary>
+            Callback called when the simulation queries local input.
+            </summary>
+        </member>
+        <member name="T:Quantum.CallbackGameInit">
+            <summary>
+            Callback called when the game has been started.
+            </summary>
+        </member>
+        <member name="T:Quantum.CallbackGameStarted">
+            <summary>
+            Callback called when the game has been started.
+            </summary>
+        </member>
+        <member name="T:Quantum.CallbackGameResynced">
+            <summary>
+            Callback called when the game has been re-synchronized from a snapshot.
+            </summary>
+        </member>
+        <member name="T:Quantum.CallbackGameDestroyed">
+            <summary>
+            Callback called when the game was destroyed.
+            </summary>
+        </member>
+        <member name="T:Quantum.CallbackUpdateView">
+            <summary>
+            Callback guaranteed to be called every rendered frame.
+            </summary>
+        </member>
+        <member name="T:Quantum.CallbackSimulateFinished">
+            <summary>
+            Callback called when frame simulation has completed.
+            </summary>
+        </member>
+        <member name="T:Quantum.CallbackEventCanceled">
+            <summary>
+            Callback called when an event raised in a predicted frame was canceled in a verified frame due to a roll-back / missed prediction.
+            Synchronised events are only raised on verified frames and thus will never be canceled; this is useful to graciously discard non-sync'ed events in the view.
+            </summary>
+        </member>
+        <member name="T:Quantum.CallbackEventConfirmed">
+            <summary>
+            Callback called when an event was confirmed by a verified frame.
+            </summary>
+        </member>
+        <member name="T:Quantum.CallbackChecksumError">
+            <summary>
+            Callback called on a checksum error.
+            </summary>
+        </member>
+        <member name="T:Quantum.CallbackChecksumErrorFrameDump">
+            <summary>
+            Callback called when due to a checksum error a frame is dumped.
+            </summary>
+        </member>
+        <member name="T:Quantum.CallbackInputConfirmed">
+            <summary>
+            Callback when local input was confirmed.
+            </summary>
+        </member>
+        <member name="T:Quantum.CallbackChecksumComputed">
+            <summary>
+            Callback called when a checksum has been computed.
+            </summary>
+        </member>
+        <member name="T:Quantum.CallbackPluginDisconnect">
+            <summary>
+            Callback called when the local client is disconnected by the plugin.
+            </summary>
+        </member>
+        <member name="T:Quantum.ISignalOnCollision2D">
+            <summary>
+            Interface for receiving callbacks once per frame while two non-trigger 2D colliders are touching.
+            <remarks>At least one of the entities involved in a collision must have the respective <see cref="T:Quantum.CallbackFlags"/> set for the callback to be called.</remarks>
+            <remarks>See <see cref="M:Quantum.Physics2D.PhysicsEngine2D.Api.SetCallbacks(Quantum.EntityRef,Quantum.CallbackFlags)"/> for setting the callbacks flags to an entity.</remarks>
+            </summary>
+            \ingroup Physics2dApi
+        </member>
+        <member name="M:Quantum.ISignalOnCollision2D.OnCollision2D(Quantum.Frame,Quantum.CollisionInfo2D)">
+            <summary>
+            Called once per frame while two non-trigger 2D colliders are touching.
+            </summary>
+            <param name="f">The frame in which the collision happened.</param>
+            <param name="info">The <see cref="T:Quantum.CollisionInfo2D"/> with data about the collision.</param>
+            \ingroup Physics2dApi
+        </member>
+        <member name="T:Quantum.ISignalOnCollisionEnter2D">
+            <summary>
+            Interface for receiving callbacks once two non-trigger 2D colliders start touching.
+            <remarks>At least one of the entities involved in a collision must have the respective <see cref="T:Quantum.CallbackFlags"/> set for the callback to be called.</remarks>
+            <remarks>See <see cref="M:Quantum.Physics2D.PhysicsEngine2D.Api.SetCallbacks(Quantum.EntityRef,Quantum.CallbackFlags)"/> for setting the callbacks flags to an entity.</remarks>
+            </summary>
+            \ingroup Physics2dApi
+        </member>
+        <member name="M:Quantum.ISignalOnCollisionEnter2D.OnCollisionEnter2D(Quantum.Frame,Quantum.CollisionInfo2D)">
+            <summary>
+            Called once two non-trigger 2D colliders start touching.
+            </summary>
+            <param name="f">The frame in which the collision happened.</param>
+            <param name="info">The <see cref="T:Quantum.CollisionInfo2D"/> with data about the collision.</param>
+            \ingroup Physics2dApi
+        </member>
+        <member name="T:Quantum.ISignalOnCollisionExit2D">
+            <summary>
+            Interface for receiving callbacks once two non-trigger 2D colliders stop touching.
+            <remarks>At least one of the entities involved in a collision must have the respective <see cref="T:Quantum.CallbackFlags"/> set for the callback to be called.</remarks>
+            <remarks>See <see cref="M:Quantum.Physics2D.PhysicsEngine2D.Api.SetCallbacks(Quantum.EntityRef,Quantum.CallbackFlags)"/> for setting the callbacks flags to an entity.</remarks>
+            </summary>
+            \ingroup Physics2dApi
+        </member>
+        <member name="M:Quantum.ISignalOnCollisionExit2D.OnCollisionExit2D(Quantum.Frame,Quantum.ExitInfo2D)">
+            <summary>
+            Called once two non-trigger 2D colliders stop touching.
+            </summary>
+            <param name="f">The frame in which the entities stopped touching.</param>
+            <param name="info">The <see cref="T:Quantum.ExitInfo2D"/> with the entities that were touching.</param>
+            \ingroup Physics2dApi
+        </member>
+        <member name="T:Quantum.ISignalOnTrigger2D">
+            <summary>
+            Interface for receiving callbacks once per frame while a non-trigger and a trigger 2D colliders are touching.
+            <remarks>No collision is checked between two kinematic colliders that are both trigger or both non-trigger.</remarks>
+            <remarks>At least one of the entities involved in a collision must have the respective <see cref="T:Quantum.CallbackFlags"/> set for the callback to be called.</remarks>
+            <remarks>See <see cref="M:Quantum.Physics2D.PhysicsEngine2D.Api.SetCallbacks(Quantum.EntityRef,Quantum.CallbackFlags)"/> for setting the callbacks flags to an entity.</remarks>
+            </summary>
+            \ingroup Physics2dApi
+        </member>
+        <member name="M:Quantum.ISignalOnTrigger2D.OnTrigger2D(Quantum.Frame,Quantum.TriggerInfo2D)">
+            <summary>
+            Called once per frame while a non-trigger and a trigger 2D colliders are touching.
+            </summary>
+            <param name="f">The frame in which the collision happened.</param>
+            <param name="info">The <see cref="T:Quantum.TriggerInfo2D"/> with data about the trigger collision.</param>
+            \ingroup Physics2dApi
+        </member>
+        <member name="T:Quantum.ISignalOnTriggerEnter2D">
+            <summary>
+            Interface for receiving callbacks once a non-trigger and a trigger 2D colliders start touching.
+            <remarks>No collision is checked between two kinematic colliders that are both trigger or both non-trigger.</remarks>
+            <remarks>At least one of the entities involved in a collision must have the respective <see cref="T:Quantum.CallbackFlags"/> set for the callback to be called.</remarks>
+            <remarks>See <see cref="M:Quantum.Physics2D.PhysicsEngine2D.Api.SetCallbacks(Quantum.EntityRef,Quantum.CallbackFlags)"/> for setting the callbacks flags to an entity.</remarks>
+            </summary>
+            \ingroup Physics2dApi
+        </member>
+        <member name="M:Quantum.ISignalOnTriggerEnter2D.OnTriggerEnter2D(Quantum.Frame,Quantum.TriggerInfo2D)">
+            <summary>
+            Called once a non-trigger and a trigger 2D colliders start touching.
+            </summary>
+            <param name="f">The frame in which the collision happened.</param>
+            <param name="info">The <see cref="T:Quantum.TriggerInfo2D"/> with data about the trigger collision.</param>
+            \ingroup Physics2dApi
+        </member>
+        <member name="T:Quantum.ISignalOnTriggerExit2D">
+            <summary>
+            Interface for receiving callbacks once a non-trigger and a trigger 2D colliders stop touching.
+            <remarks>No collision is checked between two kinematic colliders that are both trigger or both non-trigger.</remarks>
+            <remarks>At least one of the entities involved in a collision must have the respective <see cref="T:Quantum.CallbackFlags"/> set for the callback to be called.</remarks>
+            <remarks>See <see cref="M:Quantum.Physics2D.PhysicsEngine2D.Api.SetCallbacks(Quantum.EntityRef,Quantum.CallbackFlags)"/> for setting the callbacks flags to an entity.</remarks>
+            </summary>
+            \ingroup Physics2dApi
+        </member>
+        <member name="M:Quantum.ISignalOnTriggerExit2D.OnTriggerExit2D(Quantum.Frame,Quantum.ExitInfo2D)">
+            <summary>
+            Called once a non-trigger and a trigger 2D colliders stop touching.
+            </summary>
+            <param name="f">The frame in which the entities stopped touching.</param>
+            <param name="info">The <see cref="T:Quantum.ExitInfo2D"/> with the entities that were touching.</param>
+            \ingroup Physics2dApi
+        </member>
+        <member name="T:Quantum.ISignalOnCollision3D">
+            <summary>
+            Interface for receiving callbacks once per frame while two non-trigger 3D colliders are touching.
+            <remarks>At least one of the entities involved in a collision must have the respective <see cref="T:Quantum.CallbackFlags"/> set for the callback to be called.</remarks>
+            <remarks>See <see cref="M:Quantum.Physics3D.PhysicsEngine3D.Api.SetCallbacks(Quantum.EntityRef,Quantum.CallbackFlags)"/> for setting the callbacks flags to an entity.</remarks>
+            </summary>
+            \ingroup Physics3dApi
+        </member>
+        <member name="M:Quantum.ISignalOnCollision3D.OnCollision3D(Quantum.Frame,Quantum.CollisionInfo3D)">
+            <summary>
+            Called once per frame while two non-trigger 3D colliders are touching.
+            </summary>
+            <param name="f">The frame in which the collision happened.</param>
+            <param name="info">The <see cref="T:Quantum.CollisionInfo3D"/> with data about the collision.</param>
+            \ingroup Physics3dApi
+        </member>
+        <member name="T:Quantum.ISignalOnCollisionEnter3D">
+            <summary>
+            Interface for receiving callbacks once two non-trigger 3D colliders start touching.
+            <remarks>At least one of the entities involved in a collision must have the respective <see cref="T:Quantum.CallbackFlags"/> set for the callback to be called.</remarks>
+            <remarks>See <see cref="M:Quantum.Physics3D.PhysicsEngine3D.Api.SetCallbacks(Quantum.EntityRef,Quantum.CallbackFlags)"/> for setting the callbacks flags to an entity.</remarks>
+            </summary>
+            \ingroup Physics3dApi
+        </member>
+        <member name="M:Quantum.ISignalOnCollisionEnter3D.OnCollisionEnter3D(Quantum.Frame,Quantum.CollisionInfo3D)">
+            <summary>
+            Called once two non-trigger 3D colliders start touching.
+            </summary>
+            <param name="f">The frame in which the collision happened.</param>
+            <param name="info">The <see cref="T:Quantum.CollisionInfo3D"/> with data about the collision.</param>
+            \ingroup Physics3dApi
+        </member>
+        <member name="T:Quantum.ISignalOnCollisionExit3D">
+            <summary>
+            Interface for receiving callbacks once two non-trigger 3D colliders stop touching.
+            <remarks>At least one of the entities involved in a collision must have the respective <see cref="T:Quantum.CallbackFlags"/> set for the callback to be called.</remarks>
+            <remarks>See <see cref="M:Quantum.Physics3D.PhysicsEngine3D.Api.SetCallbacks(Quantum.EntityRef,Quantum.CallbackFlags)"/> for setting the callbacks flags to an entity.</remarks>
+            </summary>
+            \ingroup Physics3dApi
+        </member>
+        <member name="M:Quantum.ISignalOnCollisionExit3D.OnCollisionExit3D(Quantum.Frame,Quantum.ExitInfo3D)">
+            <summary>
+            Called once two non-trigger 3D colliders stop touching.
+            </summary>
+            <param name="f">The frame in which the entities stopped touching.</param>
+            <param name="info">The <see cref="T:Quantum.ExitInfo3D"/> with the entities that were touching.</param>
+            \ingroup Physics3dApi
+        </member>
+        <member name="T:Quantum.ISignalOnTrigger3D">
+            <summary>
+            Interface for receiving callbacks once per frame while a non-trigger and a trigger 3D colliders are touching.
+            <remarks>No collision is checked between two kinematic colliders that are both trigger or both non-trigger.</remarks>
+            <remarks>At least one of the entities involved in a collision must have the respective <see cref="T:Quantum.CallbackFlags"/> set for the callback to be called.</remarks>
+            <remarks>See <see cref="M:Quantum.Physics3D.PhysicsEngine3D.Api.SetCallbacks(Quantum.EntityRef,Quantum.CallbackFlags)"/> for setting the callbacks flags to an entity.</remarks>
+            </summary>
+            \ingroup Physics3dApi
+        </member>
+        <member name="M:Quantum.ISignalOnTrigger3D.OnTrigger3D(Quantum.Frame,Quantum.TriggerInfo3D)">
+            <summary>
+            Called once per frame while a non-trigger and a trigger 3D colliders are touching.
+            </summary>
+            <param name="f">The frame in which the collision happened.</param>
+            <param name="info">The <see cref="T:Quantum.TriggerInfo3D"/> with data about the trigger collision.</param>
+            \ingroup Physics3dApi
+        </member>
+        <member name="T:Quantum.ISignalOnTriggerEnter3D">
+            <summary>
+            Interface for receiving callbacks once a non-trigger and a trigger 3D colliders start touching.
+            <remarks>No collision is checked between two kinematic colliders that are both trigger or both non-trigger.</remarks>
+            <remarks>At least one of the entities involved in a collision must have the respective <see cref="T:Quantum.CallbackFlags"/> set for the callback to be called.</remarks>
+            <remarks>See <see cref="M:Quantum.Physics3D.PhysicsEngine3D.Api.SetCallbacks(Quantum.EntityRef,Quantum.CallbackFlags)"/> for setting the callbacks flags to an entity.</remarks>
+            </summary>
+            \ingroup Physics3dApi
+        </member>
+        <member name="M:Quantum.ISignalOnTriggerEnter3D.OnTriggerEnter3D(Quantum.Frame,Quantum.TriggerInfo3D)">
+            <summary>
+            Called once a non-trigger and a trigger 3D colliders start touching.
+            </summary>
+            <param name="f">The frame in which the collision happened.</param>
+            <param name="info">The <see cref="T:Quantum.TriggerInfo3D"/> with data about the trigger collision.</param>
+            \ingroup Physics3dApi
+        </member>
+        <member name="T:Quantum.ISignalOnTriggerExit3D">
+            <summary>
+            Interface for receiving callbacks once a non-trigger and a trigger 3D colliders stop touching.
+            <remarks>No collision is checked between two kinematic colliders that are both trigger or both non-trigger.</remarks>
+            <remarks>At least one of the entities involved in a collision must have the respective <see cref="T:Quantum.CallbackFlags"/> set for the callback to be called.</remarks>
+            <remarks>See <see cref="M:Quantum.Physics3D.PhysicsEngine3D.Api.SetCallbacks(Quantum.EntityRef,Quantum.CallbackFlags)"/> for setting the callbacks flags to an entity.</remarks>
+            </summary>
+            \ingroup Physics3dApi
+        </member>
+        <member name="M:Quantum.ISignalOnTriggerExit3D.OnTriggerExit3D(Quantum.Frame,Quantum.ExitInfo3D)">
+            <summary>
+            Called once a non-trigger and a trigger 3D colliders stop touching.
+            </summary>
+            <param name="f">The frame in which the entities stopped touching.</param>
+            <param name="info">The <see cref="T:Quantum.ExitInfo3D"/> with the entities that were touching.</param>
+            \ingroup Physics3dApi
+        </member>
+        <member name="T:Quantum.ReplayFile">
+            <summary>
+            A class that holds all relevant data to run a Quantum replay that can be saved and loaded in JSON.
+            </summary>
+        </member>
+        <member name="F:Quantum.ReplayFile.RuntimeConfig">
+            <summary>
+            The runtime config class.
+            </summary>
+        </member>
+        <member name="F:Quantum.ReplayFile.RuntimeConfigBinary">
+            <summary>
+            Alternatively the runtime config in binary form, when the replay is saved on a platform that does not have access to the game.dll.
+            </summary>
+        </member>
+        <member name="F:Quantum.ReplayFile.DeterministicConfig">
+            <summary>
+            The session config.
+            </summary>
+        </member>
+        <member name="F:Quantum.ReplayFile.InputHistory">
+            <summary>
+            The full verbose input history. This is replaced by InputHistoryRaw in Quantum 3.0.
+            </summary>
+        </member>
+        <member name="F:Quantum.ReplayFile.InputHistoryRaw">
+            <summary>
+            The delta compressed input history stream.
+            [length as int][data as int array][len][data][len][data]..
+            </summary>
+        </member>
+        <member name="F:Quantum.ReplayFile.LastTick">
+            <summary>
+            The last tick of the input.
+            </summary>
+        </member>
+        <member name="F:Quantum.ReplayFile.Frame">
+            <summary>
+            The initial frame used when starting the replay from a certain tick.
+            </summary>
+        </member>
+        <member name="F:Quantum.ReplayFile.InitialFrame">
+            <summary>
+            The initial tick to start from, requires Frame and InitialFrameData to be set.
+            </summary>
+        </member>
+        <member name="F:Quantum.ReplayFile.InitialFrameData">
+            <summary>
+            The initial frame data (from the session) to start the replay with.
+            </summary>
+        </member>
+        <member name="T:Quantum.SimulationConfig">
+            <summary>
+            The SimulationConfig holds parameters used in the ECS layer and inside core systems like physics and navigation.
+            </summary>
+        </member>
+        <member name="F:Quantum.SimulationConfig.Entities">
+            <summary>
+            Global entities configuration
+            </summary>
+        </member>
+        <member name="F:Quantum.SimulationConfig.Physics">
+            <summary>
+            Global physics configurations.
+            </summary>
+        </member>
+        <member name="F:Quantum.SimulationConfig.Navigation">
+            <summary>
+            Global navmesh configurations.
+            </summary>
+        </member>
+        <member name="F:Quantum.SimulationConfig.AutoLoadSceneFromMap">
+            <summary>
+            This option will trigger a Unity scene load during the Quantum start sequence.\n
+            This might be convenient to start with but once the starting sequence is customized disable it and implement the scene loading by yourself.
+            "Previous Scene" refers to a scene name in Quantum Map.
+            </summary>
+        </member>
+        <member name="F:Quantum.SimulationConfig.DeltaTimeType">
+            <summary>
+            Configure how the client tracks the time to progress the Quantum simulation from the QuantumRunner class.
+            </summary>
+        </member>
+        <member name="F:Quantum.SimulationConfig.ThreadCount">
+            <summary>
+            Override the number of threads used internally. Default is 2.
+            </summary>
+        </member>
+        <member name="F:Quantum.SimulationConfig.ChecksumSnapshotHistoryLengthSeconds">
+            <summary>
+            How long to store checksumed verified frames. The are used to generate a frame dump in case of a checksum error happening. Not used in Replay and Local mode. Default is 3.
+            </summary>
+        </member>
+        <member name="F:Quantum.SimulationConfig.ChecksumErrorDumpOptions">
+            <summary>
+            Additional options for checksum dumps, if the default settings don't provide a clear picture. 
+            </summary>
+        </member>
+        <member name="F:Quantum.SimulationConfig.HeapTrackingMode">
+            <summary>
+            If and to which extent allocations in the Frame Heap should be tracked when in Debug mode.
+            Recommended modes for development is `DetectLeaks`.
+            While actively debugging a memory leak,`TraceAllocations` mode can be enabled (warning: tracing is very slow).
+            </summary>
+        </member>
+        <member name="F:Quantum.SimulationConfig.HeapPageShift">
+            <summary>
+            Define the max heap size for one page of memory the frame class uses for custom allocations like QList for example. The default is 15.
+            </summary>
+            <remarks>2^15 = 32.768 bytes</remarks>
+            <remarks><code>TotalHeapSizeInBytes = (1 &lt;&lt; HeapPageShift) * HeapPageCount</code></remarks>
+        </member>
+        <member name="F:Quantum.SimulationConfig.HeapPageCount">
+            <summary>
+            Define the max heap page count for memory the frame class uses for custom allocations like QList for example. Default is 256.
+            </summary>
+            <remarks><code>TotalHeapSizeInBytes = (1 &lt;&lt; HeapPageShift) * HeapPageCount</code></remarks>
+        </member>
+        <member name="F:Quantum.SimulationConfig.HeapExtraCount">
+            <summary>
+            Sets extra heaps to allocate for a session in case you need to
+            create 'auxiliary' frames than actually required for the simulation itself.
+            Default is 0.
+            </summary>
+        </member>
+        <member name="T:Quantum.ISignalOnNavMeshWaypointReached">
+            <summary>
+            Signal is fired when an agent reaches a waypoint.
+            </summary>
+            <remarks>Requires enabled <see cref="F:Quantum.Navigation.Config.EnableNavigationCallbacks"/> in <see cref="F:Quantum.SimulationConfig.Navigation"/>.</remarks>
+            \ingroup NavigationApi
+        </member>
+        <member name="M:Quantum.ISignalOnNavMeshWaypointReached.OnNavMeshWaypointReached(Quantum.Frame,Quantum.EntityRef,Photon.Deterministic.FPVector3,Quantum.Navigation.WaypointFlag,System.Boolean@)">
+            <param name="f">Current frame object</param>
+            <param name="entity">The entity the navmesh agent component belongs to</param>
+            <param name="waypoint">The current waypoint position</param>
+            <param name="waypointFlags">The current waypoint flags</param>
+            <param name="resetAgent">If set to true the NavMeshPathfinder component will be cleared and stopped. Set to false if NavMeshPathfinder.SetTarget() was called inside the callback.</param>
+        </member>
+        <member name="T:Quantum.ISignalOnNavMeshSearchFailed">
+            <summary>
+            Signal is fired when the agent could not find a path in the agent update after using <see cref="M:Quantum.NavMeshPathfinder.SetTarget(Quantum.Core.FrameBase,Photon.Deterministic.FPVector3,Quantum.NavMesh)"/>
+            </summary>
+            <remarks>Requires enabled <see cref="F:Quantum.Navigation.Config.EnableNavigationCallbacks"/> in <see cref="F:Quantum.SimulationConfig.Navigation"/>.</remarks>
+            \ingroup NavigationApi
+        </member>
+        <member name="M:Quantum.ISignalOnNavMeshSearchFailed.OnNavMeshSearchFailed(Quantum.Frame,Quantum.EntityRef,System.Boolean@)">
+            <param name="f">Current frame object</param>
+            <param name="entity">The entity the navmesh agent component belongs to</param>
+            <param name="resetAgent">Set this to true if the agent should reset its internal state (default is true).</param>
+        </member>
+        <member name="T:Quantum.ISignalOnNavMeshMoveAgent">
+            <summary>
+            Signal is called when the agent should move. The desired direction is influence by avoidance.
+            </summary>
+            <remarks>The agent velocity should be set in the callback.</remarks>
+            \ingroup NavigationApi
+        </member>
+        <member name="T:Quantum.QuantumGameFlags">
+            <summary>
+            This class contains values for flags that will be accessible with <see cref="P:Quantum.QuantumGame.GameFlags"/>.
+            Built-in flags control some aspects of QuantumGame inner workings, without affecting the simulation
+            outcome.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameFlags.Server">
+            <summary>
+            Starts the game in the server mode. 
+            When this flag is not set, all the events marked with "server" get culled immediatelly.
+            If this flag is set, all the events marked with "client" get culled immediatelly.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameFlags.DisableSharedChecksumSerializer">
+            <summary>
+            By default, QuantumGame uses a single shared checksum serializer to reduce allocations. 
+            The serializer is *not* static - it is only shared between frames comming from the same QuantumGame.
+            Set this flag if you want to disable this behaviour, for example if you calculate
+            checksums for multiple frames using multiple threads.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameFlags.DisableInterpolatableStates">
+            <summary>
+            By default, a Quantum session creates additional frame instances to cache previous states that can
+            be used for interpolation, notably for transform interpolations on the View.
+            Set this flag if you want to disable this behaviour (e.g. a server-side or console-only simulation),
+            reducing memory allocations and the time spent copying states over.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameFlags.EnableTaskProfiler">
+            <summary>
+            Set this flag to enables the Quantum task profiler in debug or release configurations.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameFlags.CustomFlagsStart">
+            <summary>
+            Custom user flags start from this value. Flags are accessible with <see cref="P:Quantum.QuantumGame.GameFlags"/>.
+            </summary>
+        </member>
+        <member name="F:Quantum.TrajectoryPredictor.lutExtraPrecisionBits">
+            <summary>
+            The LUT stores the raw values with an increased number of precision bits relative to the
+            regular FP precision. This value must be smalled than the FP precision.
+            </summary>
+        </member>
+        <member name="F:Quantum.TrajectoryPredictor.minInitBlock">
+            <summary>
+            The minimum amount of power factors computed one initializing a key.
+            Further expansions also follow this minimum amount. 
+            </summary>
+        </member>
+        <member name="F:Quantum.TrajectoryPredictor._dragPowFactorLut">
+            <summary>
+            LUT to store values for the expression (1 - drag * deltaTime)^n
+            The values are store as raw FP value shifted by an additional number of precision bits.
+            </summary>
+        </member>
+        <member name="M:Quantum.TrajectoryPredictor.PredictPosition(Photon.Deterministic.FP,System.Int32,Photon.Deterministic.FPVector2,Photon.Deterministic.FPVector2,Photon.Deterministic.FPVector2,Photon.Deterministic.FP)">
+            <summary>
+            Predicts the expected position of a dynamic physics body on a given tick in the future,
+            taking into consideration gravity and the drag force.
+            </summary>
+            <param name="dt">Delta time of each integration step. Usually the Frame.DeltaTime</param>
+            <param name="ticksAhead">How many ticks ahead the prediction will be, where each tick is <paramref name="dt"/> long.</param>
+            <param name="initPos">The initial position of the object, before the prediction.</param>
+            <param name="initVel">The initial velocity of the object, before the prediction.</param>
+            <param name="gravity">The gravity force which the object is subject to.</param>
+            <param name="drag">Drag factor of the dynamic body.</param>
+            <returns>The predicted position.</returns>
+            <exception cref="T:System.InvalidOperationException">if <paramref name="ticksAhead"/> is smaller than 0.</exception>
+        </member>
+        <member name="M:Quantum.TrajectoryPredictor.PredictPosition(Photon.Deterministic.FP,System.Int32,Photon.Deterministic.FPVector3,Photon.Deterministic.FPVector3,Photon.Deterministic.FPVector3,Photon.Deterministic.FP)">
+            <summary>
+            Predicts the expected position of a dynamic physics body on a given tick in the future,
+            taking into consideration gravity and the drag force.
+            </summary>
+            <param name="dt">Delta time of each integration step. Usually the Frame.DeltaTime</param>
+            <param name="ticksAhead">How many ticks ahead the prediction will be, where each tick is <paramref name="dt"/> long.</param>
+            <param name="initPos">The initial position of the object, before the prediction.</param>
+            <param name="initVel">The initial velocity of the object, before the prediction.</param>
+            <param name="gravity">The gravity force which the object is subject to.</param>
+            <param name="drag">Drag factor of the dynamic body.</param>
+            <returns>The predicted position.</returns>
+            <exception cref="T:System.InvalidOperationException">if <paramref name="ticksAhead"/> is smaller than 0.</exception>
+        </member>
+        <member name="M:Quantum.TrajectoryPredictor.PredictVelocity(Photon.Deterministic.FP,System.Int32,Photon.Deterministic.FPVector2,Photon.Deterministic.FPVector2,Photon.Deterministic.FP)">
+            <summary>
+            Predicts the expected velocity of a dynamic physics body on a given tick in the future,
+            taking into consideration gravity and the drag force.
+            </summary>
+            <param name="dt">Delta time of each integration step. Usually the Frame.DeltaTime</param>
+            <param name="ticksAhead">How many ticks ahead the prediction will be, where each tick is <paramref name="dt"/> long.</param>
+            <param name="initVel">The initial velocity of the object, before the prediction.</param>
+            <param name="gravity">The gravity force which the object is subject to.</param>
+            <param name="drag">Drag factor of the dynamic body.</param>
+            <returns>The predicted velocity.</returns>
+            <exception cref="T:System.InvalidOperationException">if <paramref name="ticksAhead"/> is smaller than 0.</exception>
+        </member>
+        <member name="M:Quantum.TrajectoryPredictor.PredictVelocity(Photon.Deterministic.FP,System.Int32,Photon.Deterministic.FPVector3,Photon.Deterministic.FPVector3,Photon.Deterministic.FP)">
+            <summary>
+            Predicts the expected velocity of a dynamic physics body on a given tick in the future,
+            taking into consideration gravity and the drag force.
+            </summary>
+            <param name="dt">Delta time of each integration step. Usually the Frame.DeltaTime</param>
+            <param name="ticksAhead">How many ticks ahead the prediction will be, where each tick is <paramref name="dt"/> long.</param>
+            <param name="initVel">The initial velocity of the object, before the prediction.</param>
+            <param name="gravity">The gravity force which the object is subject to.</param>
+            <param name="drag">Drag factor of the dynamic body.</param>
+            <returns>The predicted velocity.</returns>
+            <exception cref="T:System.InvalidOperationException">if <paramref name="ticksAhead"/> is smaller than 0.</exception>
+        </member>
+        <member name="M:Quantum.FrameThreadSafeExtensions.GetGlobal(Quantum.FrameThreadSafe)">
+            <summary>
+            A convenience method to get the global state from a frame without having to cast it.
+            </summary>
+            <param name="frame"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Quantum.SystemsConfig">
+            <summary>
+            A Quantum configuration asset that will create and start Quantum systems in a data-driven way when starting the simulation.
+            Can be assigned to <see cref="T:Quantum.RuntimeConfig"/>. 
+            If no config is assigned then a default selection of build-in systems is used (<see cref="M:Quantum.DeterministicSystemSetup.CreateSystems(Quantum.RuntimeConfig,Quantum.SimulationConfig,Quantum.SystemsConfig)"/>.
+            The systems to be used can always be changed by code inside <see cref="M:Quantum.DeterministicSystemSetup.AddSystemsUser(System.Collections.Generic.ICollection{Quantum.SystemBase},Quantum.RuntimeConfig,Quantum.SimulationConfig,Quantum.SystemsConfig)"/>.
+            </summary>
+        </member>
+        <member name="T:Quantum.SystemsConfig.SystemEntryBase">
+            <summary>
+            System that will be instatiated on simulation start.
+            </summary>
+        </member>
+        <member name="F:Quantum.SystemsConfig.SystemEntryBase.SystemType">
+            <summary>
+            System type name. Use typeof(SystemBase).FullName to get a valid name progamatically. E.g. Quantum.Core.SystemSignalsOnly.
+            </summary>
+        </member>
+        <member name="F:Quantum.SystemsConfig.SystemEntryBase.SystemName">
+            <summary>
+            Optional System name. If set, then the SystemType class needs to have a matching contructor.
+            </summary>
+        </member>
+        <member name="F:Quantum.SystemsConfig.SystemEntryBase.StartDisabled">
+            <summary>
+            Start system disabled.
+            Set <see cref="P:Quantum.SystemBase.StartEnabled"/> accordingly. The value is inversed to have a better default value in Unity inspectors.
+            </summary>
+        </member>
+        <member name="F:Quantum.SystemsConfig.Entries">
+            <summary>
+            System entries to be instantiated on simulation start.
+            </summary>
+        </member>
+        <member name="M:Quantum.SystemsConfig.CreateSystems(Quantum.SystemsConfig)">
+            <summary>
+            Converts the systems configuration into a list of system objects while calling the matching (Name, Children) contructors.
+            This method throws AssertionExceptions on any invalid system configuration.
+            
+                                                 SystemBase   
+                   __________________________________|___________________________________________________________
+                  |                 |                |                    |                     |                |
+            SystemGroup     SystemMainThread  SystemArrayComponent  SystemArrayFilter  SystemSignalsOnly  SystemThreadedFilter
+             children (SystemBase)  |
+                          __________|__________
+                         |                     |
+              SystemMainThreadGroup  SystemMainThreadFilter
+                   children (SystemMainThread)
+            </summary>
+        </member>
+    </members>
+</doc>

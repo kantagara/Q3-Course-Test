@@ -1,0 +1,9 @@
+component PlayerLink{
+    PlayerRef Player;
+}
+
+input{
+    FPVector2 Movement;
+    FPVector2 MousePosition;
+    button Jump;
+}

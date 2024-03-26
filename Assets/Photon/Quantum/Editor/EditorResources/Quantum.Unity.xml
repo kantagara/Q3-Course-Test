@@ -1,0 +1,1397 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Quantum.Unity</name>
+    </assembly>
+    <members>
+        <member name="T:Quantum.QuantumUnityLogger">
+            <summary>
+            A log wrapper around the Quantum static logger to bind to the Unity debug logging.
+            Toggle the LogLevel using `Quantum.Log.LogLevel`. It get's initialized using the defines:
+              QUANTUM_LOGLEVEL_TRACE, QUANTUM_LOGLEVEL_DEBUG, QUANTUM_LOGLEVEL_INFO, QUANTUM_LOGLEVEL_WARN, QUANTUM_LOGLEVEL_ERROR
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumUnityLogger.NameUnavailableObjectDestroyedLabel">
+            <summary>
+            Customize logged object names for destroyed objects.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumUnityLogger.NameUnavailableInWorkerThreadLabel">
+            <summary>
+            Cusomize logged object names from other threads.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumUnityLogger.UseGlobalPrefix">
+            <summary>
+            If true, all messages will be prefixed with [Quantum] tag
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumUnityLogger.UseColorTags">
+            <summary>
+            If true, some parts of messages will be enclosed with &lt;color&gt; tags.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumUnityLogger.AddHashCodePrefix">
+            <summary>
+            If true, each log message that has a source parameter will be prefixed with a hash code of the source object. 
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumUnityLogger.GlobalPrefixColor">
+            <summary>
+            Color of the global prefix (see <see cref="F:Quantum.QuantumUnityLogger.UseGlobalPrefix"/>).
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumUnityLogger.MinRandomColor">
+            <summary>
+            Min Random Color
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumUnityLogger.MaxRandomColor">
+            <summary>
+            Max Random Color
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumUnityLogger.GlobalPrefix">
+            <summary>
+            A prefix tag added to each log.
+            </summary>
+            
+        </member>
+        <member name="P:Quantum.QuantumUnityLogger.DefinedLogLevel">
+            <summary>
+            Returns the log level defined by QUANTUM_LOGLEVEL_(..) defines.
+            </summary>
+        </member>
+        <member name="P:Quantum.DebugMesh.DebugMaterial">
+            <summary>
+            The material used to draw transparent simulation debug shapes. 
+            Replace by setting a material before it's ever used.
+            </summary>
+        </member>
+        <member name="T:Quantum.DebugDraw">
+            <summary>
+            This class will draw shapes issued by the simulation (e.g. <see cref="M:Quantum.Draw.Sphere(Photon.Deterministic.FPVector3,Photon.Deterministic.FP,System.Nullable{Quantum.ColorRGBA},System.Boolean)"/>)
+            The shape drawig is based on the DEBUG define which is enabled in UnityEditor and development builds.
+            Can be globally toggled of by using <see cref="F:Quantum.DebugDraw.IsEnabled"/>.
+            </summary>
+        </member>
+        <member name="F:Quantum.DebugDraw.IsEnabled">
+            <summary>
+            Globally toggle on/off any simualtion debug shape drawing.
+            </summary>
+        </member>
+        <member name="T:Quantum.QuantumEntityViewFlags">
+            <summary>
+            Additional configuration of the entity view that enables of disabled parts of the updating process.
+            Either for performance reasons or when taking over control.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumEntityViewFlags.DisableUpdateView">
+            <summary>
+            <see cref="M:Quantum.QuantumEntityView.UpdateView(System.Boolean,System.Boolean)"/> and <see cref="M:Quantum.QuantumEntityView.LateUpdateView"/> are not processed and forwarded to entity view components.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumEntityViewFlags.DisableUpdatePosition">
+            <summary>
+            Will completely disable updating the entity view positions.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumEntityViewFlags.UseCachedTransform">
+            <summary>
+            Use cached transforms to improve the performance by not calling Transform properties.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumEntityViewFlags.DisableEntityRefNaming">
+            <summary>
+            The entity game object will be named to resemble the EntityRef, set this flag to prevent naming.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumEntityViewFlags.DisableSearchChildrenForEntityViewComponents">
+            <summary>
+            Disable searching the entity view game object children for entity view components.
+            </summary>
+        </member>
+        <member name="P:Quantum.QuantumUnityJsonSerializer.DecompressBinaryDataOnDeserialization">
+            <summary>
+            If true, all BinaryData assets will be decompressed during deserialization.
+            </summary>
+        </member>
+        <member name="P:Quantum.QuantumUnityJsonSerializer.CompressBinaryDataOnSerializationThreshold">
+            <summary>
+            If set to a positive value, all uncompressed BinaryData assets with size over the value will be compressed
+            during serialization.
+            </summary>
+        </member>
+        <member name="P:Quantum.QuantumUnityJsonSerializer.IntegerEnquotingMinDigits">
+            <summary>
+            How many digits should a number have to be enquoted.
+            Some JSON parsers deserialize all numbers as floating points,  which in case of large integers (e.g. entity ids) can lead to precision loss.
+            If this property is set to true (default), all integers with <see cref="P:Quantum.QuantumUnityJsonSerializer.IntegerEnquotingMinDigits"/> or more digits
+            are enquoted.
+            </summary>
+        </member>
+        <member name="P:Quantum.QuantumUnityJsonSerializer.NullifyUnityObjectReferences">
+             <summary>
+             Should all UnityEngine.Object references be nullified in the resulting JSON?
+             If true, all UnityEngine.Object references will be serialized as null. Otherwise,
+             they are serialized as { "instanceId": &lt;value&gt; }.
+            
+             True by default.
+             </summary>
+        </member>
+        <member name="P:Quantum.QuantumUnityJsonSerializer.EntityViewPrefabResolver">
+             <summary>
+             Custom resolver for EntityView prefabs.
+            
+             EntityViews are serialized without prefab references (as they are not JSON serializable). Resolving
+             takes place during deserialization, by looking up the prefab in the global DB.
+             </summary>
+        </member>
+        <member name="M:Quantum.QuantumUnityJsonSerializer.ResolvePrefab(Quantum.AssetGuid)">
+            <summary>
+            Resolves the prefab associated with the provided AssetGuid by looking it up in the global DB.
+            </summary>
+            <param name="guid">The AssetGuid of the prefab to be resolved.</param>
+            <returns>Returns the GameObject associated with the provided AssetGuid.</returns>
+            <exception cref="T:System.InvalidOperationException">Thrown when the prefab associated with the provided AssetGuid cannot be found.</exception>
+        </member>
+        <member name="T:Quantum.IQuantumViewComponent">
+            <summary>
+            The interface that the <see cref="T:Quantum.QuantumEntityViewUpdater"/> uses to control the view components.
+            </summary>
+        </member>
+        <member name="T:Quantum.QuantumEntityView">
+            <summary>
+            The Quantum entity view component is the representation of the entity inside Unity.
+            Instances will be created by the <see cref="P:Quantum.QuantumEntityView.EntityViewUpdater"/>.
+            Quantum entity with the <see cref="T:Quantum.View"/> component will references a Quantum <see cref="T:Quantum.EntityView"/> asset which will in turn be instantiated as 
+            <see cref="F:Quantum.EntityView.Prefab"/> and the resulting game object includes this script.
+            </summary>
+        </member>
+        <member name="T:Quantum.QuantumEntityView.EntityUnityEvent">
+            <summary>
+            Wrapping UnityEvent(QuantumGame) into a class. Is used by the QuantumEntityView to make create and destroy publish Unity events.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumEntityView.AssetGuid">
+            <summary>
+            Will set to the <see cref="P:Quantum.AssetObject.Guid"/> that the underlying <see cref="T:Quantum.EntityView"/> asset has.
+            Or receives a new Guid when binding this view script to a scene entity.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumEntityView.EntityRef">
+            <summary>
+            References the Quantum entity that this view script is liked to.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumEntityView.BindBehaviour">
+            <summary>
+            Set the entity view bind behaviour. If set to <see cref="F:Quantum.QuantumEntityViewBindBehaviour.NonVerified"/> then the view is created during a predicted frame.
+            Entity views created at that time can be subject to changes and even be destroyed because of misprediction.
+            Entity views created during <see cref="F:Quantum.QuantumEntityViewBindBehaviour.Verified"/> will be more stable but are always created at a later time, when the input has been confirmed by the server.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumEntityView.ManualDisposal">
+            <summary>
+            If enabled the QuantumEntityViewUpdater will not destroy (or disable, in case of map entities) this instance, and you are responsible for removing it from the game world yourself.\n\nYou will still receive the OnEntityDestroyed callback.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumEntityView.ViewFlags">
+            <summary>
+            Set the <see cref="T:Quantum.QuantumEntityViewFlags"/> to further configure the entity view.
+            </summary>
+        </member>
+        <member name="P:Quantum.QuantumEntityView.GameObjectNameIsEntityRef">
+            <summary>
+            If set to true, the game object will be renamed to the EntityRef number.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumEntityView.ErrorCorrectionRateMin">
+            <summary>
+              <para>
+                A factor with dimension of 1/s (Hz) that works as a lower limit for how much
+                of the accumulated prediction error is corrected every frame.
+                This factor affects both the position and the rotation correction.
+                Suggested values are greater than zero and smaller than
+                <see cref="F:Quantum.QuantumEntityView.ErrorCorrectionRateMax">ErrorCorrectionRateMax</see>.
+              </para>
+              <para>
+                E.g.: ErrorCorrectionRateMin = 3, rendering delta time = (1/60)s: at least 5% (3 * 1/60) of the accumulated error
+                will be corrected on this rendered frame.
+              </para>
+              <para>
+                This threshold might not be respected if the resultant correction magnitude is
+                below the <see cref="F:Quantum.QuantumEntityView.ErrorPositionMinCorrection">ErrorPositionMinCorrection</see>
+                or above the <see cref="F:Quantum.QuantumEntityView.ErrorPositionTeleportDistance">ErrorPositionTeleportDistance</see>, for the position error,
+                or above the <see cref="F:Quantum.QuantumEntityView.ErrorRotationTeleportDistance">ErrorRotationTeleportDistance</see>, for the rotation error.
+              </para>
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumEntityView.ErrorCorrectionRateMax">
+            <summary>
+              <para>
+                A factor with dimension of 1/s (Hz) that works as a upper limit for how much
+                of the accumulated prediction error is corrected every frame.
+                This factor affects both the position and the rotation correction.
+                Suggested values are greater than <see cref="F:Quantum.QuantumEntityView.ErrorCorrectionRateMin">ErrorCorrectionRateMin</see>
+                and smaller than half of a target rendering rate.
+              </para>
+              <para>
+                E.g.: ErrorCorrectionRateMax = 15, rendering delta time = (1/60)s: at maximum 25% (15 * 1/60) of the accumulated
+                error
+                will be corrected on this rendered frame.
+              </para>
+              <para>
+                This threshold might not be respected if the resultant correction magnitude is
+                below the <see cref="F:Quantum.QuantumEntityView.ErrorPositionMinCorrection">ErrorPositionMinCorrection</see> or
+                above the <see cref="F:Quantum.QuantumEntityView.ErrorPositionTeleportDistance">ErrorPositionTeleportDistance</see>, for the position error,
+                or above the <see cref="F:Quantum.QuantumEntityView.ErrorRotationTeleportDistance">ErrorRotationTeleportDistance</see>, for the rotation error.
+              </para>
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumEntityView.ErrorPositionBlendStart">
+            <summary>
+              <para>
+                The reference for the magnitude of the accumulated position error, in meters,
+                at which the position error will be corrected at the
+                <see cref="F:Quantum.QuantumEntityView.ErrorCorrectionRateMin">ErrorCorrectionRateMin</see>.
+                Suggested values are greater than <see cref="F:Quantum.QuantumEntityView.ErrorPositionMinCorrection">ErrorPositionMinCorrection</see>
+                and smaller than <see cref="F:Quantum.QuantumEntityView.ErrorPositionBlendEnd">ErrorPositionBlendEnd</see>.
+              </para>
+              <para>
+                In other words, if the magnitude of the accumulated error is equal to or smaller than this threshold,
+                it will be corrected at the <see cref="F:Quantum.QuantumEntityView.ErrorCorrectionRateMin">ErrorCorrectionRateMin</see>.
+                If, instead, the magnitude is between this threshold and
+                <see cref="F:Quantum.QuantumEntityView.ErrorPositionBlendEnd">ErrorPositionBlendEnd</see>,
+                the error is corrected at a rate between <see cref="F:Quantum.QuantumEntityView.ErrorCorrectionRateMin">ErrorCorrectionRateMin</see>
+                and <see cref="F:Quantum.QuantumEntityView.ErrorCorrectionRateMax">ErrorCorrectionRateMax</see>, proportionally.
+                If it is equal to or greater than <see cref="F:Quantum.QuantumEntityView.ErrorPositionBlendEnd">ErrorPositionBlendEnd</see>,
+                it will be corrected at the <see cref="F:Quantum.QuantumEntityView.ErrorCorrectionRateMax">ErrorCorrectionRateMax</see>.
+              </para>
+              <para>
+                Note: as the factor is expressed in distance units (meters), it might need to be scaled
+                proportionally to the overall scale of objects in the scene and speeds at which they move,
+                which are factors that affect the expected magnitude of prediction errors.
+              </para>
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumEntityView.ErrorPositionBlendEnd">
+            <summary>
+              <para>
+                The reference for the magnitude of the accumulated position error, in meters,
+                at which the position error will be corrected at the
+                <see cref="F:Quantum.QuantumEntityView.ErrorCorrectionRateMax">ErrorCorrectionRateMax</see>.
+                Suggested values are greater than <see cref="F:Quantum.QuantumEntityView.ErrorPositionBlendStart">ErrorPositionBlendStart</see>
+                and smaller than <see cref="F:Quantum.QuantumEntityView.ErrorPositionTeleportDistance">ErrorPositionTeleportDistance</see>.
+              </para>
+              <para>
+                In other words, if the magnitude of the accumulated error is equal to or greater than this threshold,
+                it will be corrected at the <see cref="F:Quantum.QuantumEntityView.ErrorCorrectionRateMax">ErrorCorrectionRateMax</see>.
+                If, instead, the magnitude is between <see cref="F:Quantum.QuantumEntityView.ErrorPositionBlendStart">ErrorPositionBlendStart</see> and this
+                threshold,
+                the error is corrected at a rate between <see cref="F:Quantum.QuantumEntityView.ErrorCorrectionRateMin">ErrorCorrectionRateMin</see>
+                and <see cref="F:Quantum.QuantumEntityView.ErrorCorrectionRateMax">ErrorCorrectionRateMax</see>, proportionally.
+                If it is equal to or smaller than <see cref="F:Quantum.QuantumEntityView.ErrorPositionBlendStart">ErrorPositionBlendStart</see>,
+                it will be corrected at the <see cref="F:Quantum.QuantumEntityView.ErrorCorrectionRateMin">ErrorCorrectionRateMin</see>.
+              </para>
+              <para>
+                Note: as the factor is expressed in distance units (meters), it might need to be scaled
+                proportionally to the overall scale of objects in the scene and speeds at which they move,
+                which are factors that affect the expected magnitude of prediction errors.
+              </para>
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumEntityView.ErrorRotationBlendStart">
+            <summary>
+              <para>
+                The reference for the magnitude of the accumulated rotation error, in radians,
+                at which the rotation error will be corrected at the
+                <see cref="F:Quantum.QuantumEntityView.ErrorCorrectionRateMin">ErrorCorrectionRateMin</see>.
+                Suggested values are smaller than <see cref="F:Quantum.QuantumEntityView.ErrorRotationBlendEnd">ErrorRotationBlendEnd</see>.
+              </para>
+              <para>
+                In other words, if the magnitude of the accumulated error is equal to or smaller than this threshold,
+                it will be corrected at the <see cref="F:Quantum.QuantumEntityView.ErrorCorrectionRateMin">ErrorCorrectionRateMin</see>.
+                If, instead, the magnitude is between this threshold and
+                <see cref="F:Quantum.QuantumEntityView.ErrorRotationBlendEnd">ErrorRotationBlendEnd</see>,
+                the error is corrected at a rate between <see cref="F:Quantum.QuantumEntityView.ErrorCorrectionRateMin">ErrorCorrectionRateMin</see>
+                and <see cref="F:Quantum.QuantumEntityView.ErrorCorrectionRateMax">ErrorCorrectionRateMax</see>, proportionally.
+                If it is equal to or greater than <see cref="F:Quantum.QuantumEntityView.ErrorRotationBlendEnd">ErrorRotationBlendEnd</see>,
+                it will be corrected at the <see cref="F:Quantum.QuantumEntityView.ErrorCorrectionRateMax">ErrorCorrectionRateMax</see>.
+              </para>
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumEntityView.ErrorRotationBlendEnd">
+            <summary>
+              <para>
+                The reference for the magnitude of the accumulated rotation error, in radians,
+                at which the rotation error will be corrected at the
+                <see cref="F:Quantum.QuantumEntityView.ErrorCorrectionRateMax">ErrorCorrectionRateMax</see>.
+                Suggested values are greater than <see cref="F:Quantum.QuantumEntityView.ErrorRotationBlendStart">ErrorRotationBlendStart</see>
+                and smaller than <see cref="F:Quantum.QuantumEntityView.ErrorRotationTeleportDistance">ErrorRotationTeleportDistance</see>.
+              </para>
+              <para>
+                In other words, if the magnitude of the accumulated error is equal to or greater than this threshold,
+                it will be corrected at the <see cref="F:Quantum.QuantumEntityView.ErrorCorrectionRateMax">ErrorCorrectionRateMax</see>.
+                If, instead, the magnitude is between <see cref="F:Quantum.QuantumEntityView.ErrorRotationBlendStart">ErrorRotationBlendStart</see> and this
+                threshold,
+                the error is corrected at a rate between <see cref="F:Quantum.QuantumEntityView.ErrorCorrectionRateMin">ErrorCorrectionRateMin</see>
+                and <see cref="F:Quantum.QuantumEntityView.ErrorCorrectionRateMax">ErrorCorrectionRateMax</see>, proportionally.
+                If it is equal to or smaller than <see cref="F:Quantum.QuantumEntityView.ErrorRotationBlendStart">ErrorRotationBlendStart</see>,
+                it will be corrected at the <see cref="F:Quantum.QuantumEntityView.ErrorCorrectionRateMin">ErrorCorrectionRateMin</see>.
+              </para>
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumEntityView.ErrorPositionMinCorrection">
+            <summary>
+              <para>
+                The value, in meters, that represents the minimum magnitude of the accumulated position error
+                that will be corrected in a single frame, until it is fully corrected.
+              </para>
+              <para>
+                This setting has priority over the resultant correction rate, i.e. the restriction
+                will be respected even if it makes the effective correction rate be different than
+                the one computed according to the min/max rates and start/end blend values.
+                Suggested values are greater than zero and smaller than
+                <see cref="F:Quantum.QuantumEntityView.ErrorPositionBlendStart">ErrorPositionBlendStart</see>.
+              </para>
+              <para>
+                Note: as the factor is expressed in distance units (meters), it might need to be scaled
+                proportionally to the overall scale of objects in the scene and speeds at which they move,
+                which are factors that affect the expected magnitude of prediction errors.
+              </para>
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumEntityView.ErrorPositionTeleportDistance">
+            <summary>
+              <para>
+                The value, in meters, that represents the magnitude of the accumulated
+                position error above which the error will be instantaneously corrected,
+                effectively teleporting the rendered object to its correct position.
+                Suggested values are greater than <see cref="F:Quantum.QuantumEntityView.ErrorPositionBlendEnd">ErrorPositionBlendEnd</see>.
+              </para>
+              <para>
+                This setting has priority over the resultant correction rate, i.e. the restriction
+                will be respected even if it makes the effective correction rate be different than
+                the one computed according to the min/max rates and start/end blend values.
+              </para>
+              <para>
+                Note: as the factor is expressed in distance units (meters), it might need to be scaled
+                proportionally to the overall scale of objects in the scene and speeds at which they move,
+                which are factors that affect the expected magnitude of prediction errors.
+              </para>
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumEntityView.ErrorRotationTeleportDistance">
+            <summary>
+              <para>
+                The value, in radians, that represents the magnitude of the accumulated
+                rotation error above which the error will be instantaneously corrected,
+                effectively teleporting the rendered object to its correct orientation.
+                Suggested values are greater than <see cref="F:Quantum.QuantumEntityView.ErrorRotationBlendEnd">ErrorRotationBlendEnd</see>.
+              </para>
+              <para>
+                This setting has priority over the resultant correction rate, i.e. the restriction
+                will be respected even if it makes the effective correction rate be different than
+                the one computed according to the min/max rates and start/end blend values.
+              </para>
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumEntityView.OnEntityInstantiated">
+            <summary>
+            Is called after the entity view has been instantiated.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumEntityView.OnEntityDestroyed">
+            <summary>
+            Is called before the entity view is destroyed.
+            </summary>
+        </member>
+        <member name="P:Quantum.QuantumEntityView.ViewComponents">
+            <summary>
+            Access the entity view components registered to this entity view.
+            All view components found on this game object during creation are used.
+            </summary>
+        </member>
+        <member name="P:Quantum.QuantumEntityView.EntityViewUpdater">
+            <summary>
+            A reference to the entity view updater that controls this entity view.
+            </summary>
+        </member>
+        <member name="P:Quantum.QuantumEntityView.Game">
+            <summary>
+            A reference to the current game that this entity view belongs to <see cref="P:Quantum.QuantumEntityViewUpdater.ObservedGame"/>.
+            </summary>
+        </member>
+        <member name="P:Quantum.QuantumEntityView.ViewContexts">
+            <summary>
+            All contexts found on the <see cref="P:Quantum.QuantumEntityView.EntityViewUpdater"/> game object accessible by their type.
+            </summary>
+        </member>
+        <member name="M:Quantum.QuantumEntityView.SetViewFlag(Quantum.QuantumEntityViewFlags,System.Boolean)">
+            <summary>
+            Set the <see cref="T:Quantum.QuantumEntityViewFlags"/> to further configure the entity view.
+            </summary>
+            <param name="flag">The flag enum value</param>
+            <param name="isEnabled">Set or unset the flag.</param>
+        </member>
+        <member name="M:Quantum.QuantumEntityView.HasViewFlag(Quantum.QuantumEntityViewFlags)">
+            <summary>
+            Test if a view flag is set.
+            </summary>
+            <param name="flag"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Quantum.QuantumDefaultConfigs">
+            <summary>
+            This class represents a collection of Quantum config assets that are used when no explicit simulation config was assigned to a simulation (through RuntimeConfig).
+            It's also implementing QuantumGlobalScriptableObject to have one instance globally accessible.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumRunner.IsSessionUpdateDisabled">
+            <summary>
+              Disable updating the runner completely. Useful when ticking the simualtion by other means.
+            </summary>
+        </member>
+        <member name="P:Quantum.QuantumRunner.Game">
+            <summary>
+              Access the QuantumGame.
+            </summary>
+        </member>
+        <member name="P:Quantum.QuantumRunner.HideGizmos">
+            <summary>
+              Hide Gizmos toggle.
+            </summary>
+        </member>
+        <member name="P:Quantum.QuantumRunner.GizmoSettings">
+            <summary>
+              Gizmo settings for this runner.
+            </summary>
+        </member>
+        <member name="P:Quantum.QuantumRunner.NetworkClient">
+            <summary>
+              Access the network client through the Communicator.
+            </summary>
+        </member>
+        <member name="P:Quantum.QuantumRunner.UnityObject">
+            <summary>
+              The reference to the Unity object that is updating this runner.
+            </summary>
+        </member>
+        <member name="T:Quantum.QuantumSceneViewComponent`1">
+            <summary>
+            The SceneViewComponent is able to attach itself to the <see cref="T:Quantum.QuantumEntityViewUpdater"/> and received updates from it.
+            </summary>
+            <typeparam name="T"></typeparam>
+        </member>
+        <member name="F:Quantum.QuantumSceneViewComponent`1.Updater">
+            <summary>
+            Will attach this view component to this EntityViewUpater so it receives update callbacks from there.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumSceneViewComponent`1.UseFindUpdater">
+            <summary>
+            Uses UnityEngine.Object.FindObjectOfType/FindObjectByType to find the <see cref="F:Quantum.QuantumSceneViewComponent`1.Updater"/>. This is very slow and not recommended.
+            </summary>
+        </member>
+        <member name="M:Quantum.QuantumSceneViewComponent`1.OnEnable">
+            <summary>
+            Unity OnEnabled, will try to attach this script to the <see cref="F:Quantum.QuantumSceneViewComponent`1.Updater"/>.
+            </summary>
+        </member>
+        <member name="M:Quantum.QuantumSceneViewComponent`1.OnDisable">
+            <summary>
+            Unity OnDisabled, will try to detach the script from the <see cref="F:Quantum.QuantumSceneViewComponent`1.Updater"/>.
+            </summary>
+        </member>
+        <member name="T:Quantum.QuantumSceneViewComponent">
+            <summary>
+            A scene view component without context.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumUnityDB.DefaultPath">
+            <summary>
+            The default location of the DB asset.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumUnityDB._entries">
+            <summary>
+            All the assets that are managed by this DB.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumUnityDB._guidToIndex">
+            <summary>
+            AssetGuid to index in <see cref="F:Quantum.QuantumUnityDB._entries"/> mapping.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumUnityDB._pathToIndex">
+            <summary>
+            Path to index in <see cref="F:Quantum.QuantumUnityDB._entries"/> mapping.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumUnityDB._allocator">
+            <summary>
+            Allocator used for assets initialization and disposal.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumUnityDB._disposeQueue">
+            <summary>
+            Assets are disposed on the main thread, but the disposal is scheduled from the worker threads.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumUnityDB._workedThreadLoadQueue">
+            <summary>
+            When loading assets on the main thread, the loading is scheduled from the worker threads.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumUnityDB._mainThreadId">
+            <summary>
+            Actual loading is done on the main thread, but the loading is scheduled from the worker threads.
+            </summary>
+        </member>
+        <member name="P:Quantum.QuantumUnityDB.Entries">
+            <summary>
+            Exposes the list of entries in the DB. Can be used to iterate asset sources at both runtime and edit time.
+            </summary>
+        </member>
+        <member name="E:Quantum.QuantumUnityDB.AssetObjectDisposing">
+            <summary>
+            Raised when an asset is unloaded.
+            </summary>
+        </member>
+        <member name="M:Quantum.QuantumUnityDB.UpdateGlobal">
+            <summary>
+            Updates <see cref="P:Quantum.QuantumUnityDB.Global"/> DB, if loaded. Must be called from the main thread. Call periodically, if assets are
+            loaded/unloaded without the simulation running.
+            </summary>
+        </member>
+        <member name="M:Quantum.QuantumUnityDB.UnloadGlobal">
+            <summary>
+            Unloads <see cref="P:Quantum.QuantumUnityDB.Global" />, if already loaded and unloads any asset that has been loaded.
+            Next call to <see cref="P:Quantum.QuantumUnityDB.Global"/> will load the DB again.
+            </summary>
+        </member>
+        <member name="M:Quantum.QuantumUnityDB.OnUnloadedAsGlobal(System.Boolean)">
+            <summary>
+            Unloads all the assets that have been loaded by the <see cref="P:Quantum.QuantumUnityDB.Global"/> DB.
+            </summary>
+            <param name="destroyed"></param>
+        </member>
+        <member name="M:Quantum.QuantumUnityDB.AddSource(Quantum.IQuantumAssetObjectSource,Quantum.AssetGuid,System.String)">
+            <summary>
+            Registers a source for the asset with the given <paramref name="guid"/> and an optional <paramref name="path"/>.
+            </summary>
+            <param name="source"></param>
+            <param name="guid"></param>
+            <param name="path"></param>
+        </member>
+        <member name="M:Quantum.QuantumUnityDB.RemoveSource(Quantum.AssetGuid,System.ValueTuple{Quantum.IQuantumAssetObjectSource,System.Boolean}@)">
+            <summary>
+            Removes the source for the asset with the given <paramref name="guid"/>.
+            </summary>
+            <param name="guid"></param>
+            <param name="result"></param>
+            <returns></returns>
+        </member>
+        <member name="P:Quantum.QuantumUnityDB.Global">
+            <summary>
+            Returns the global DB. If the DB is not loaded, it will be loaded.
+            </summary>
+        </member>
+        <member name="M:Quantum.QuantumUnityDB.GetAssetGuid(System.String)">
+            <summary>
+            Converts a Quantum asset path to a Quantum asset guid.
+            </summary>
+            <param name="path"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Quantum.QuantumViewComponent`1">
+            <summary>
+            The base class to inherit entity view components from.
+            Entity view components can be used to add features to entity views and gain simple access to all relevant Quantum game API and the Quantum entity.
+            </summary>
+            <typeparam name="T">The type of the custom view context used by this view component. Can be `IQuantumEntityViewContext` if not required.</typeparam>
+        </member>
+        <member name="P:Quantum.QuantumViewComponent`1.Game">
+            <summary>
+            The Game that the entity belongs to. This can change after the <see cref="M:Quantum.QuantumViewComponent`1.OnGameChanged"/> callback.
+            Set before calling <see cref="M:Quantum.QuantumViewComponent`1.OnActivate(Quantum.Frame)"/>.
+            </summary>
+        </member>
+        <member name="P:Quantum.QuantumViewComponent`1.PredictedFrame">
+            <summary>
+            The newest predicted frame.
+            Set before calling <see cref="M:Quantum.QuantumViewComponent`1.OnActivate(Quantum.Frame)"/>.
+            </summary>
+        </member>
+        <member name="P:Quantum.QuantumViewComponent`1.VerifiedFrame">
+            <summary>
+            The newest verified frame.
+            Set before calling <see cref="M:Quantum.QuantumViewComponent`1.OnActivate(Quantum.Frame)"/>.
+            </summary>
+        </member>
+        <member name="P:Quantum.QuantumViewComponent`1.PredictedPreviousFrame">
+            <summary>
+            The newest predicted previous frame.
+            Set before calling <see cref="M:Quantum.QuantumViewComponent`1.OnActivate(Quantum.Frame)"/>.
+            </summary>
+        </member>
+        <member name="P:Quantum.QuantumViewComponent`1.ViewContext">
+            <summary>
+            The view context of the <see cref="T:Quantum.QuantumEntityViewUpdater"/> associated with this entity view component.
+            </summary>
+        </member>
+        <member name="P:Quantum.QuantumViewComponent`1.IsActive">
+            <summary>
+            Is the view component currently activated.
+            </summary>
+        </member>
+        <member name="M:Quantum.QuantumViewComponent`1.OnInitialize">
+            <summary>
+            Is called when the entity view is enabled for the first time.
+            The <see cref="P:Quantum.QuantumViewComponent`1.ViewContext"/> is already set if available.
+            Access to <see cref="P:Quantum.QuantumViewComponent`1.Game"/>, <see cref="P:Quantum.QuantumViewComponent`1.VerifiedFrame"/>, <see cref="P:Quantum.QuantumViewComponent`1.PredictedFrame"/> and <see cref="P:Quantum.QuantumViewComponent`1.PredictedPreviousFrame"/> is not avalable yet.
+            </summary>
+        </member>
+        <member name="M:Quantum.QuantumViewComponent`1.OnActivate(Quantum.Frame)">
+            <summary>
+            Is called when the entity view is activated and the entity was created.
+            </summary>
+            <param name="frame">The frame that the entity was created with, can be predicted or verified base on the <see cref="T:Quantum.QuantumEntityViewBindBehaviour"></see></param>.
+        </member>
+        <member name="M:Quantum.QuantumViewComponent`1.OnDeactivate">
+            <summary>
+            Is called when the view component is deactivated.
+            </summary>
+        </member>
+        <member name="M:Quantum.QuantumViewComponent`1.OnUpdateView">
+            <summary>
+            Is called from the <see cref="T:Quantum.QuantumEntityViewUpdater"/> on a Unity update.
+            </summary>
+        </member>
+        <member name="M:Quantum.QuantumViewComponent`1.OnLateUpdateView">
+            <summary>
+            Is called from the <see cref="T:Quantum.QuantumEntityViewUpdater"/> on a Unity late update.
+            </summary>
+        </member>
+        <member name="M:Quantum.QuantumViewComponent`1.OnGameChanged">
+            <summary>
+            Is called from the <see cref="T:Quantum.QuantumEntityViewUpdater"/> then the observed game is changed.
+            </summary>
+        </member>
+        <member name="M:Quantum.QuantumViewComponent`1.Initialize(System.Collections.Generic.Dictionary{System.Type,Quantum.IQuantumViewContext})">
+            <summary>
+            Is only called internally.
+            Sets the view context of this entity view component.
+            </summary>
+            <param name="contexts">All of the different contexts of the EntityViewUpdater, will select the matching type.</param>
+        </member>
+        <member name="M:Quantum.QuantumViewComponent`1.Activate(Quantum.Frame,Quantum.QuantumGame,Quantum.QuantumEntityView)">
+            <summary>
+            Is only called internally.
+            Sets the entity view parent.
+            </summary>
+            <param name="frame"></param>
+            <param name="game"></param>
+            <param name="entityView"></param>
+        </member>
+        <member name="M:Quantum.QuantumViewComponent`1.Deactivate">
+            <summary>
+            Is only called internally.
+            </summary>
+        </member>
+        <member name="M:Quantum.QuantumViewComponent`1.UpdateView">
+            <summary>
+            Is only called internally.
+            </summary>
+        </member>
+        <member name="M:Quantum.QuantumViewComponent`1.LateUpdateView">
+            <summary>
+            Is only called internally.
+            </summary>
+        </member>
+        <member name="M:Quantum.QuantumViewComponent`1.GameChanged(Quantum.QuantumGame)">
+            <summary>
+            Is only called internally.
+            </summary>
+        </member>
+        <member name="T:Quantum.QuantumMultiClientRunner">
+            <summary>
+              The script will can manage multiple online clients and Quantum players in your Editor. This means the remote view of
+              your player can be visualized in the same Unity instance.
+              Minimum settings:
+              * Requires a valid AppId and working network settings in Photon Server Settings
+              * Drag the QuantumMultiClientRunner prefab into you Quantum game scene (this works similar to the default Runner
+              except it does not reload the Unity scene)
+              * Add game objects that belong to the regular Quantum scene to DisableOnStart (QuantumDefaultRunner,
+              QuantumEntityViewUpdater, Your Input Script, CustomCallbacks)
+              * The PlayerInputTemplate is instantiated for each client to gather input by fireing the Unity message
+              PollInput(CallbackPollInput c). Implement your input to support this format:
+              public class QuantumMultiClientTestInput : QuantumMonoBehaviour {
+                private void PollInput(CallbackPollInput c) {
+                  var i = new Quantum.Input();
+                  i.Direction.X = 1;
+                  i.Direction.Y = 0;
+                  c.SetInput(i, DeterministicInputFlags.Repeatable);
+                }
+              }
+              * Press "New Client" to add additional online players
+              I = toggle input of the player
+              V = toggle view of the player
+              G = toggle gizmos of the player
+              X = quit player
+              0-9 = Add a local player slot
+              SHIFT+0-9 = remove local player slot
+              * If you don't experience ghosting try a different cloud that if farther away from you (Fixed Region 'sa' for
+              example)
+              * Enable AddAsLocalPlayers to add new players as local players instead of each having a seprarate connection.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumMultiClientRunner.PlayerViewTemplate">
+            <summary>
+            Get instanciated for each client and makes connection controls for that client available.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumMultiClientRunner.CreatePlayerBtn">
+            <summary>
+            The button to create a new client connection.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumMultiClientRunner.DisableOnStart">
+            <summary>
+            Quantum scripts in your game scene that are part of the regular setup like QuantumEntityViewUpdater,
+            Input and CustomCallbacks need to be disabled when using the MultiClientRunner, add them here.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumMultiClientRunner.GizmosSettings">
+            <summary>
+            Optionally provide non-default editor settings for all additional clients after the first one (to change the gizmo colors for example).
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumMultiClientRunner.ServerSettings">
+            <summary>
+            Optionally provide different non-default server app settings.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumMultiClientRunner.SessionConfig">
+            <summary>
+            Add a session config here.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumMultiClientRunner.RuntimeConfig">
+            <summary>
+            Add custom runtime config settings here
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumMultiClientRunner.PlayerCount">
+            <summary>
+            Set the max player count
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumMultiClientRunner.InitialClientCount">
+            <summary>
+            How many clients to start with when starting the app.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumMultiClientRunner.InitialPlayerCount">
+            <summary>
+            How many additional players per client to start with when starting the app.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumMultiClientRunner.InitialPlayerDelayInSec">
+            <summary>
+            Start initial clients and players with an extra delay.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumMultiClientRunner.RuntimePlayer">
+            <summary>
+            Add custom runtime player settings here.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumMultiClientRunner.PlayerInputTemplate">
+            <summary>
+            Provide a player input template that is instantiated for the clients. 
+            A Unity script that has to implement void Unity message PollInput(CallbackPollInput c).
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumMultiClientRunner.EntityViewUpdaterTemplate">
+            <summary>
+            Optionally provide a custom QuantumEntityViewUpdater game object template that is instantiated for the clients 
+            (otherwise a new instance of QuantumEntityViewUpdater is created for each player).
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumMultiClientRunner.UseRandomMatchmaking">
+            <summary>
+            Use random matchmaking or let subsequent players join the primary players room.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumMultiClientRunner.UsePrivateAppVersion">
+            <summary>
+            Use a private AppVersion when connecting to isolate matchmaking players
+            </summary>
+        </member>
+        <member name="M:Quantum.QuantumMultiClientRunner.CreateNewConnectedPlayer">
+            <summary>
+            Create and connect a new client.
+            </summary>
+        </member>
+        <member name="M:Quantum.QuantumMultiClientRunner.CreateNewLocalPlayer(Quantum.QuantumMultiClientPlayer)">
+            <summary>
+            Create a new player for a connected client.
+            </summary>
+            <param name="mainPlayer">The connection that the player should be added to</param>
+        </member>
+        <member name="M:Quantum.QuantumMultiClientRunner.DestroyPlayer(Quantum.QuantumMultiClientPlayer)">
+            <summary>
+            MultiClientPlayer class uses this to signal a player quits.
+            </summary>
+            <param name="player">Player class</param>
+        </member>
+        <member name="M:Quantum.QuantumMultiClientRunner.OnRunnerShutdown(Quantum.ShutdownCause,Quantum.SessionRunner)">
+            <summary>
+            Is called when the QuantumRunner terminates, on request or any connection error.
+            </summary>
+            <param name="cause">The shutdown cause</param>
+            <param name="runner">The associated QuantumRunner</param>
+        </member>
+        <member name="T:Quantum.QuantumDebugInput">
+            <summary>
+            A Unity script that creates empty input for any Quantum game.
+            </summary>
+        </member>
+        <member name="T:Quantum.QuantumRunnerBehaviour">
+            <summary>
+            A unity script that updates the Quantum runner.
+            Also manages calls to Gizmos and DebugDraw required to render Quantum debug gizmos.
+            If you are writing a custom SRP, you must call RenderPipeline.EndCameraRendering to trigger OnPostRenderInternal().
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumRunnerBehaviour.Runner">
+            <summary>
+            The runner object set during <see cref="M:Quantum.QuantumRunner.StartGame(Quantum.SessionRunner.Arguments)"/>
+            </summary>
+        </member>
+        <member name="T:Quantum.IQuantumEntityViewPool">
+            <summary>
+            Interface to create custom implementation of the entity view pool that can be assigned to the <see cref="P:Quantum.QuantumEntityViewUpdater.Pool"/>.
+            </summary>
+        </member>
+        <member name="P:Quantum.IQuantumEntityViewPool.PooledCount">
+            <summary>
+            Returns how many items are inside the pool in total.
+            </summary>
+        </member>
+        <member name="P:Quantum.IQuantumEntityViewPool.BorrowedCount">
+            <summary>
+            Returns how many pooled items are currently in use.
+            </summary>
+        </member>
+        <member name="M:Quantum.IQuantumEntityViewPool.Create``1(``0,System.Boolean,System.Boolean)">
+            <summary>
+            Create a pooled game object and return the component of chose type.
+            </summary>
+            <typeparam name="T">Component type</typeparam>
+            <param name="prefab">Prefab to instantiate</param>
+            <param name="activate">Call SetActive() on the game object</param>
+            <param name="createIfEmpty">Create a new entity if there is no suitable one found in the pool</param>
+            <returns>Component on the created prefab instance, can be null</returns>
+        </member>
+        <member name="M:Quantum.IQuantumEntityViewPool.Create(UnityEngine.GameObject,System.Boolean,System.Boolean)">
+            <summary>
+            Create a pooled game object.
+            </summary>
+            <param name="prefab">Prefab to instantiate</param>
+            <param name="activate">Call SetActive() on the game object</param>
+            <param name="createIfEmpty">Create a new entity if there is no suitable one found in the pool</param>
+            <returns>An instance of the prefab</returns>
+        </member>
+        <member name="M:Quantum.IQuantumEntityViewPool.Create``1(``0,UnityEngine.Transform,System.Boolean,System.Boolean)">
+            <summary>
+            Create a pooled game object and return the component of chose type.
+            </summary>
+            <typeparam name="T">Component type</typeparam>
+            <param name="prefab">Prefab to instantiate</param>
+            <param name="parent">Calls SetParent(parent) on the new game object transform when set</param>
+            <param name="activate">Call SetActive() on the game object</param>
+            <param name="createIfEmpty">Create a new entity if there is no suitable one found in the pool</param>
+            <returns>Component on the created prefab instance, can be null</returns>
+        </member>
+        <member name="M:Quantum.IQuantumEntityViewPool.Create(UnityEngine.GameObject,UnityEngine.Transform,System.Boolean,System.Boolean)">
+            <summary>
+            Create a pooled game object.
+            </summary>
+            <param name="prefab">Prefab to instantiate</param>
+            <param name="parent">Calls SetParent(parent) on the new game object transform when set</param>
+            <param name="activate">Call SetActive() on the game object</param>
+            <param name="createIfEmpty">Create a new entity if there is no suitable one found in the pool</param>
+            <returns>An instance of the prefab</returns>
+        </member>
+        <member name="M:Quantum.IQuantumEntityViewPool.Destroy(UnityEngine.Component,System.Boolean)">
+            <summary>
+            Destroy or return the pooled game object that the component is attached to.
+            </summary>
+            <param name="component">Component that belongs to the pooled game object.</param>
+            <param name="deactivate">Call SetActive(false) on the pooled game object before returning it to the pool</param>
+        </member>
+        <member name="M:Quantum.IQuantumEntityViewPool.Destroy(UnityEngine.GameObject,System.Boolean)">
+            <summary>
+            Destroy or return the pooled game object.
+            </summary>
+            <param name="instance">Poole game object</param>
+            <param name="deactivate">Call SetActive(false) on the pooled game object before returning it to the pool</param>
+        </member>
+        <member name="M:Quantum.IQuantumEntityViewPool.Destroy(UnityEngine.GameObject,System.Single)">
+            <summary>
+            Destroy or return the pooled game object after a delay.
+            </summary>
+            <param name="instance">Poole game object</param>
+            <param name="delay">Delay in seconds to complete returning it to the pool</param>
+        </member>
+        <member name="M:Quantum.IQuantumEntityViewPool.Prepare(UnityEngine.GameObject,System.Int32)">
+            <summary>
+            Create prefab instances and fill the pool.
+            </summary>
+            <param name="prefab">Prefab to created pooled instances</param>
+            <param name="desiredCount">The number of instances to create and add to the pool</param>
+        </member>
+        <member name="T:Quantum.IQuantumViewContext">
+            <summary>
+            Use this interface to create view context classes that can be used inside concrete <see cref="T:Quantum.QuantumEntityViewComponent`1"/>.
+            </summary>
+        </member>
+        <member name="M:Quantum.QuantumUnityComponentPrototype.CreatePrototype(Quantum.QuantumEntityPrototypeConverter)">
+            <summary>
+            </summary>
+            <param name="converter"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Quantum.QuantumRunnerLocalDebug">
+            <summary>
+              A debug script that starts the Quantum simulation for <see cref="F:Quantum.QuantumRunnerLocalDebug.MaxPlayerCount" /> players when starting the game
+              from a gameplay scene.
+              Will add <see cref="F:Quantum.QuantumRunnerLocalDebug.LocalPlayers" /> as local players during simulation start.
+              The script will disable itself when it detectes that other scene were loaded before this (to delegate adding players
+              to a menu scene / game bootstrap).
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumRunnerLocalDebug.DeltaTypeType">
+            <summary>
+              Set the <see cref="F:Quantum.QuantumRunnerLocalDebug.DeltaTypeType" /> to <see cref="F:Quantum.SimulationUpdateTime.EngineDeltaTime" /> to not progress the
+              simulation during break points.
+              Has to be set before starting the runner and can only be changed on the runner directly during runtime: <see cref="P:Quantum.SessionRunner.DeltaTimeType"/>.
+            </summary>
+        </member>
+        <member name="T:Quantum.QuantumEntityViewPool">
+            <summary>
+            An implementation of a EntityView pool to be used with the <see cref="P:Quantum.QuantumEntityViewUpdater.Pool"/>.
+            Add this behaviour to the same game object that the <see cref="T:Quantum.QuantumEntityViewUpdater"/> behaviour is on.
+            Using QuantumCallback.Subscribe() with pooled objects as listener nees to use the onlyIfActiveAndEnabled option to not be callbacks from disabled pooled objects.
+            </summary>
+        </member>
+        <member name="P:Quantum.QuantumEntityViewPool.PooledCount">
+            <summary>
+            Returns how many items are inside the pool in total.
+            </summary>
+        </member>
+        <member name="P:Quantum.QuantumEntityViewPool.BorrowedCount">
+            <summary>
+            Returns how many pooled items are currently in use.
+            </summary>
+        </member>
+        <member name="M:Quantum.QuantumEntityViewPool.Create``1(``0,System.Boolean,System.Boolean)">
+            <summary>
+            Create a pooled game object and return the component of chose type.
+            </summary>
+            <typeparam name="T">Component type</typeparam>
+            <param name="prefab">Prefab to instantiate</param>
+            <param name="activate">Call SetActive() on the game object</param>
+            <param name="createIfEmpty">Create a new entity if there is no suitable one found in the pool</param>
+            <returns>Component on the created prefab instance, can be null</returns>
+        </member>
+        <member name="M:Quantum.QuantumEntityViewPool.Create(UnityEngine.GameObject,System.Boolean,System.Boolean)">
+            <summary>
+            Create a pooled game object.
+            </summary>
+            <param name="prefab">Prefab to instantiate</param>
+            <param name="activate">Call SetActive() on the game object</param>
+            <param name="createIfEmpty">Create a new entity if there is no suitable one found in the pool</param>
+            <returns>An instance of the prefab</returns>
+        </member>
+        <member name="M:Quantum.QuantumEntityViewPool.Create``1(``0,UnityEngine.Transform,System.Boolean,System.Boolean)">
+            <summary>
+            Create a pooled game object and return the component of chose type.
+            </summary>
+            <typeparam name="T">Component type</typeparam>
+            <param name="prefab">Prefab to instantiate</param>
+            <param name="parent">Calls SetParent(parent) on the new game object transform when set</param>
+            <param name="activate">Call SetActive() on the game object</param>
+            <param name="createIfEmpty">Create a new entity if there is no suitable one found in the pool</param>
+            <returns>Component on the created prefab instance, can be null</returns>
+        </member>
+        <member name="M:Quantum.QuantumEntityViewPool.Create(UnityEngine.GameObject,UnityEngine.Transform,System.Boolean,System.Boolean)">
+            <summary>
+            Create a pooled game object.
+            </summary>
+            <param name="prefab">Prefab to instantiate</param>
+            <param name="parent">Calls SetParent(parent) on the new game object transform when set</param>
+            <param name="activate">Call SetActive() on the game object</param>
+            <param name="createIfEmpty">Create a new entity if there is no suitable one found in the pool</param>
+            <returns>An instance of the prefab</returns>
+        </member>
+        <member name="M:Quantum.QuantumEntityViewPool.Destroy(UnityEngine.Component,System.Boolean)">
+            <summary>
+            Destroy or return the pooled game object that the component is attached to.
+            </summary>
+            <param name="component">Component that belongs to the pooled game object.</param>
+            <param name="deactivate">Call SetActive(false) on the pooled game object before returning it to the pool</param>
+        </member>
+        <member name="M:Quantum.QuantumEntityViewPool.Destroy(UnityEngine.GameObject,System.Boolean)">
+            <summary>
+            Destroy or return the pooled game object.
+            </summary>
+            <param name="instance">Poole game object</param>
+            <param name="deactivate">Call SetActive(false) on the pooled game object before returning it to the pool</param>
+        </member>
+        <member name="M:Quantum.QuantumEntityViewPool.Destroy(UnityEngine.GameObject,System.Single)">
+            <summary>
+            Destroy or return the pooled game object after a delay.
+            </summary>
+            <param name="instance">Poole game object</param>
+            <param name="delay">Delay in seconds to complete returning it to the pool</param>
+        </member>
+        <member name="M:Quantum.QuantumEntityViewPool.Prepare(UnityEngine.GameObject,System.Int32)">
+            <summary>
+            Create prefab instances and fill the pool.
+            </summary>
+            <param name="prefab">Prefab to created pooled instances</param>
+            <param name="desiredCount">The number of instances to create and add to the pool</param>
+        </member>
+        <member name="M:Quantum.QuantumEntityViewPool.Awake">
+            <summary>
+            Create pre cached pooled game objects during Awake().
+            </summary>
+        </member>
+        <member name="M:Quantum.QuantumEntityViewPool.OnDestroy">
+            <summary>
+            Shutdow the pool.
+            </summary>
+        </member>
+        <member name="M:Quantum.QuantumEntityViewPool.Update">
+            <summary>
+            Update is used to track deferred pooled game object destroy requests.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumEntityViewPool.PooledObject.Count">
+            <summary>
+            The number of game objects instances to pre allocate.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumEntityViewPool.PooledObject.GameObject">
+            <summary>
+            The prefab to instantiate pooled game objects from.
+            </summary>
+        </member>
+        <member name="T:Quantum.PhotonServerSettings">
+            <summary>
+            This class wraps the AppSettings into a scriptable object and adds a few Quantum connection related configurations.
+            Connect to specific region cloud: UseNameSever = true,  FixedRegion = "us", Server = ""
+            Connect to best region:           UseNameSever = true,  FixedRegion = "",   Server = ""
+            Connect to (local) master server: UseNameSever = false, FixedRegion = "",   Server = "10.0.0.0.", Port = 5055
+            Connect to (local) name server:   UseNameSever = true,  FixedRegion = "",   Server = "10.0.0.0.", Port = 5058
+            </summary>
+        </member>
+        <member name="F:Quantum.PhotonServerSettings.AppSettings">
+            <summary>
+            Photon AppSettings is serialized on this class.
+            </summary>
+        </member>
+        <member name="F:Quantum.PhotonServerSettings.PlayerTtlInSeconds">
+            <summary>
+            PlayerTTL used when opening rooms.
+            </summary>
+        </member>
+        <member name="F:Quantum.PhotonServerSettings.EmptyRoomTtlInSeconds">
+            <summary>
+            EmptyRoomTTL used when opening rooms.
+            </summary>
+        </member>
+        <member name="F:Quantum.PhotonServerSettings.BestRegionSummaryKey">
+            <summary>
+            Best region summary key used to store ping results in PlayerPrefs.
+            </summary>
+        </member>
+        <member name="P:Quantum.PhotonServerSettings.CanRejoin">
+            <summary>
+            Rejoining rooms (after the 10 second default timeout) is only possible when PlayerTTL > 0.
+            </summary>
+        </member>
+        <member name="P:Quantum.PhotonServerSettings.BestRegionSummary">
+            <summary>
+            Access best region summary in PlayerPrefs.
+            </summary>
+        </member>
+        <member name="T:Quantum.QuantumMultiClientPlayer">
+            <summary>
+            This class keeps track of individual Photon connections and Quantum simulations (QuantumRunner). 
+            </summary>
+        </member>
+        <member name="P:Quantum.QuantumMultiClientPlayer.Runner">
+            <summary>
+            The QuantumRunner that this player belongs to.
+            </summary>
+        </member>
+        <member name="P:Quantum.QuantumMultiClientPlayer.RunnerId">
+            <summary>
+            Access the runner id of it's runner or null if it does not exist.
+            </summary>
+        </member>
+        <member name="P:Quantum.QuantumMultiClientPlayer.Input">
+            <summary>
+            The Input object to toggle on or off.
+            </summary>
+        </member>
+        <member name="P:Quantum.QuantumMultiClientPlayer.ShutdownHandler">
+            <summary>
+            The shutdown handler used to keep track of disconnect events from the QuantumRunner. Requires a reference to clean up during destruction.
+            </summary>
+        </member>
+        <member name="P:Quantum.QuantumMultiClientPlayer.DetroyPlayerCallback">
+            <summary>
+            The callback to notify the MultiClientRunner class of pressing exit.
+            </summary>
+        </member>
+        <member name="P:Quantum.QuantumMultiClientPlayer.PlayerSlot">
+            <summary>
+            The local player slot this player uses. Only used when AddAsLocalPlayers is enabled.
+            </summary>
+        </member>
+        <member name="P:Quantum.QuantumMultiClientPlayer.MainPlayer">
+            <summary>
+            If this player is using the connection and QuantumRunner of another player (only used when AddAsLocalPlayers is enabled).
+            </summary>
+        </member>
+        <member name="P:Quantum.QuantumMultiClientPlayer.LocalPlayers">
+            <summary>
+            Other local players running on this players connection and QuantumRunner.
+            </summary>
+        </member>
+        <member name="P:Quantum.QuantumMultiClientPlayer.View">
+            <summary>
+            Access the view object.
+            </summary>
+        </member>
+        <member name="T:Quantum.QuantumEntityViewComponent`1">
+            <summary>
+            The base class to inherit entity view components from.
+            Entity view components can be used to add features to entity views and gain simple access to all relevant Quantum game API and the Quantum entity.
+            </summary>
+            <typeparam name="T">The type of the custom view context used by this view component. Can be `IQuantumEntityViewContext` if not required.</typeparam>
+        </member>
+        <member name="P:Quantum.QuantumEntityViewComponent`1.Game">
+            <summary>
+            The Game that the entity belongs to. This can change after the OnGameChanged() callback.
+            Set before calling OnActivate(Frame).
+            </summary>
+        </member>
+        <member name="P:Quantum.QuantumEntityViewComponent`1.EntityRef">
+            <summary>
+            The Quantum EntityRef that the underlying entity view is attached to.
+            </summary>
+        </member>
+        <member name="P:Quantum.QuantumEntityViewComponent`1.EntityView">
+            <summary>
+            A reference to the parent class to access interesting game and entity data.
+            </summary>
+        </member>
+        <member name="T:Quantum.QuantumEntityViewComponent">
+            <summary>
+            A entity view component without context type.
+            </summary>
+        </member>
+        <member name="M:Quantum.FPMathUtils.ToUnityVector3(Photon.Deterministic.FPVector3,System.Boolean)">
+            <summary>
+              Use this version of ToUnityVector3() when converting a 3D position from the XZ plane in the simulation to the 2D XY
+              plane in Unity.
+            </summary>
+        </member>
+        <member name="T:Quantum.QuantumEntityViewBindBehaviour">
+            <summary>
+            The view bind behaviour controls when the view is created. For entities on the predicted or entities on the verified frame. 
+            Because the verified frame is confirmed by the server this bind behaviour will show local entity views delayed.
+            When using non-verifed it may happen that they get destroyed when the frame is finally confirmed by the server.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumEntityViewBindBehaviour.NonVerified">
+            <summary>
+            The entity view is created during a predicted frame.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumEntityViewBindBehaviour.Verified">
+            <summary>
+            The entity view is created during a verified frame.
+            </summary>
+        </member>
+        <member name="T:Quantum.QuantumEntityPrototypeColliderLayerSource">
+            <summary>
+            Defines the source of the physics collider layer information.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumEntityPrototypeColliderLayerSource.GameObject">
+            <summary>
+            The layer information is retrieved from the Source Collider's GameObject (if one is provided)
+            or this Prototype's GameObject (otherwise).
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumEntityPrototypeColliderLayerSource.Explicit">
+            <summary>
+            The layer is defined explicitly from a layer enumeration.
+            </summary>
+        </member>
+        <member name="T:Quantum.QuantumAddRuntimePlayers">
+            <summary>
+              Similar to the CustomCallback script and the <see cref="T:Quantum.QuantumRunnerLocalDebug" /> this script will add all players
+              inside the <see cref="T:Quantum.RuntimePlayer" /> list as local players to Quantum during the game start. The script must <see cref="M:Quantum.QuantumAddRuntimePlayers.Awake" /> before starting the
+              game and it works for local debug and online matches via a menu.
+              Remove this script from your scene when the players are only added inside the menu classes (use the Player list in
+              <see cref="T:Quantum.QuantumRunnerLocalDebug" />  to start game scenes directly).
+            </summary>
+        </member>
+        <member name="M:Quantum.MapDataBakerCallback.OnBeforeBake(Quantum.QuantumMapData)">
+            <summary>
+              Is called in the beginning of map baking. Both signatures are called.
+            </summary>
+            <param name="data">The MapData object that is currently baked.</param>
+        </member>
+        <member name="M:Quantum.MapDataBakerCallback.OnBake(Quantum.QuantumMapData)">
+            <summary>
+              Is called after map baking when colliders and prototypes have been baked and before navmesh baking.
+            </summary>
+            <param name="data"></param>
+        </member>
+        <member name="M:Quantum.MapDataBakerCallback.OnBeforeBakeNavMesh(Quantum.QuantumMapData)">
+            <summary>
+              Is called before any navmeshes are generated or any bake data is collected.
+            </summary>
+            <param name="data">The MapData object that is currently baked.</param>
+        </member>
+        <member name="M:Quantum.MapDataBakerCallback.OnCollectNavMeshBakeData(Quantum.QuantumMapData,System.Collections.Generic.List{Quantum.NavMeshBakeData})">
+            <summary>
+              Is called during navmesh baking with the current list of bake data retreived from Unity navmeshes flagged for Quantum
+              navmesh baking.
+              Add new BakeData objects to the navMeshBakeData list.
+            </summary>
+            <param name="data">The MapData object that is currently baked.</param>
+            <param name="navMeshBakeData">Current list of bake data to be baked</param>
+        </member>
+        <member name="M:Quantum.MapDataBakerCallback.OnCollectNavMeshes(Quantum.QuantumMapData,System.Collections.Generic.List{Quantum.NavMesh})">
+            <summary>
+              Is called after navmesh baking before serializing them to assets.
+              Add new NavMesh objects the navmeshes list.
+            </summary>
+            <param name="data">The MapData object that is currently baked.</param>
+            <param name="navmeshes">Current list of baked navmeshes to be saved to assets.</param>
+        </member>
+        <member name="M:Quantum.MapDataBakerCallback.OnBakeNavMesh(Quantum.QuantumMapData)">
+            <summary>
+              Is called after the navmesh generation has been completed.
+              Navmeshes assets references are stored in data.Asset.Settings.NavMeshLinks.
+            </summary>
+            <param name="data">The MapData object that is currently baked.</param>
+        </member>
+        <member name="F:Quantum.QuantumEntityViewUpdater.ViewParentTransform">
+            <summary>
+            "Optionally provide a transform that all entity views will be parented under."
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumEntityViewUpdater.AutoFindMapData">
+            <summary>
+            Disable you don't intend to use MapData component.
+            </summary>
+        </member>
+        <member name="M:Quantum.QuantumEntityViewUpdater.AddViewComponent(Quantum.IQuantumViewComponent)">
+            <summary>
+            Attach a non-entity view component that is then updated by the EntityViewUpdater.
+            The <see cref="M:Quantum.QuantumViewComponent`1.OnActivate(Quantum.Frame)"/> will be deferred until the next view update.
+            </summary>
+            <param name="viewComponent">View component instance</param>
+        </member>
+        <member name="M:Quantum.QuantumEntityViewUpdater.RemoveViewComponent(Quantum.IQuantumViewComponent)">
+            <summary>
+            Remove a view component from being updated by the EntityViewUpdater.
+            The removing of the view component is being deferred until the next late update.
+            </summary>
+            <param name="viewComponent">View component instance to remove</param>
+        </member>
+        <member name="T:Quantum.QuantumRunnerLocalReplay">
+            <summary>
+            An example of how to start a Quantum replay simulation from a replay file.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumRunnerLocalReplay.DeltaTypeType">
+            <summary>
+            Set the <see cref="F:Quantum.QuantumRunnerLocalReplay.DeltaTypeType" /> to <see cref="F:Quantum.SimulationUpdateTime.EngineDeltaTime" /> to not progress the
+            simulation time during break points.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumRunnerLocalReplay.ReplayFile">
+            <summary>
+            Replay JSON file.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumRunnerLocalReplay.DatabaseFile">
+            <summary>
+            Quantum asset database Json file.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumRunnerLocalReplay.ChecksumFile">
+            <summary>
+            List of checksums to verify against (optional).
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumRunnerLocalReplay.SimulationSpeedMultiplier">
+            <summary>
+            Simulation speed multiplier to playback the replay in a different speed.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumRunnerLocalReplay.ShowReplayLabel">
+            <summary>
+            Toggle the replay gui lable on/off.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumRunnerLocalReplay.InstantReplayConfig">
+            <summary>
+            Instant replay configurations to start the replay with.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumRunnerLocalReplay.ForceUsingUnityJson">
+            <summary>
+            Force Unity json deserialization of the deplay file even when Newtonsoft is available.
+            Newtonsoft is very low when compiled with IL2CPP. But Unity Json deserialization expects the byte arrays to be int array instead on base64 strings.
+            </summary>
+        </member>
+        <member name="M:Quantum.QuantumNavMesh.CreateAndDrawGizmoMesh(Quantum.NavMesh,Quantum.NavMeshRegionMask,Quantum.QuantumGameGizmosSettings)">
+            <summary>
+              Creates a Unity mesh from the navmesh data and renders it as a gizmo. Uses submeshes to draw main mesh, regions and
+              deactivated regions in different colors.
+              The meshes are cached in a static dictionary by their NavMesh.Name. Call InvalidateGizmos() to reset the cache
+              manually.
+              New meshes are created when the region mask changed.
+            </summary>
+        </member>
+        <member name="F:QuantumSDKAttributesTest.LayerMask">
+            <summary>
+            Some inline help.
+            </summary>
+        </member>
+        <member name="F:QuantumSDKAttributesTest.EntityPrototype">
+            <summary>
+            Some inline help.
+            </summary>
+        </member>
+        <member name="F:QuantumSDKAttributesTest.fpUnitsHelp">
+            <summary>
+            Some inline help.
+            </summary>
+        </member>
+    </members>
+</doc>
