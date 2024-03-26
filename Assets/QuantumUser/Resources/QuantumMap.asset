@@ -22,7 +22,7 @@ MonoBehaviour:
   Scene: QuantumGameScene
   ScenePath: Assets/QuantumUser/Scenes/QuantumGameScene.unity
   SceneGuid: 48760cc7023d43d4183d4662e0b0e97c
-  WorldSize: 256
+  WorldSize: 250
   BucketsCount: 16
   BucketsSubdivisions: 8
   BucketingAxis: 0
@@ -32,8 +32,8 @@ MonoBehaviour:
     Id:
       Value: 359330099366706911
   SerializeTrianglesMetadata: 0
-  GridSizeX: 64
-  GridSizeY: 64
+  GridSizeX: 60
+  GridSizeY: 60
   GridNodeSize: 4
   NavMeshLinks: []
   Regions: []
@@ -67,11 +67,11 @@ MonoBehaviour:
       RawValue: 0
     BoxExtents:
       X:
-        RawValue: 16384000
+        RawValue: 8192000
       Y:
         RawValue: 9830
       Z:
-        RawValue: 16384000
+        RawValue: 8192000
     SmoothSphereMeshCollisions: 0
     StaticData:
       Name: Ground
@@ -358,11 +358,11 @@ MonoBehaviour:
       data:
         Position:
           X:
-            RawValue: 16112028
+            RawValue: 5439488
           Y:
-            RawValue: -4060460
+            RawValue: 0
           Z:
-            RawValue: 1446846
+            RawValue: 0
         Rotation:
           X:
             RawValue: 0
@@ -379,11 +379,11 @@ MonoBehaviour:
       data:
         Position:
           X:
-            RawValue: 10233449
+            RawValue: 6750208
           Y:
-            RawValue: -4060460
+            RawValue: 0
           Z:
-            RawValue: -13967221
+            RawValue: -5767168
         Rotation:
           X:
             RawValue: 0
@@ -422,11 +422,11 @@ MonoBehaviour:
       data:
         Position:
           X:
-            RawValue: 7297436
+            RawValue: -1572864
           Y:
-            RawValue: -4060460
+            RawValue: 0
           Z:
-            RawValue: 8105304
+            RawValue: 6658457
         Rotation:
           X:
             RawValue: 0
@@ -443,11 +443,11 @@ MonoBehaviour:
       data:
         Position:
           X:
-            RawValue: 468584
+            RawValue: 0
           Y:
-            RawValue: -4060460
+            RawValue: 0
           Z:
-            RawValue: -14294901
+            RawValue: -4194304
         Rotation:
           X:
             RawValue: 0
@@ -464,11 +464,11 @@ MonoBehaviour:
       data:
         Position:
           X:
-            RawValue: -9086564
+            RawValue: -6422528
           Y:
-            RawValue: -4060460
+            RawValue: 0
           Z:
-            RawValue: 1446846
+            RawValue: 0
         Rotation:
           X:
             RawValue: 0

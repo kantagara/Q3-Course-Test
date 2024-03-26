@@ -1497,7 +1497,7 @@ namespace Quantum {
   using Photon.Deterministic;
   using Quantum.Core;
   public unsafe interface ISignalOnComponentAdded<T> : ISignal where T : unmanaged, IComponent {
-    void OnAdded(Frame f, EntityRef entity, T* component);
+    void OnAdded(Frame f, EntityRef entity, T* weapon);
   }
 
   public unsafe interface ISignalOnComponentRemoved<T> : ISignal where T : unmanaged, IComponent {
