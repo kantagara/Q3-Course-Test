@@ -49,6 +49,21 @@ namespace Quantum.Prototypes.Unity {
   using RuntimeInitializeOnLoadMethodAttribute = UnityEngine.RuntimeInitializeOnLoadMethodAttribute;
   #endif //;
   
+  [System.SerializableAttribute()]
+  public unsafe partial class SpawnPointListPrototype : Quantum.QuantumUnityPrototypeAdapter<Quantum.Prototypes.SpawnPointListPrototype> {
+    [DynamicCollectionAttribute()]
+    public Quantum.QuantumEntityPrototype[] availableSpawnPoints = {};
+    [DynamicCollectionAttribute()]
+    public Quantum.QuantumEntityPrototype[] usedSpawnPoints = {};
+    partial void ConvertUser(Quantum.QuantumEntityPrototypeConverter converter, ref Quantum.Prototypes.SpawnPointListPrototype prototype);
+    public override Quantum.Prototypes.SpawnPointListPrototype Convert(Quantum.QuantumEntityPrototypeConverter converter) {
+      var result = new Quantum.Prototypes.SpawnPointListPrototype();
+      converter.Convert(this.availableSpawnPoints, out result.availableSpawnPoints);
+      converter.Convert(this.usedSpawnPoints, out result.usedSpawnPoints);
+      ConvertUser(converter, ref result);
+      return result;
+    }
+  }
 }
 #pragma warning restore 0109
 #pragma warning restore 1591

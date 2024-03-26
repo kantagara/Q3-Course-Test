@@ -22,7 +22,6 @@ namespace Quantum {
       Quantum.Input i = new Quantum.Input {
         Movement = new FPVector2(UnityEngine.Input.GetAxis("Horizontal").ToFP(),
           UnityEngine.Input.GetAxis("Vertical").ToFP()),
-        Jump = UnityEngine.Input.GetButton("Jump"),
         MousePosition = _previousPosition.ToFPVector3().XZ
       };
       callback.SetInput(i, DeterministicInputFlags.Repeatable);

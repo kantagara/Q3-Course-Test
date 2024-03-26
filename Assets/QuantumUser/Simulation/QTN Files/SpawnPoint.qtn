@@ -1,0 +1,10 @@
+﻿component SpawnPoint
+{
+    
+}
+
+singleton component SpawnPointList
+{
+    list<EntityRef> availableSpawnPoints;
+    list<EntityRef> usedSpawnPoints;
+}

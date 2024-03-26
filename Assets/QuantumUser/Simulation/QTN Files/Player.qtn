@@ -5,5 +5,4 @@ component PlayerLink{
 input{
     FPVector2 Movement;
     FPVector2 MousePosition;
-    button Jump;
 }

@@ -69,12 +69,10 @@ namespace Quantum.Prototypes {
   public unsafe partial class InputPrototype : StructPrototype {
     public FPVector2 Movement;
     public FPVector2 MousePosition;
-    public Button Jump;
     partial void MaterializeUser(Frame frame, ref Quantum.Input result, in PrototypeMaterializationContext context);
     public void Materialize(Frame frame, ref Quantum.Input result, in PrototypeMaterializationContext context = default) {
         result.Movement = this.Movement;
         result.MousePosition = this.MousePosition;
-        result.Jump = this.Jump;
         MaterializeUser(frame, ref result, in context);
     }
   }
@@ -91,6 +89,56 @@ namespace Quantum.Prototypes {
     public void Materialize(Frame frame, ref Quantum.PlayerLink result, in PrototypeMaterializationContext context = default) {
         result.Player = this.Player;
         MaterializeUser(frame, ref result, in context);
+    }
+  }
+  [System.SerializableAttribute()]
+  [Quantum.Prototypes.Prototype(typeof(Quantum.SpawnPoint))]
+  public unsafe partial class SpawnPointPrototype : ComponentPrototype<Quantum.SpawnPoint> {
+    [HideInInspector()]
+    public Int32 _empty_prototype_dummy_field_;
+    partial void MaterializeUser(Frame frame, ref Quantum.SpawnPoint result, in PrototypeMaterializationContext context);
+    public override Boolean AddToEntity(FrameBase f, EntityRef entity, in PrototypeMaterializationContext context) {
+        Quantum.SpawnPoint component = default;
+        Materialize((Frame)f, ref component, in context);
+        return f.Set(entity, component) == SetResult.ComponentAdded;
+    }
+    public void Materialize(Frame frame, ref Quantum.SpawnPoint result, in PrototypeMaterializationContext context = default) {
+        MaterializeUser(frame, ref result, in context);
+    }
+  }
+  [System.SerializableAttribute()]
+  [Quantum.Prototypes.Prototype(typeof(Quantum.SpawnPointList))]
+  public unsafe class SpawnPointListPrototype : ComponentPrototype<Quantum.SpawnPointList> {
+    [DynamicCollectionAttribute()]
+    public MapEntityId[] availableSpawnPoints = {};
+    [DynamicCollectionAttribute()]
+    public MapEntityId[] usedSpawnPoints = {};
+    public override Boolean AddToEntity(FrameBase f, EntityRef entity, in PrototypeMaterializationContext context) {
+        Quantum.SpawnPointList component = default;
+        Materialize((Frame)f, ref component, in context);
+        return f.Set(entity, component) == SetResult.ComponentAdded;
+    }
+    public void Materialize(Frame frame, ref Quantum.SpawnPointList result, in PrototypeMaterializationContext context = default) {
+        if (this.availableSpawnPoints.Length == 0) {
+          result.availableSpawnPoints = default;
+        } else {
+          var list = frame.AllocateList(out result.availableSpawnPoints, this.availableSpawnPoints.Length);
+          for (int i = 0; i < this.availableSpawnPoints.Length; ++i) {
+            EntityRef tmp = default;
+            PrototypeValidator.FindMapEntity(this.availableSpawnPoints[i], in context, out tmp);
+            list.Add(tmp);
+          }
+        }
+        if (this.usedSpawnPoints.Length == 0) {
+          result.usedSpawnPoints = default;
+        } else {
+          var list = frame.AllocateList(out result.usedSpawnPoints, this.usedSpawnPoints.Length);
+          for (int i = 0; i < this.usedSpawnPoints.Length; ++i) {
+            EntityRef tmp = default;
+            PrototypeValidator.FindMapEntity(this.usedSpawnPoints[i], in context, out tmp);
+            list.Add(tmp);
+          }
+        }
     }
   }
 }
