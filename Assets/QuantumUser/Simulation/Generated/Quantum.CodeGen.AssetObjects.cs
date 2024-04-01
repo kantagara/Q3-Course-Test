@@ -49,6 +49,15 @@ namespace Quantum {
   using RuntimeInitializeOnLoadMethodAttribute = UnityEngine.RuntimeInitializeOnLoadMethodAttribute;
   #endif //;
   
+  [CreateAssetMenu(menuName = "Quantum/KCCSettings")]
+  public unsafe partial class KCCSettings : Quantum.AssetObject {
+    public new static KCCSettings Create() {
+      return AssetObject.Create<KCCSettings>();
+    }
+    public new static KCCSettings Create(System.Action<KCCSettings> init) {
+      return AssetObject.Create<KCCSettings>(init);
+    }
+  }
 }
 #pragma warning restore 0109
 #pragma warning restore 1591

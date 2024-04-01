@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0accbd98446645b47b9ac71d1d5a1f87, type: 3}
+  m_Name: KCCSettings
+  m_EditorClassIdentifier: 
+  Identifier:
+    Path: QuantumUser/Simulation/Data/KCCSettings
+    Guid:
+      Value: 367468418594912750
+  Radius:
+    RawValue: 65536
+  MaxContacts: 2
+  AllowedPenetration:
+    RawValue: 6553
+  CorrectionSpeed:
+    RawValue: 1966080
+  BaseSpeed:
+    RawValue: 458752
+  Acceleration:
+    RawValue: 1966080
+  Debug: 0
+  Brake:
+    RawValue: 196608000

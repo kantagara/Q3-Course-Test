@@ -37,42 +37,40 @@ MonoBehaviour:
   GridNodeSize: 4
   NavMeshLinks: []
   Regions: []
-  StaticColliders2D: []
-  StaticColliders3D:
+  StaticColliders2D:
   - Rotation:
-      X:
-        RawValue: 0
-      Y:
-        RawValue: 0
-      Z:
-        RawValue: 0
-      W:
-        RawValue: 65536
+      RawValue: 0
     Position:
       X:
         RawValue: 0
       Y:
         RawValue: 0
-      Z:
-        RawValue: 0
+    Height:
+      RawValue: 0
+    VerticalOffset:
+      RawValue: 0
     PhysicsMaterial:
       Id:
         Value: 0
-    ShapeType: 2
-    SphereRadius:
-      RawValue: 0
-    CapsuleRadius:
-      RawValue: 0
-    CapsuleHeight:
+    Layer: 0
+    ShapeType: 4
+    CircleRadius:
       RawValue: 0
     BoxExtents:
       X:
-        RawValue: 8192000
+        RawValue: 0
       Y:
-        RawValue: 9830
-      Z:
-        RawValue: 8192000
-    SmoothSphereMeshCollisions: 0
+        RawValue: 0
+    CapsuleSize:
+      X:
+        RawValue: 0
+      Y:
+        RawValue: 0
+    EdgeExtent:
+      RawValue: 0
+    PolygonCollider:
+      Vertices: []
+      Normals: []
     StaticData:
       Name: Ground
       Tag: Untagged
@@ -84,187 +82,283 @@ MonoBehaviour:
       ColliderIndex: 0
       MutableMode: 0
   - Rotation:
-      X:
-        RawValue: -46340
-      Y:
-        RawValue: 0
-      Z:
-        RawValue: 0
-      W:
-        RawValue: 46340
+      RawValue: 0
     Position:
       X:
-        RawValue: -1238496
+        RawValue: 0
       Y:
-        RawValue: 9830
-      Z:
-        RawValue: 1731911
+        RawValue: 2690908
+    Height:
+      RawValue: 0
+    VerticalOffset:
+      RawValue: 51118
     PhysicsMaterial:
       Id:
         Value: 0
+    Layer: 8
     ShapeType: 4
-    SphereRadius:
-      RawValue: 0
-    CapsuleRadius:
-      RawValue: 0
-    CapsuleHeight:
+    CircleRadius:
       RawValue: 0
     BoxExtents:
+      X:
+        RawValue: 655360
+      Y:
+        RawValue: 327680
+    CapsuleSize:
       X:
         RawValue: 0
       Y:
         RawValue: 0
-      Z:
-        RawValue: 0
-    SmoothSphereMeshCollisions: 0
+    EdgeExtent:
+      RawValue: 0
+    PolygonCollider:
+      Vertices: []
+      Normals: []
     StaticData:
-      Name: Container_Long
+      Name: BoxStaticCollider
       Tag: Untagged
-      Layer: 0
+      Layer: 8
       Asset:
         Id:
           Value: 0
-      IsTrigger: 0
+      IsTrigger: 1
       ColliderIndex: 1
       MutableMode: 0
   - Rotation:
-      X:
-        RawValue: -46340
-      Y:
-        RawValue: 0
-      Z:
-        RawValue: 0
-      W:
-        RawValue: 46340
+      RawValue: 0
     Position:
       X:
-        RawValue: -430571
+        RawValue: 0
       Y:
-        RawValue: 9830
-      Z:
-        RawValue: 1870082
+        RawValue: -3945267
+    Height:
+      RawValue: 0
+    VerticalOffset:
+      RawValue: 51118
     PhysicsMaterial:
       Id:
         Value: 0
+    Layer: 8
     ShapeType: 4
-    SphereRadius:
-      RawValue: 0
-    CapsuleRadius:
-      RawValue: 0
-    CapsuleHeight:
+    CircleRadius:
       RawValue: 0
     BoxExtents:
+      X:
+        RawValue: 655360
+      Y:
+        RawValue: 327680
+    CapsuleSize:
       X:
         RawValue: 0
       Y:
         RawValue: 0
-      Z:
-        RawValue: 0
-    SmoothSphereMeshCollisions: 0
+    EdgeExtent:
+      RawValue: 0
+    PolygonCollider:
+      Vertices: []
+      Normals: []
     StaticData:
-      Name: Debris_BrokenCar
+      Name: BoxStaticCollider (1)
       Tag: Untagged
-      Layer: 0
+      Layer: 8
       Asset:
         Id:
           Value: 0
-      IsTrigger: 0
+      IsTrigger: 1
       ColliderIndex: 2
       MutableMode: 0
   - Rotation:
-      X:
-        RawValue: -46340
-      Y:
-        RawValue: 0
-      Z:
-        RawValue: 0
-      W:
-        RawValue: 46340
+      RawValue: 0
     Position:
       X:
-        RawValue: -899809
+        RawValue: 4816896
       Y:
-        RawValue: 9830
-      Z:
-        RawValue: 1656750
+        RawValue: -3945267
+    Height:
+      RawValue: 0
+    VerticalOffset:
+      RawValue: 51118
     PhysicsMaterial:
       Id:
         Value: 0
+    Layer: 8
     ShapeType: 4
-    SphereRadius:
-      RawValue: 0
-    CapsuleRadius:
-      RawValue: 0
-    CapsuleHeight:
+    CircleRadius:
       RawValue: 0
     BoxExtents:
+      X:
+        RawValue: 655360
+      Y:
+        RawValue: 327680
+    CapsuleSize:
       X:
         RawValue: 0
       Y:
         RawValue: 0
-      Z:
-        RawValue: 0
-    SmoothSphereMeshCollisions: 0
+    EdgeExtent:
+      RawValue: 0
+    PolygonCollider:
+      Vertices: []
+      Normals: []
     StaticData:
-      Name: Pallet
+      Name: BoxStaticCollider (2)
       Tag: Untagged
-      Layer: 0
+      Layer: 8
       Asset:
         Id:
           Value: 0
-      IsTrigger: 0
+      IsTrigger: 1
       ColliderIndex: 3
       MutableMode: 0
   - Rotation:
-      X:
-        RawValue: -46340
-      Y:
-        RawValue: 0
-      Z:
-        RawValue: 0
-      W:
-        RawValue: 46340
+      RawValue: 0
     Position:
       X:
-        RawValue: -874905
+        RawValue: 4816896
       Y:
-        RawValue: 9830
-      Z:
-        RawValue: 1005801
+        RawValue: 4895539
+    Height:
+      RawValue: 0
+    VerticalOffset:
+      RawValue: 51118
     PhysicsMaterial:
       Id:
         Value: 0
+    Layer: 8
     ShapeType: 4
-    SphereRadius:
-      RawValue: 0
-    CapsuleRadius:
-      RawValue: 0
-    CapsuleHeight:
+    CircleRadius:
       RawValue: 0
     BoxExtents:
+      X:
+        RawValue: 655360
+      Y:
+        RawValue: 327680
+    CapsuleSize:
       X:
         RawValue: 0
       Y:
         RawValue: 0
-      Z:
-        RawValue: 0
-    SmoothSphereMeshCollisions: 0
+    EdgeExtent:
+      RawValue: 0
+    PolygonCollider:
+      Vertices: []
+      Normals: []
     StaticData:
-      Name: Structure_4
+      Name: BoxStaticCollider (3)
       Tag: Untagged
-      Layer: 0
+      Layer: 8
       Asset:
         Id:
           Value: 0
-      IsTrigger: 0
+      IsTrigger: 1
       ColliderIndex: 4
       MutableMode: 0
+  - Rotation:
+      RawValue: 0
+    Position:
+      X:
+        RawValue: -4771021
+      Y:
+        RawValue: 4895539
+    Height:
+      RawValue: 0
+    VerticalOffset:
+      RawValue: 51118
+    PhysicsMaterial:
+      Id:
+        Value: 0
+    Layer: 8
+    ShapeType: 4
+    CircleRadius:
+      RawValue: 0
+    BoxExtents:
+      X:
+        RawValue: 655360
+      Y:
+        RawValue: 327680
+    CapsuleSize:
+      X:
+        RawValue: 0
+      Y:
+        RawValue: 0
+    EdgeExtent:
+      RawValue: 0
+    PolygonCollider:
+      Vertices: []
+      Normals: []
+    StaticData:
+      Name: BoxStaticCollider (4)
+      Tag: Untagged
+      Layer: 8
+      Asset:
+        Id:
+          Value: 0
+      IsTrigger: 1
+      ColliderIndex: 5
+      MutableMode: 0
+  - Rotation:
+      RawValue: 0
+    Position:
+      X:
+        RawValue: -4771021
+      Y:
+        RawValue: -3827302
+    Height:
+      RawValue: 0
+    VerticalOffset:
+      RawValue: 51118
+    PhysicsMaterial:
+      Id:
+        Value: 0
+    Layer: 8
+    ShapeType: 4
+    CircleRadius:
+      RawValue: 0
+    BoxExtents:
+      X:
+        RawValue: 655360
+      Y:
+        RawValue: 327680
+    CapsuleSize:
+      X:
+        RawValue: 0
+      Y:
+        RawValue: 0
+    EdgeExtent:
+      RawValue: 0
+    PolygonCollider:
+      Vertices: []
+      Normals: []
+    StaticData:
+      Name: BoxStaticCollider (5)
+      Tag: Untagged
+      Layer: 8
+      Asset:
+        Id:
+          Value: 0
+      IsTrigger: 1
+      ColliderIndex: 6
+      MutableMode: 0
+  StaticColliders3D: []
   MapEntities:
   - Components:
     - rid: 2343711100207366144
     - rid: 2343711100207366145
-    - rid: 2343711100207366146
-    - rid: 2343711100207366147
+  - Components:
+    - rid: 5857436860963356672
+    - rid: 5857436860963356673
+  - Components:
+    - rid: 7141096231610089472
+    - rid: 7141096231610089473
+  - Components:
+    - rid: 2069089796084465664
+    - rid: 2069089796084465665
+  - Components:
+    - rid: 3514879071144116224
+    - rid: 3514879071144116225
+  - Components:
+    - rid: 6487063606822174720
+    - rid: 6487063606822174721
   - Components:
     - rid: 3747113162634166272
     - rid: 3747113162634166273
@@ -283,116 +377,78 @@ MonoBehaviour:
   - Components:
     - rid: 5907229898589601792
     - rid: 5907229898589601793
-  SerializedTriangleDataUncompressedSize: 349796
+  SerializedTriangleDataUncompressedSize: 8
   references:
     version: 2
     RefIds:
+    - rid: 2069089796084465664
+      type: {class: Transform2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
+      data:
+        Position:
+          X:
+            RawValue: 4816896
+          Y:
+            RawValue: 4895539
+        Rotation:
+          RawValue: 0
+    - rid: 2069089796084465665
+      type: {class: GrassPrototype, ns: Quantum.Prototypes, asm: Quantum.Simulation}
+      data:
+        _empty_prototype_dummy_field_: 0
     - rid: 2343711100207366144
-      type: {class: Transform3DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
+      type: {class: Transform2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
       data:
         Position:
           X:
             RawValue: 0
           Y:
-            RawValue: 51118
-          Z:
             RawValue: 2690908
         Rotation:
-          X:
-            RawValue: 0
-          Y:
-            RawValue: 0
-          Z:
-            RawValue: 0
+          RawValue: 0
     - rid: 2343711100207366145
-      type: {class: PhysicsCollider3DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
-      data:
-        ShapeConfig:
-          ShapeType: 2
-          SphereRadius:
-            RawValue: 0
-          CapsuleRadius:
-            RawValue: 0
-          CapsuleHeight:
-            RawValue: 0
-          PositionOffset:
-            X:
-              RawValue: 0
-            Y:
-              RawValue: 0
-            Z:
-              RawValue: 0
-          BoxExtents:
-            X:
-              RawValue: 655360
-            Y:
-              RawValue: 32768
-            Z:
-              RawValue: 327680
-          RotationOffset:
-            X:
-              RawValue: 0
-            Y:
-              RawValue: 0
-            Z:
-              RawValue: 0
-          UserTag: 0
-          IsPersistent: 1
-          CompoundShapes: []
-        Layer: 8
-        IsTrigger: 1
-        PhysicsMaterial:
-          Id:
-            Value: 0
-    - rid: 2343711100207366146
-      type: {class: PhysicsCallbacks3DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
-      data:
-        CallbackFlags:
-          Value: 384
-    - rid: 2343711100207366147
       type: {class: GrassPrototype, ns: Quantum.Prototypes, asm: Quantum.Simulation}
       data:
         _empty_prototype_dummy_field_: 0
     - rid: 3291974634315972608
-      type: {class: Transform3DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
+      type: {class: Transform2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
       data:
         Position:
           X:
             RawValue: 5439488
           Y:
             RawValue: 0
-          Z:
-            RawValue: 0
         Rotation:
-          X:
-            RawValue: 0
-          Y:
-            RawValue: 0
-          Z:
-            RawValue: 0
+          RawValue: 0
     - rid: 3291974634315972609
       type: {class: SpawnPointPrototype, ns: Quantum.Prototypes, asm: Quantum.Simulation}
       data:
         _empty_prototype_dummy_field_: 0
     - rid: 3513391852818530304
-      type: {class: Transform3DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
+      type: {class: Transform2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
       data:
         Position:
           X:
             RawValue: 6750208
           Y:
-            RawValue: 0
-          Z:
             RawValue: -5767168
         Rotation:
-          X:
-            RawValue: 0
-          Y:
-            RawValue: 0
-          Z:
-            RawValue: 0
+          RawValue: 0
     - rid: 3513391852818530305
       type: {class: SpawnPointPrototype, ns: Quantum.Prototypes, asm: Quantum.Simulation}
+      data:
+        _empty_prototype_dummy_field_: 0
+    - rid: 3514879071144116224
+      type: {class: Transform2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
+      data:
+        Position:
+          X:
+            RawValue: -4771021
+          Y:
+            RawValue: 4895539
+        Rotation:
+          RawValue: 0
+    - rid: 3514879071144116225
+      type: {class: GrassPrototype, ns: Quantum.Prototypes, asm: Quantum.Simulation}
       data:
         _empty_prototype_dummy_field_: 0
     - rid: 3747113162634166272
@@ -417,66 +473,87 @@ MonoBehaviour:
       data:
         availableSpawnPoints: []
         usedSpawnPoints: []
+    - rid: 5857436860963356672
+      type: {class: Transform2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
+      data:
+        Position:
+          X:
+            RawValue: 0
+          Y:
+            RawValue: -3945267
+        Rotation:
+          RawValue: 0
+    - rid: 5857436860963356673
+      type: {class: GrassPrototype, ns: Quantum.Prototypes, asm: Quantum.Simulation}
+      data:
+        _empty_prototype_dummy_field_: 0
     - rid: 5907229898589601792
-      type: {class: Transform3DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
+      type: {class: Transform2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
       data:
         Position:
           X:
             RawValue: -1572864
           Y:
-            RawValue: 0
-          Z:
             RawValue: 6658457
         Rotation:
-          X:
-            RawValue: 0
-          Y:
-            RawValue: 0
-          Z:
-            RawValue: 0
+          RawValue: 0
     - rid: 5907229898589601793
       type: {class: SpawnPointPrototype, ns: Quantum.Prototypes, asm: Quantum.Simulation}
       data:
         _empty_prototype_dummy_field_: 0
     - rid: 6093566079768985600
-      type: {class: Transform3DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
+      type: {class: Transform2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
       data:
         Position:
           X:
             RawValue: 0
           Y:
-            RawValue: 0
-          Z:
             RawValue: -4194304
         Rotation:
-          X:
-            RawValue: 0
-          Y:
-            RawValue: 0
-          Z:
-            RawValue: 0
+          RawValue: 0
     - rid: 6093566079768985601
       type: {class: SpawnPointPrototype, ns: Quantum.Prototypes, asm: Quantum.Simulation}
       data:
         _empty_prototype_dummy_field_: 0
+    - rid: 6487063606822174720
+      type: {class: Transform2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
+      data:
+        Position:
+          X:
+            RawValue: -4771021
+          Y:
+            RawValue: -3827302
+        Rotation:
+          RawValue: 0
+    - rid: 6487063606822174721
+      type: {class: GrassPrototype, ns: Quantum.Prototypes, asm: Quantum.Simulation}
+      data:
+        _empty_prototype_dummy_field_: 0
     - rid: 6911313464786944000
-      type: {class: Transform3DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
+      type: {class: Transform2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
       data:
         Position:
           X:
             RawValue: -6422528
           Y:
             RawValue: 0
-          Z:
-            RawValue: 0
         Rotation:
-          X:
-            RawValue: 0
-          Y:
-            RawValue: 0
-          Z:
-            RawValue: 0
+          RawValue: 0
     - rid: 6911313464786944001
       type: {class: SpawnPointPrototype, ns: Quantum.Prototypes, asm: Quantum.Simulation}
+      data:
+        _empty_prototype_dummy_field_: 0
+    - rid: 7141096231610089472
+      type: {class: Transform2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
+      data:
+        Position:
+          X:
+            RawValue: 4816896
+          Y:
+            RawValue: -3945267
+        Rotation:
+          RawValue: 0
+    - rid: 7141096231610089473
+      type: {class: GrassPrototype, ns: Quantum.Prototypes, asm: Quantum.Simulation}
       data:
         _empty_prototype_dummy_field_: 0

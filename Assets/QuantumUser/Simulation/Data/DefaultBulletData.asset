@@ -16,10 +16,8 @@ MonoBehaviour:
     Path: QuantumUser/Simulation/Data/DefaultBulletData
     Guid:
       Value: 360552212653312523
+  Entity: {fileID: 3097001405596171208, guid: f5263705712eb484dac0fc88b8b9c377, type: 3}
   Duration:
     RawValue: 655360
-  Entity: {fileID: 3097001405596171208, guid: f5263705712eb484dac0fc88b8b9c377, type: 3}
-  Damage:
-    RawValue: 1310720
   Speed:
-    RawValue: 327680
+    RawValue: 2621440

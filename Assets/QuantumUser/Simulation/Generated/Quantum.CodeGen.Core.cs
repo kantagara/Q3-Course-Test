@@ -513,12 +513,14 @@ namespace Quantum {
     public EntityRef Owner;
     [FieldOffset(8)]
     public FP Damage;
-    [FieldOffset(24)]
-    public FP Time;
-    [FieldOffset(16)]
-    public FP Speed;
     [FieldOffset(32)]
-    public FPVector3 Direction;
+    public FP Time;
+    [FieldOffset(24)]
+    public FP Speed;
+    [FieldOffset(40)]
+    public FPVector2 Direction;
+    [FieldOffset(16)]
+    public FP HeightOffset;
     public override Int32 GetHashCode() {
       unchecked { 
         var hash = 18307;
@@ -527,6 +529,7 @@ namespace Quantum {
         hash = hash * 31 + Time.GetHashCode();
         hash = hash * 31 + Speed.GetHashCode();
         hash = hash * 31 + Direction.GetHashCode();
+        hash = hash * 31 + HeightOffset.GetHashCode();
         return hash;
       }
     }
@@ -534,9 +537,10 @@ namespace Quantum {
         var p = (Bullet*)ptr;
         EntityRef.Serialize(&p->Owner, serializer);
         FP.Serialize(&p->Damage, serializer);
+        FP.Serialize(&p->HeightOffset, serializer);
         FP.Serialize(&p->Speed, serializer);
         FP.Serialize(&p->Time, serializer);
-        FPVector3.Serialize(&p->Direction, serializer);
+        FPVector2.Serialize(&p->Direction, serializer);
     }
   }
   [StructLayout(LayoutKind.Explicit)]
@@ -553,6 +557,36 @@ namespace Quantum {
     }
     public static void Serialize(void* ptr, FrameSerializer serializer) {
         var p = (Grass*)ptr;
+    }
+  }
+  [StructLayout(LayoutKind.Explicit)]
+  public unsafe partial struct KCC : Quantum.IComponent {
+    public const Int32 SIZE = 40;
+    public const Int32 ALIGNMENT = 8;
+    [FieldOffset(0)]
+    public AssetRef<KCCSettings> Settings;
+    [FieldOffset(16)]
+    public FP MaxSpeed;
+    [FieldOffset(8)]
+    public FP Acceleration;
+    [FieldOffset(24)]
+    public FPVector2 Velocity;
+    public override Int32 GetHashCode() {
+      unchecked { 
+        var hash = 659;
+        hash = hash * 31 + Settings.GetHashCode();
+        hash = hash * 31 + MaxSpeed.GetHashCode();
+        hash = hash * 31 + Acceleration.GetHashCode();
+        hash = hash * 31 + Velocity.GetHashCode();
+        return hash;
+      }
+    }
+    public static void Serialize(void* ptr, FrameSerializer serializer) {
+        var p = (KCC*)ptr;
+        AssetRef.Serialize(&p->Settings, serializer);
+        FP.Serialize(&p->Acceleration, serializer);
+        FP.Serialize(&p->MaxSpeed, serializer);
+        FPVector2.Serialize(&p->Velocity, serializer);
     }
   }
   [StructLayout(LayoutKind.Explicit)]
@@ -641,9 +675,13 @@ namespace Quantum {
         FP.Serialize(&p->CooldownTime, serializer);
     }
   }
+  public unsafe partial interface ISignalCreateBullet : ISignal {
+    void CreateBullet(Frame f, EntityRef Owner, Weapon Weapon);
+  }
   public static unsafe partial class Constants {
   }
   public unsafe partial class Frame {
+    private ISignalCreateBullet[] _ISignalCreateBulletSystems;
     partial void AllocGen() {
       _globals = (_globals_*)Context.Allocator.AllocAndClear(sizeof(_globals_));
     }
@@ -655,6 +693,7 @@ namespace Quantum {
     }
     partial void InitGen() {
       Initialize(this, this.SimulationConfig.Entities);
+      _ISignalCreateBulletSystems = BuildSignalsArray<ISignalCreateBullet>();
       _ComponentSignalsOnAdded = new ComponentReactiveCallbackInvoker[ComponentTypeId.Type.Length];
       _ComponentSignalsOnRemoved = new ComponentReactiveCallbackInvoker[ComponentTypeId.Type.Length];
       BuildSignalsArrayOnComponentAdded<Quantum.Bullet>();
@@ -665,6 +704,8 @@ namespace Quantum {
       BuildSignalsArrayOnComponentRemoved<CharacterController3D>();
       BuildSignalsArrayOnComponentAdded<Quantum.Grass>();
       BuildSignalsArrayOnComponentRemoved<Quantum.Grass>();
+      BuildSignalsArrayOnComponentAdded<Quantum.KCC>();
+      BuildSignalsArrayOnComponentRemoved<Quantum.KCC>();
       BuildSignalsArrayOnComponentAdded<MapEntityLink>();
       BuildSignalsArrayOnComponentRemoved<MapEntityLink>();
       BuildSignalsArrayOnComponentAdded<NavMeshAvoidanceAgent>();
@@ -727,6 +768,15 @@ namespace Quantum {
       Physics3D.Init(_globals->PhysicsState3D.MapStaticCollidersState.TrackedMap);
     }
     public unsafe partial struct FrameSignals {
+      public void CreateBullet(EntityRef Owner, Weapon Weapon) {
+        var array = _f._ISignalCreateBulletSystems;
+        for (Int32 i = 0; i < array.Length; ++i) {
+          var s = array[i];
+          if (_f.SystemIsEnabledInHierarchy((SystemBase)s)) {
+            s.CreateBullet(_f, Owner, Weapon);
+          }
+        }
+      }
     }
   }
   public unsafe partial class Statics {
@@ -776,6 +826,7 @@ namespace Quantum {
       typeRegistry.Register(typeof(Quantum.InputButtons), 4);
       typeRegistry.Register(typeof(Joint), Joint.SIZE);
       typeRegistry.Register(typeof(Joint3D), Joint3D.SIZE);
+      typeRegistry.Register(typeof(Quantum.KCC), Quantum.KCC.SIZE);
       typeRegistry.Register(typeof(LayerMask), LayerMask.SIZE);
       typeRegistry.Register(typeof(MapEntityId), MapEntityId.SIZE);
       typeRegistry.Register(typeof(MapEntityLink), MapEntityLink.SIZE);
@@ -819,10 +870,11 @@ namespace Quantum {
       typeRegistry.Register(typeof(Quantum._globals_), Quantum._globals_.SIZE);
     }
     static partial void InitComponentTypeIdGen() {
-      ComponentTypeId.Reset(ComponentTypeId.BuiltInComponentCount + 6)
+      ComponentTypeId.Reset(ComponentTypeId.BuiltInComponentCount + 7)
         .AddBuiltInComponents()
         .Add<Quantum.Bullet>(Quantum.Bullet.Serialize, null, null, ComponentFlags.None)
         .Add<Quantum.Grass>(Quantum.Grass.Serialize, null, null, ComponentFlags.None)
+        .Add<Quantum.KCC>(Quantum.KCC.Serialize, null, null, ComponentFlags.None)
         .Add<Quantum.PlayerLink>(Quantum.PlayerLink.Serialize, null, null, ComponentFlags.None)
         .Add<Quantum.SpawnPoint>(Quantum.SpawnPoint.Serialize, null, null, ComponentFlags.None)
         .Add<Quantum.SpawnPointList>(Quantum.SpawnPointList.Serialize, null, Quantum.SpawnPointList.OnRemoved, ComponentFlags.Singleton)

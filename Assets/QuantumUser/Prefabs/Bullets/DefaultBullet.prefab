@@ -136,13 +136,13 @@ TrailRenderer:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: 0.14606667
-        inSlope: 0
-        outSlope: 0
+        value: 0
+        inSlope: 0.75024515
+        outSlope: 0.75024515
         tangentMode: 0
         weightedMode: 0
         inWeight: 0.33333334
-        outWeight: 0.33333334
+        outWeight: 0.1503268
       - serializedVersion: 3
         time: 1
         value: 0.0056152344
@@ -208,6 +208,7 @@ GameObject:
   - component: {fileID: 5734102243657728622}
   - component: {fileID: 2103904383105780411}
   - component: {fileID: -1168874114741265928}
+  - component: {fileID: 777513739540710045}
   - component: {fileID: -6921655212322538917}
   m_Layer: 0
   m_Name: DefaultBullet
@@ -274,7 +275,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 836dcb7e0f6259748b850a10912ce727, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TransformMode: 1
+  TransformMode: 0
   Transform2DVertical:
     IsEnabled: 0
     Height:
@@ -477,6 +478,19 @@ MonoBehaviour:
   View:
     Id:
       Value: 0
+--- !u!114 &777513739540710045
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3055301441527152227}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b9736a123061fa544ac93205c1113f84, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  trailRenderer: {fileID: 3068956773510629825}
 --- !u!114 &-6921655212322538917
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -502,8 +516,8 @@ MonoBehaviour:
         RawValue: 0
       Y:
         RawValue: 0
-      Z:
-        RawValue: 0
+    HeightOffset:
+      RawValue: 0
 --- !u!114 &-8973122033387300525
 MonoBehaviour:
   m_ObjectHideFlags: 0

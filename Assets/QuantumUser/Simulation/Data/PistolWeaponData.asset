@@ -16,12 +16,13 @@ MonoBehaviour:
     Path: QuantumUser/Simulation/Data/PistolWeaponData
     Guid:
       Value: 341755006242495730
-  Cooldown:
-    RawValue: 65536
   Offset:
     X:
-      RawValue: 0
+      RawValue: 13107
     Y:
-      RawValue: 0
+      RawValue: 78643
     Z:
-      RawValue: 0
+      RawValue: 65536
+  Cooldown:
+    RawValue: 19661
+  BulletData: {fileID: 11400000, guid: 0ab806a574bd49649893f5611430f120, type: 2}

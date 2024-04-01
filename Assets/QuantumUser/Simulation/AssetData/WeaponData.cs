@@ -6,8 +6,8 @@ namespace Quantum
     [Serializable]
     public class WeaponData : AssetObject
     {
-        public FP Cooldown;
         public FPVector3 Offset;
+        public FP Cooldown;
         public BulletData BulletData;
     }
 }

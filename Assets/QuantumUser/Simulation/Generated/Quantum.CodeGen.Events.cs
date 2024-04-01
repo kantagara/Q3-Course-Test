@@ -52,7 +52,7 @@ namespace Quantum {
   public unsafe partial class Frame {
     public unsafe partial struct FrameEvents {
       static partial void GetEventTypeCountCodeGen(ref Int32 eventCount) {
-        eventCount = 2;
+        eventCount = 3;
       }
       static partial void GetParentEventIDCodeGen(Int32 eventID, ref Int32 parentEventID) {
         switch (eventID) {
@@ -63,6 +63,7 @@ namespace Quantum {
         switch (eventID) {
           case EventOnPlayerEnteredGrass.ID: result = typeof(EventOnPlayerEnteredGrass); return;
           case EventOnPlayerExitGrass.ID: result = typeof(EventOnPlayerExitGrass); return;
+          case EventBulletHit.ID: result = typeof(EventBulletHit); return;
           default: break;
         }
       }
@@ -75,6 +76,12 @@ namespace Quantum {
       public EventOnPlayerExitGrass OnPlayerExitGrass(EntityRef player) {
         var ev = _f.Context.AcquireEvent<EventOnPlayerExitGrass>(EventOnPlayerExitGrass.ID);
         ev.player = player;
+        _f.AddEvent(ev);
+        return ev;
+      }
+      public EventBulletHit BulletHit(EntityRef Bullet) {
+        var ev = _f.Context.AcquireEvent<EventBulletHit>(EventBulletHit.ID);
+        ev.Bullet = Bullet;
         _f.AddEvent(ev);
         return ev;
       }
@@ -126,6 +133,31 @@ namespace Quantum {
       unchecked {
         var hash = 41;
         hash = hash * 31 + player.GetHashCode();
+        return hash;
+      }
+    }
+  }
+  public unsafe partial class EventBulletHit : EventBase {
+    public new const Int32 ID = 2;
+    public EntityRef Bullet;
+    protected EventBulletHit(Int32 id, EventFlags flags) : 
+        base(id, flags) {
+    }
+    public EventBulletHit() : 
+        base(2, EventFlags.Server|EventFlags.Client) {
+    }
+    public new QuantumGame Game {
+      get {
+        return (QuantumGame)base.Game;
+      }
+      set {
+        base.Game = value;
+      }
+    }
+    public override Int32 GetHashCode() {
+      unchecked {
+        var hash = 43;
+        hash = hash * 31 + Bullet.GetHashCode();
         return hash;
       }
     }

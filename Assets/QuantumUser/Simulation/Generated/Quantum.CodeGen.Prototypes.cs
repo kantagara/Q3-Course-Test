@@ -56,7 +56,8 @@ namespace Quantum.Prototypes {
     public FP Damage;
     public FP Time;
     public FP Speed;
-    public FPVector3 Direction;
+    public FPVector2 Direction;
+    public FP HeightOffset;
     public override Boolean AddToEntity(FrameBase f, EntityRef entity, in PrototypeMaterializationContext context) {
         Quantum.Bullet component = default;
         Materialize((Frame)f, ref component, in context);
@@ -68,6 +69,7 @@ namespace Quantum.Prototypes {
         result.Time = this.Time;
         result.Speed = this.Speed;
         result.Direction = this.Direction;
+        result.HeightOffset = this.HeightOffset;
     }
   }
   [System.SerializableAttribute()]
@@ -96,6 +98,27 @@ namespace Quantum.Prototypes {
         result.Movement = this.Movement;
         result.MousePosition = this.MousePosition;
         result.Fire = this.Fire;
+        MaterializeUser(frame, ref result, in context);
+    }
+  }
+  [System.SerializableAttribute()]
+  [Quantum.Prototypes.Prototype(typeof(Quantum.KCC))]
+  public unsafe partial class KCCPrototype : ComponentPrototype<Quantum.KCC> {
+    public AssetRef<KCCSettings> Settings;
+    public FP MaxSpeed;
+    public FP Acceleration;
+    public FPVector2 Velocity;
+    partial void MaterializeUser(Frame frame, ref Quantum.KCC result, in PrototypeMaterializationContext context);
+    public override Boolean AddToEntity(FrameBase f, EntityRef entity, in PrototypeMaterializationContext context) {
+        Quantum.KCC component = default;
+        Materialize((Frame)f, ref component, in context);
+        return f.Set(entity, component) == SetResult.ComponentAdded;
+    }
+    public void Materialize(Frame frame, ref Quantum.KCC result, in PrototypeMaterializationContext context = default) {
+        result.Settings = this.Settings;
+        result.MaxSpeed = this.MaxSpeed;
+        result.Acceleration = this.Acceleration;
+        result.Velocity = this.Velocity;
         MaterializeUser(frame, ref result, in context);
     }
   }

@@ -10,5 +10,13 @@ component Bullet
     FP Damage;
     FP Time;
     FP Speed;
-    FPVector3 Direction;   
+    FPVector2 Direction;   
+    FP HeightOffset;
+}
+
+signal CreateBullet(EntityRef Owner,Weapon Weapon);
+
+event BulletHit
+{
+    EntityRef Bullet;
 }

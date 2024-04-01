@@ -18,8 +18,8 @@ namespace Quantum
             
             var spawnPoint = GetRandomSpawnPoint(f, spawnPointList);
 
-            var spawnPointTransform = f.Get<Transform3D>(spawnPoint);
-            var playerTransform = f.Unsafe.GetPointer<Transform3D>(playerEntity);
+            var spawnPointTransform = f.Get<Transform2D>(spawnPoint);
+            var playerTransform = f.Unsafe.GetPointer<Transform2D>(playerEntity);
             
             playerTransform->Position = spawnPointTransform.Position;
         }
