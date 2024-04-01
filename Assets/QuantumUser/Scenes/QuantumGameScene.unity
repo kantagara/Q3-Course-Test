@@ -137,7 +137,7 @@ GameObject:
   - component: {fileID: 233998041}
   - component: {fileID: 233998040}
   - component: {fileID: 233998043}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Ground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -279,12 +279,6 @@ MonoBehaviour:
   BakeAllMode: 112
   StaticCollider2DReferences:
   - {fileID: 233998043}
-  - {fileID: 475398276}
-  - {fileID: 332028076}
-  - {fileID: 1109527821}
-  - {fileID: 628807705}
-  - {fileID: 1897885688}
-  - {fileID: 467225624}
   StaticCollider3DReferences: []
   MapEntityReferences:
   - {fileID: 475398274}
@@ -328,7 +322,6 @@ GameObject:
   - component: {fileID: 332028079}
   - component: {fileID: 332028078}
   - component: {fileID: 332028077}
-  - component: {fileID: 332028076}
   m_Layer: 8
   m_Name: BoxStaticCollider (1)
   m_TagString: Untagged
@@ -336,42 +329,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &332028076
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 332028075}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b488b62207097a04392bf63c707ab9c5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  SourceCollider: {fileID: 0}
-  Size:
-    X:
-      RawValue: 65536
-    Y:
-      RawValue: 65536
-  PositionOffset:
-    X:
-      RawValue: 0
-    Y:
-      RawValue: 0
-  RotationOffset:
-    RawValue: 0
-  Height:
-    RawValue: 0
-  Settings:
-    MutableMode: 0
-    PhysicsMaterial:
-      Id:
-        Value: 0
-    Asset:
-      Id:
-        Value: 0
-    Trigger: 1
 --- !u!114 &332028077
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -441,7 +398,7 @@ MonoBehaviour:
       Id:
         Value: 0
     SourceCollider: {fileID: 0}
-    IsEnabled: 0
+    IsEnabled: 1
     Shape2D:
       ShapeType: 4
       PolygonCollider:
@@ -458,9 +415,9 @@ MonoBehaviour:
         RawValue: 0
       BoxExtents:
         X:
-          RawValue: 0
+          RawValue: 32768
         Y:
-          RawValue: 0
+          RawValue: 32768
       PositionOffset:
         X:
           RawValue: 0
@@ -519,9 +476,9 @@ MonoBehaviour:
         RawValue: 0
       BoxExtents:
         X:
-          RawValue: 0
+          RawValue: 655360
         Y:
-          RawValue: 0
+          RawValue: 327680
       PositionOffset:
         X:
           RawValue: 0
@@ -567,7 +524,7 @@ MonoBehaviour:
     LayerSource: 0
     Layer: 8
     CallbackFlags:
-      Value: 384
+      Value: 0
   PhysicsBody:
     IsEnabled: 0
     Config2D: 116
@@ -2585,7 +2542,6 @@ GameObject:
   - component: {fileID: 467225627}
   - component: {fileID: 467225626}
   - component: {fileID: 467225625}
-  - component: {fileID: 467225624}
   m_Layer: 8
   m_Name: BoxStaticCollider (5)
   m_TagString: Untagged
@@ -2593,42 +2549,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &467225624
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 467225623}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b488b62207097a04392bf63c707ab9c5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  SourceCollider: {fileID: 0}
-  Size:
-    X:
-      RawValue: 65536
-    Y:
-      RawValue: 65536
-  PositionOffset:
-    X:
-      RawValue: 0
-    Y:
-      RawValue: 0
-  RotationOffset:
-    RawValue: 0
-  Height:
-    RawValue: 0
-  Settings:
-    MutableMode: 0
-    PhysicsMaterial:
-      Id:
-        Value: 0
-    Asset:
-      Id:
-        Value: 0
-    Trigger: 1
 --- !u!114 &467225625
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2698,7 +2618,7 @@ MonoBehaviour:
       Id:
         Value: 0
     SourceCollider: {fileID: 0}
-    IsEnabled: 0
+    IsEnabled: 1
     Shape2D:
       ShapeType: 4
       PolygonCollider:
@@ -2715,9 +2635,9 @@ MonoBehaviour:
         RawValue: 0
       BoxExtents:
         X:
-          RawValue: 0
+          RawValue: 32768
         Y:
-          RawValue: 0
+          RawValue: 32768
       PositionOffset:
         X:
           RawValue: 0
@@ -2776,9 +2696,9 @@ MonoBehaviour:
         RawValue: 0
       BoxExtents:
         X:
-          RawValue: 0
+          RawValue: 655360
         Y:
-          RawValue: 0
+          RawValue: 327680
       PositionOffset:
         X:
           RawValue: 0
@@ -2824,7 +2744,7 @@ MonoBehaviour:
     LayerSource: 0
     Layer: 8
     CallbackFlags:
-      Value: 384
+      Value: 0
   PhysicsBody:
     IsEnabled: 0
     Config2D: 116
@@ -2967,7 +2887,6 @@ GameObject:
   - component: {fileID: 475398273}
   - component: {fileID: 475398274}
   - component: {fileID: 475398275}
-  - component: {fileID: 475398276}
   m_Layer: 8
   m_Name: BoxStaticCollider
   m_TagString: Untagged
@@ -3065,7 +2984,7 @@ MonoBehaviour:
       Id:
         Value: 0
     SourceCollider: {fileID: 0}
-    IsEnabled: 0
+    IsEnabled: 1
     Shape2D:
       ShapeType: 4
       PolygonCollider:
@@ -3082,9 +3001,9 @@ MonoBehaviour:
         RawValue: 0
       BoxExtents:
         X:
-          RawValue: 0
+          RawValue: 32768
         Y:
-          RawValue: 0
+          RawValue: 32768
       PositionOffset:
         X:
           RawValue: 0
@@ -3143,9 +3062,9 @@ MonoBehaviour:
         RawValue: 0
       BoxExtents:
         X:
-          RawValue: 0
+          RawValue: 655360
         Y:
-          RawValue: 0
+          RawValue: 327680
       PositionOffset:
         X:
           RawValue: 0
@@ -3191,7 +3110,7 @@ MonoBehaviour:
     LayerSource: 0
     Layer: 8
     CallbackFlags:
-      Value: 384
+      Value: 0
   PhysicsBody:
     IsEnabled: 0
     Config2D: 116
@@ -3299,42 +3218,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Prototype:
     _empty_prototype_dummy_field_: 0
---- !u!114 &475398276
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 475398268}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b488b62207097a04392bf63c707ab9c5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  SourceCollider: {fileID: 0}
-  Size:
-    X:
-      RawValue: 65536
-    Y:
-      RawValue: 65536
-  PositionOffset:
-    X:
-      RawValue: 0
-    Y:
-      RawValue: 0
-  RotationOffset:
-    RawValue: 0
-  Height:
-    RawValue: 0
-  Settings:
-    MutableMode: 0
-    PhysicsMaterial:
-      Id:
-        Value: 0
-    Asset:
-      Id:
-        Value: 0
-    Trigger: 1
 --- !u!1 &617196155
 GameObject:
   m_ObjectHideFlags: 0
@@ -3521,7 +3404,6 @@ GameObject:
   - component: {fileID: 628807708}
   - component: {fileID: 628807707}
   - component: {fileID: 628807706}
-  - component: {fileID: 628807705}
   m_Layer: 8
   m_Name: BoxStaticCollider (3)
   m_TagString: Untagged
@@ -3529,42 +3411,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &628807705
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 628807704}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b488b62207097a04392bf63c707ab9c5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  SourceCollider: {fileID: 0}
-  Size:
-    X:
-      RawValue: 65536
-    Y:
-      RawValue: 65536
-  PositionOffset:
-    X:
-      RawValue: 0
-    Y:
-      RawValue: 0
-  RotationOffset:
-    RawValue: 0
-  Height:
-    RawValue: 0
-  Settings:
-    MutableMode: 0
-    PhysicsMaterial:
-      Id:
-        Value: 0
-    Asset:
-      Id:
-        Value: 0
-    Trigger: 1
 --- !u!114 &628807706
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3634,7 +3480,7 @@ MonoBehaviour:
       Id:
         Value: 0
     SourceCollider: {fileID: 0}
-    IsEnabled: 0
+    IsEnabled: 1
     Shape2D:
       ShapeType: 4
       PolygonCollider:
@@ -3651,9 +3497,9 @@ MonoBehaviour:
         RawValue: 0
       BoxExtents:
         X:
-          RawValue: 0
+          RawValue: 32768
         Y:
-          RawValue: 0
+          RawValue: 32768
       PositionOffset:
         X:
           RawValue: 0
@@ -3712,9 +3558,9 @@ MonoBehaviour:
         RawValue: 0
       BoxExtents:
         X:
-          RawValue: 0
+          RawValue: 655360
         Y:
-          RawValue: 0
+          RawValue: 327680
       PositionOffset:
         X:
           RawValue: 0
@@ -3760,7 +3606,7 @@ MonoBehaviour:
     LayerSource: 0
     Layer: 8
     CallbackFlags:
-      Value: 384
+      Value: 0
   PhysicsBody:
     IsEnabled: 0
     Config2D: 116
@@ -4502,7 +4348,6 @@ GameObject:
   - component: {fileID: 1109527824}
   - component: {fileID: 1109527823}
   - component: {fileID: 1109527822}
-  - component: {fileID: 1109527821}
   m_Layer: 8
   m_Name: BoxStaticCollider (2)
   m_TagString: Untagged
@@ -4510,42 +4355,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1109527821
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1109527820}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b488b62207097a04392bf63c707ab9c5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  SourceCollider: {fileID: 0}
-  Size:
-    X:
-      RawValue: 65536
-    Y:
-      RawValue: 65536
-  PositionOffset:
-    X:
-      RawValue: 0
-    Y:
-      RawValue: 0
-  RotationOffset:
-    RawValue: 0
-  Height:
-    RawValue: 0
-  Settings:
-    MutableMode: 0
-    PhysicsMaterial:
-      Id:
-        Value: 0
-    Asset:
-      Id:
-        Value: 0
-    Trigger: 1
 --- !u!114 &1109527822
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4615,7 +4424,7 @@ MonoBehaviour:
       Id:
         Value: 0
     SourceCollider: {fileID: 0}
-    IsEnabled: 0
+    IsEnabled: 1
     Shape2D:
       ShapeType: 4
       PolygonCollider:
@@ -4632,9 +4441,9 @@ MonoBehaviour:
         RawValue: 0
       BoxExtents:
         X:
-          RawValue: 0
+          RawValue: 32768
         Y:
-          RawValue: 0
+          RawValue: 32768
       PositionOffset:
         X:
           RawValue: 0
@@ -4693,9 +4502,9 @@ MonoBehaviour:
         RawValue: 0
       BoxExtents:
         X:
-          RawValue: 0
+          RawValue: 655360
         Y:
-          RawValue: 0
+          RawValue: 327680
       PositionOffset:
         X:
           RawValue: 0
@@ -4741,7 +4550,7 @@ MonoBehaviour:
     LayerSource: 0
     Layer: 8
     CallbackFlags:
-      Value: 384
+      Value: 0
   PhysicsBody:
     IsEnabled: 0
     Config2D: 116
@@ -5887,7 +5696,6 @@ GameObject:
   - component: {fileID: 1897885691}
   - component: {fileID: 1897885690}
   - component: {fileID: 1897885689}
-  - component: {fileID: 1897885688}
   m_Layer: 8
   m_Name: BoxStaticCollider (4)
   m_TagString: Untagged
@@ -5895,42 +5703,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1897885688
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1897885687}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b488b62207097a04392bf63c707ab9c5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  SourceCollider: {fileID: 0}
-  Size:
-    X:
-      RawValue: 65536
-    Y:
-      RawValue: 65536
-  PositionOffset:
-    X:
-      RawValue: 0
-    Y:
-      RawValue: 0
-  RotationOffset:
-    RawValue: 0
-  Height:
-    RawValue: 0
-  Settings:
-    MutableMode: 0
-    PhysicsMaterial:
-      Id:
-        Value: 0
-    Asset:
-      Id:
-        Value: 0
-    Trigger: 1
 --- !u!114 &1897885689
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6000,7 +5772,7 @@ MonoBehaviour:
       Id:
         Value: 0
     SourceCollider: {fileID: 0}
-    IsEnabled: 0
+    IsEnabled: 1
     Shape2D:
       ShapeType: 4
       PolygonCollider:
@@ -6017,9 +5789,9 @@ MonoBehaviour:
         RawValue: 0
       BoxExtents:
         X:
-          RawValue: 0
+          RawValue: 32768
         Y:
-          RawValue: 0
+          RawValue: 32768
       PositionOffset:
         X:
           RawValue: 0
@@ -6078,9 +5850,9 @@ MonoBehaviour:
         RawValue: 0
       BoxExtents:
         X:
-          RawValue: 0
+          RawValue: 655360
         Y:
-          RawValue: 0
+          RawValue: 327680
       PositionOffset:
         X:
           RawValue: 0
@@ -6126,7 +5898,7 @@ MonoBehaviour:
     LayerSource: 0
     Layer: 8
     CallbackFlags:
-      Value: 384
+      Value: 0
   PhysicsBody:
     IsEnabled: 0
     Config2D: 116

@@ -780,12 +780,12 @@ MonoBehaviour:
     SourceCollider: {fileID: 0}
     IsEnabled: 1
     Shape2D:
-      ShapeType: 32
+      ShapeType: 1
       PolygonCollider:
         Id:
           Value: 0
       CircleRadius:
-        RawValue: 0
+        RawValue: 32768
       CapsuleSize:
         X:
           RawValue: 55706
@@ -841,12 +841,12 @@ MonoBehaviour:
       IsPersistent: 1
       CompoundShapes: []
     ScaledShape2D:
-      ShapeType: 32
+      ShapeType: 1
       PolygonCollider:
         Id:
           Value: 0
       CircleRadius:
-        RawValue: 0
+        RawValue: 32768
       CapsuleSize:
         X:
           RawValue: 55706
@@ -904,10 +904,10 @@ MonoBehaviour:
     LayerSource: 0
     Layer: 6
     CallbackFlags:
-      Value: 3072
+      Value: 3456
   PhysicsBody:
-    IsEnabled: 0
-    Config2D: 116
+    IsEnabled: 1
+    Config2D: 1
     Config3D: 58
     RotationFreeze: 0
     Mass:

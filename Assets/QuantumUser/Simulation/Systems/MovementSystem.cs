@@ -2,7 +2,7 @@
 namespace Quantum {
   using Photon.Deterministic;
 
-  public unsafe class MovementSystem : SystemMainThreadFilter<MovementSystem.Filter>, ISignalOnTriggerEnter3D, ISignalOnTriggerExit3D, ISignalOnComponentAdded<KCC>
+  public unsafe class MovementSystem : SystemMainThreadFilter<MovementSystem.Filter>, ISignalOnTriggerEnter2D, ISignalOnTriggerExit2D, ISignalOnComponentAdded<KCC>
   {
     public override void OnInit(Frame f)
     {
@@ -38,15 +38,14 @@ namespace Quantum {
       public PlayerLink* PlayerLink;
     }
 
-    public void OnTriggerEnter3D(Frame f, TriggerInfo3D info)
+    public void OnTriggerEnter2D(Frame f, TriggerInfo2D info)
     {
       if(!f.TryGet(info.Entity, out KCC _)) return;
       if(!f.TryGet(info.Other, out Grass _)) return;
-      Log.Info("Ohogogo");
       f.Events.OnPlayerEnteredGrass(info.Other);
     }
 
-    public void OnTriggerExit3D(Frame f, ExitInfo3D info)
+    public void OnTriggerExit2D(Frame f, ExitInfo2D info)
     {
       if(!f.TryGet(info.Other, out Grass _)) return;
       if(!f.TryGet(info.Entity, out KCC _)) return;
