@@ -186,7 +186,7 @@ MonoBehaviour:
       type: {class: PhysicsCallbacks2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
       data:
         CallbackFlags:
-          Value: 4095
+          Value: 0
     - rid: 2069089796084465667
       type: {class: GrassPrototype, ns: Quantum.Prototypes, asm: Quantum.Simulation}
       data:
@@ -242,7 +242,7 @@ MonoBehaviour:
       type: {class: PhysicsCallbacks2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
       data:
         CallbackFlags:
-          Value: 4095
+          Value: 0
     - rid: 2343711100207366147
       type: {class: GrassPrototype, ns: Quantum.Prototypes, asm: Quantum.Simulation}
       data:
@@ -326,7 +326,7 @@ MonoBehaviour:
       type: {class: PhysicsCallbacks2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
       data:
         CallbackFlags:
-          Value: 4095
+          Value: 0
     - rid: 3514879071144116227
       type: {class: GrassPrototype, ns: Quantum.Prototypes, asm: Quantum.Simulation}
       data:
@@ -404,7 +404,7 @@ MonoBehaviour:
       type: {class: PhysicsCallbacks2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
       data:
         CallbackFlags:
-          Value: 4095
+          Value: 0
     - rid: 5857436860963356675
       type: {class: GrassPrototype, ns: Quantum.Prototypes, asm: Quantum.Simulation}
       data:
@@ -488,7 +488,7 @@ MonoBehaviour:
       type: {class: PhysicsCallbacks2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
       data:
         CallbackFlags:
-          Value: 4095
+          Value: 0
     - rid: 6487063606822174723
       type: {class: GrassPrototype, ns: Quantum.Prototypes, asm: Quantum.Simulation}
       data:
@@ -558,7 +558,7 @@ MonoBehaviour:
       type: {class: PhysicsCallbacks2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
       data:
         CallbackFlags:
-          Value: 4095
+          Value: 0
     - rid: 7141096231610089475
       type: {class: GrassPrototype, ns: Quantum.Prototypes, asm: Quantum.Simulation}
       data:

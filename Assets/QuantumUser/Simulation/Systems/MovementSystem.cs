@@ -42,14 +42,14 @@ namespace Quantum {
     {
       if(!f.TryGet(info.Entity, out KCC _)) return;
       if(!f.TryGet(info.Other, out Grass _)) return;
-      f.Events.OnPlayerEnteredGrass(info.Other);
+      f.Events.OnPlayerEnteredGrass(info.Entity);
     }
 
     public void OnTriggerExit2D(Frame f, ExitInfo2D info)
     {
       if(!f.TryGet(info.Other, out Grass _)) return;
       if(!f.TryGet(info.Entity, out KCC _)) return;
-      f.Events.OnPlayerExitGrass(info.Other);
+      f.Events.OnPlayerExitGrass(info.Entity);
     }
 
     public void OnAdded(Frame f, EntityRef entity, KCC* kcc)
