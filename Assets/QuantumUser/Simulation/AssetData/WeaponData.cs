@@ -9,5 +9,6 @@ namespace Quantum
         public FPVector3 Offset;
         public FP Cooldown;
         public BulletData BulletData;
+        public FP Damage = 30;
     }
 }

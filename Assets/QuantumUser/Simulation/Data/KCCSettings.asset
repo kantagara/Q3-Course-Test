@@ -17,10 +17,10 @@ MonoBehaviour:
     Guid:
       Value: 367468418594912750
   Radius:
-    RawValue: 65536
+    RawValue: 72090
   MaxContacts: 2
   AllowedPenetration:
-    RawValue: 6553
+    RawValue: 6554
   CorrectionSpeed:
     RawValue: 655360
   BaseSpeed:
@@ -31,4 +31,4 @@ MonoBehaviour:
   Brake:
     RawValue: 3276800
   LayerMask:
-    BitMask: 1023
+    BitMask: 512

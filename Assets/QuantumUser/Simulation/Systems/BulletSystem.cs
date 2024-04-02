@@ -13,8 +13,12 @@ namespace Quantum.Systems
 
         public override void Update(Frame f, ref Filter filter)
         {
-            if (DestroyExpiredBullet(f, filter))
+            filter.Bullet->Time -= f.DeltaTime;
+            if (filter.Bullet->Time <= FP._0)
+            {
+                f.Destroy(filter.EntityRef);
                 return;
+            }
 
             var nextPosition = filter.Transform->Position + filter.Transform->Up * filter.Bullet->Speed * f.DeltaTime;
             
@@ -39,7 +43,6 @@ namespace Quantum.Systems
             for (var i = 0; i < collisions.Count; i++)
             {
                 var collision = collisions[i];
-                Log.Info(collision.Entity);
                 if(collision.Entity == filter.EntityRef || collision.Entity == playerThatShotBullet)
                     continue;
                 
@@ -49,38 +52,8 @@ namespace Quantum.Systems
             return false;
         }
 
-        private static bool DestroyExpiredBullet(Frame f, Filter filter)
-        {
-            filter.Bullet->Time -= f.DeltaTime;
-            if (filter.Bullet->Time <= FP._0)
-            {
-                f.Destroy(filter.EntityRef);
-                return true;
-            }
-
-            return false;
-        }
+      
         
-        private void InitializeBullet(Frame f, EntityRef source, Weapon weapon)
-        {
-            var weaponData = f.FindAsset<WeaponData>(weapon.WeaponData.Id);
-            var bulletData = weaponData.BulletData;
-            
-            var bulletEntity = f.Create(bulletData.Entity);
-            
-            var bullet = f.Unsafe.GetPointer<Bullet>(bulletEntity);
-            var bulletTransform = f.Unsafe.GetPointer<Transform2D>(bulletEntity);
-            var sourceTransform = f.Get<Transform2D>(source);
-
-            bulletTransform->Position = sourceTransform.Position + RotateVector(weaponData.Offset.XZ, sourceTransform.Rotation);
-            bulletTransform->Rotation = f.Get<Transform2D>(source).Rotation;
-            bullet->Speed = bulletData.Speed;
-            bullet->HeightOffset = weaponData.Offset.Y;
-            bullet->Owner = source;
-            bullet->Direction = f.Get<Transform2D>(source).Up;
-            bullet->Time = bulletData.Duration;
-            //bullet->Damage = bulletData.Damage;
-        }
         
         // Helper method to rotate a vector by a given angle
         private FPVector2 RotateVector(FPVector2 vector, FP angle)
@@ -95,9 +68,24 @@ namespace Quantum.Systems
 
         
 
-        public void CreateBullet(Frame f, EntityRef Owner, Weapon Weapon)
+        public void CreateBullet(Frame f, EntityRef owner, Weapon weapon)
         {
-            InitializeBullet(f, Owner, Weapon);
+            var weaponData = f.FindAsset(weapon.WeaponData);
+            var bulletData = weaponData.BulletData;
+            
+            var bulletEntity = f.Create(bulletData.Entity);
+            var bullet = f.Unsafe.GetPointer<Bullet>(bulletEntity);
+            var bulletTransform = f.Unsafe.GetPointer<Transform2D>(bulletEntity);
+            var sourceTransform = f.Get<Transform2D>(owner);
+
+            bulletTransform->Position = sourceTransform.Position + RotateVector(weaponData.Offset.XZ, sourceTransform.Rotation);
+            bulletTransform->Rotation = f.Get<Transform2D>(owner).Rotation;
+            bullet->Speed = bulletData.Speed;
+            bullet->HeightOffset = weaponData.Offset.Y;
+            bullet->Owner = owner;
+            bullet->Direction = f.Get<Transform2D>(owner).Up;
+            bullet->Time = bulletData.Duration; 
+            bullet->Damage = weaponData.Damage;
         }
     }
 }
