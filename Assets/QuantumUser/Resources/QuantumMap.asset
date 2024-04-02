@@ -81,6 +81,479 @@ MonoBehaviour:
       IsTrigger: 0
       ColliderIndex: 0
       MutableMode: 0
+  - Rotation:
+      RawValue: 0
+    Position:
+      X:
+        RawValue: -4676229
+      Y:
+        RawValue: 4112484
+    Height:
+      RawValue: 255580
+    VerticalOffset:
+      RawValue: 68812
+    PhysicsMaterial:
+      Id:
+        Value: 0
+    Layer: 9
+    ShapeType: 4
+    CircleRadius:
+      RawValue: 0
+    BoxExtents:
+      X:
+        RawValue: 127790
+      Y:
+        RawValue: 127790
+    CapsuleSize:
+      X:
+        RawValue: 0
+      Y:
+        RawValue: 0
+    EdgeExtent:
+      RawValue: 0
+    PolygonCollider:
+      Vertices: []
+      Normals: []
+    StaticData:
+      Name: GameObject
+      Tag: Untagged
+      Layer: 9
+      Asset:
+        Id:
+          Value: 0
+      IsTrigger: 0
+      ColliderIndex: 1
+      MutableMode: 0
+  - Rotation:
+      RawValue: 0
+    Position:
+      X:
+        RawValue: -137625
+      Y:
+        RawValue: 4112484
+    Height:
+      RawValue: 255580
+    VerticalOffset:
+      RawValue: 68812
+    PhysicsMaterial:
+      Id:
+        Value: 0
+    Layer: 9
+    ShapeType: 4
+    CircleRadius:
+      RawValue: 0
+    BoxExtents:
+      X:
+        RawValue: 127790
+      Y:
+        RawValue: 127790
+    CapsuleSize:
+      X:
+        RawValue: 0
+      Y:
+        RawValue: 0
+    EdgeExtent:
+      RawValue: 0
+    PolygonCollider:
+      Vertices: []
+      Normals: []
+    StaticData:
+      Name: GameObject
+      Tag: Untagged
+      Layer: 9
+      Asset:
+        Id:
+          Value: 0
+      IsTrigger: 0
+      ColliderIndex: 2
+      MutableMode: 0
+  - Rotation:
+      RawValue: 0
+    Position:
+      X:
+        RawValue: -707788
+      Y:
+        RawValue: 4112484
+    Height:
+      RawValue: 255580
+    VerticalOffset:
+      RawValue: 68812
+    PhysicsMaterial:
+      Id:
+        Value: 0
+    Layer: 9
+    ShapeType: 4
+    CircleRadius:
+      RawValue: 0
+    BoxExtents:
+      X:
+        RawValue: 127790
+      Y:
+        RawValue: 127790
+    CapsuleSize:
+      X:
+        RawValue: 0
+      Y:
+        RawValue: 0
+    EdgeExtent:
+      RawValue: 0
+    PolygonCollider:
+      Vertices: []
+      Normals: []
+    StaticData:
+      Name: GameObject
+      Tag: Untagged
+      Layer: 9
+      Asset:
+        Id:
+          Value: 0
+      IsTrigger: 0
+      ColliderIndex: 3
+      MutableMode: 0
+  - Rotation:
+      RawValue: 0
+    Position:
+      X:
+        RawValue: 3830814
+      Y:
+        RawValue: 4112484
+    Height:
+      RawValue: 255580
+    VerticalOffset:
+      RawValue: 68812
+    PhysicsMaterial:
+      Id:
+        Value: 0
+    Layer: 9
+    ShapeType: 4
+    CircleRadius:
+      RawValue: 0
+    BoxExtents:
+      X:
+        RawValue: 127790
+      Y:
+        RawValue: 127790
+    CapsuleSize:
+      X:
+        RawValue: 0
+      Y:
+        RawValue: 0
+    EdgeExtent:
+      RawValue: 0
+    PolygonCollider:
+      Vertices: []
+      Normals: []
+    StaticData:
+      Name: GameObject
+      Tag: Untagged
+      Layer: 9
+      Asset:
+        Id:
+          Value: 0
+      IsTrigger: 0
+      ColliderIndex: 4
+      MutableMode: 0
+  - Rotation:
+      RawValue: 0
+    Position:
+      X:
+        RawValue: -707788
+      Y:
+        RawValue: 1897262
+    Height:
+      RawValue: 255580
+    VerticalOffset:
+      RawValue: 68812
+    PhysicsMaterial:
+      Id:
+        Value: 0
+    Layer: 9
+    ShapeType: 4
+    CircleRadius:
+      RawValue: 0
+    BoxExtents:
+      X:
+        RawValue: 127790
+      Y:
+        RawValue: 127790
+    CapsuleSize:
+      X:
+        RawValue: 0
+      Y:
+        RawValue: 0
+    EdgeExtent:
+      RawValue: 0
+    PolygonCollider:
+      Vertices: []
+      Normals: []
+    StaticData:
+      Name: GameObject
+      Tag: Untagged
+      Layer: 9
+      Asset:
+        Id:
+          Value: 0
+      IsTrigger: 0
+      ColliderIndex: 5
+      MutableMode: 0
+  - Rotation:
+      RawValue: 0
+    Position:
+      X:
+        RawValue: 3830814
+      Y:
+        RawValue: 1897262
+    Height:
+      RawValue: 255580
+    VerticalOffset:
+      RawValue: 68812
+    PhysicsMaterial:
+      Id:
+        Value: 0
+    Layer: 9
+    ShapeType: 4
+    CircleRadius:
+      RawValue: 0
+    BoxExtents:
+      X:
+        RawValue: 127790
+      Y:
+        RawValue: 127790
+    CapsuleSize:
+      X:
+        RawValue: 0
+      Y:
+        RawValue: 0
+    EdgeExtent:
+      RawValue: 0
+    PolygonCollider:
+      Vertices: []
+      Normals: []
+    StaticData:
+      Name: GameObject
+      Tag: Untagged
+      Layer: 9
+      Asset:
+        Id:
+          Value: 0
+      IsTrigger: 0
+      ColliderIndex: 6
+      MutableMode: 0
+  - Rotation:
+      RawValue: 0
+    Position:
+      X:
+        RawValue: -3027763
+      Y:
+        RawValue: 1897262
+    Height:
+      RawValue: 255580
+    VerticalOffset:
+      RawValue: 68812
+    PhysicsMaterial:
+      Id:
+        Value: 0
+    Layer: 9
+    ShapeType: 4
+    CircleRadius:
+      RawValue: 0
+    BoxExtents:
+      X:
+        RawValue: 127790
+      Y:
+        RawValue: 127790
+    CapsuleSize:
+      X:
+        RawValue: 0
+      Y:
+        RawValue: 0
+    EdgeExtent:
+      RawValue: 0
+    PolygonCollider:
+      Vertices: []
+      Normals: []
+    StaticData:
+      Name: GameObject
+      Tag: Untagged
+      Layer: 9
+      Asset:
+        Id:
+          Value: 0
+      IsTrigger: 0
+      ColliderIndex: 7
+      MutableMode: 0
+  - Rotation:
+      RawValue: 0
+    Position:
+      X:
+        RawValue: 1510840
+      Y:
+        RawValue: 1897262
+    Height:
+      RawValue: 255580
+    VerticalOffset:
+      RawValue: 68812
+    PhysicsMaterial:
+      Id:
+        Value: 0
+    Layer: 9
+    ShapeType: 4
+    CircleRadius:
+      RawValue: 0
+    BoxExtents:
+      X:
+        RawValue: 127790
+      Y:
+        RawValue: 127790
+    CapsuleSize:
+      X:
+        RawValue: 0
+      Y:
+        RawValue: 0
+    EdgeExtent:
+      RawValue: 0
+    PolygonCollider:
+      Vertices: []
+      Normals: []
+    StaticData:
+      Name: GameObject
+      Tag: Untagged
+      Layer: 9
+      Asset:
+        Id:
+          Value: 0
+      IsTrigger: 0
+      ColliderIndex: 8
+      MutableMode: 0
+  - Rotation:
+      RawValue: 0
+    Position:
+      X:
+        RawValue: -3010724
+      Y:
+        RawValue: 28901
+    Height:
+      RawValue: 655360
+    VerticalOffset:
+      RawValue: 9830
+    PhysicsMaterial:
+      Id:
+        Value: 0
+    Layer: 9
+    ShapeType: 4
+    CircleRadius:
+      RawValue: 0
+    BoxExtents:
+      X:
+        RawValue: 327680
+      Y:
+        RawValue: 327680
+    CapsuleSize:
+      X:
+        RawValue: 0
+      Y:
+        RawValue: 0
+    EdgeExtent:
+      RawValue: 0
+    PolygonCollider:
+      Vertices: []
+      Normals: []
+    StaticData:
+      Name: GameObject (1)
+      Tag: Untagged
+      Layer: 9
+      Asset:
+        Id:
+          Value: 0
+      IsTrigger: 0
+      ColliderIndex: 9
+      MutableMode: 0
+  - Rotation:
+      RawValue: 0
+    Position:
+      X:
+        RawValue: -3027763
+      Y:
+        RawValue: -349312
+    Height:
+      RawValue: 255580
+    VerticalOffset:
+      RawValue: -117964
+    PhysicsMaterial:
+      Id:
+        Value: 0
+    Layer: 9
+    ShapeType: 4
+    CircleRadius:
+      RawValue: 0
+    BoxExtents:
+      X:
+        RawValue: 127790
+      Y:
+        RawValue: 127790
+    CapsuleSize:
+      X:
+        RawValue: 0
+      Y:
+        RawValue: 0
+    EdgeExtent:
+      RawValue: 0
+    PolygonCollider:
+      Vertices: []
+      Normals: []
+    StaticData:
+      Name: GameObject
+      Tag: Untagged
+      Layer: 9
+      Asset:
+        Id:
+          Value: 0
+      IsTrigger: 0
+      ColliderIndex: 10
+      MutableMode: 0
+  - Rotation:
+      RawValue: 0
+    Position:
+      X:
+        RawValue: 1510840
+      Y:
+        RawValue: -16389
+    Height:
+      RawValue: 255580
+    VerticalOffset:
+      RawValue: -117964
+    PhysicsMaterial:
+      Id:
+        Value: 0
+    Layer: 9
+    ShapeType: 4
+    CircleRadius:
+      RawValue: 0
+    BoxExtents:
+      X:
+        RawValue: 127790
+      Y:
+        RawValue: 127790
+    CapsuleSize:
+      X:
+        RawValue: 0
+      Y:
+        RawValue: 0
+    EdgeExtent:
+      RawValue: 0
+    PolygonCollider:
+      Vertices: []
+      Normals: []
+    StaticData:
+      Name: GameObject
+      Tag: Untagged
+      Layer: 9
+      Asset:
+        Id:
+          Value: 0
+      IsTrigger: 0
+      ColliderIndex: 11
+      MutableMode: 0
   StaticColliders3D: []
   MapEntities:
   - Components:
@@ -119,18 +592,6 @@ MonoBehaviour:
   - Components:
     - rid: 3513391852818530304
     - rid: 3513391852818530305
-  - Components:
-    - rid: 6093566079768985600
-    - rid: 6093566079768985601
-  - Components:
-    - rid: 3291974634315972608
-    - rid: 3291974634315972609
-  - Components:
-    - rid: 6911313464786944000
-    - rid: 6911313464786944001
-  - Components:
-    - rid: 5907229898589601792
-    - rid: 5907229898589601793
   SerializedTriangleDataUncompressedSize: 8
   references:
     version: 2
@@ -247,28 +708,14 @@ MonoBehaviour:
       type: {class: GrassPrototype, ns: Quantum.Prototypes, asm: Quantum.Simulation}
       data:
         _empty_prototype_dummy_field_: 0
-    - rid: 3291974634315972608
-      type: {class: Transform2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
-      data:
-        Position:
-          X:
-            RawValue: 5439488
-          Y:
-            RawValue: 0
-        Rotation:
-          RawValue: 0
-    - rid: 3291974634315972609
-      type: {class: SpawnPointPrototype, ns: Quantum.Prototypes, asm: Quantum.Simulation}
-      data:
-        _empty_prototype_dummy_field_: 0
     - rid: 3513391852818530304
       type: {class: Transform2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
       data:
         Position:
           X:
-            RawValue: 6750208
+            RawValue: -3506176
           Y:
-            RawValue: -5767168
+            RawValue: 4521984
         Rotation:
           RawValue: 0
     - rid: 3513391852818530305
@@ -409,34 +856,6 @@ MonoBehaviour:
       type: {class: GrassPrototype, ns: Quantum.Prototypes, asm: Quantum.Simulation}
       data:
         _empty_prototype_dummy_field_: 0
-    - rid: 5907229898589601792
-      type: {class: Transform2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
-      data:
-        Position:
-          X:
-            RawValue: -1572864
-          Y:
-            RawValue: 6658457
-        Rotation:
-          RawValue: 0
-    - rid: 5907229898589601793
-      type: {class: SpawnPointPrototype, ns: Quantum.Prototypes, asm: Quantum.Simulation}
-      data:
-        _empty_prototype_dummy_field_: 0
-    - rid: 6093566079768985600
-      type: {class: Transform2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
-      data:
-        Position:
-          X:
-            RawValue: 0
-          Y:
-            RawValue: -4194304
-        Rotation:
-          RawValue: 0
-    - rid: 6093566079768985601
-      type: {class: SpawnPointPrototype, ns: Quantum.Prototypes, asm: Quantum.Simulation}
-      data:
-        _empty_prototype_dummy_field_: 0
     - rid: 6487063606822174720
       type: {class: Transform2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
       data:
@@ -491,20 +910,6 @@ MonoBehaviour:
           Value: 0
     - rid: 6487063606822174723
       type: {class: GrassPrototype, ns: Quantum.Prototypes, asm: Quantum.Simulation}
-      data:
-        _empty_prototype_dummy_field_: 0
-    - rid: 6911313464786944000
-      type: {class: Transform2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
-      data:
-        Position:
-          X:
-            RawValue: -6422528
-          Y:
-            RawValue: 0
-        Rotation:
-          RawValue: 0
-    - rid: 6911313464786944001
-      type: {class: SpawnPointPrototype, ns: Quantum.Prototypes, asm: Quantum.Simulation}
       data:
         _empty_prototype_dummy_field_: 0
     - rid: 7141096231610089472

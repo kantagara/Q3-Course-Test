@@ -30,6 +30,8 @@ namespace Quantum
 		public FP Acceleration = FP._10;
 		public Boolean Debug = false;
 		public FP Brake = 1;
+		
+		public LayerMask LayerMask;
 
 		public void Init(ref KCC kcc)
 		{
@@ -38,7 +40,13 @@ namespace Quantum
 			kcc.Acceleration = Acceleration;
 		}
 
-		public void SteerAndMove(FrameBase f, EntityRef entity, in KCCMovementData movementData)
+		public void Move(Frame frame, EntityRef entity, FPVector2 direction)
+		{
+			var kccMovementData = ComputeRawMovement(frame, entity, direction);
+			SteerAndMove(frame, entity, in kccMovementData);
+		}
+
+		private void SteerAndMove(FrameBase f, EntityRef entity, in KCCMovementData movementData)
 		{
 			KCC* kcc = null;
 			if (f.Unsafe.TryGetPointer(entity, out kcc) == false)
@@ -126,11 +134,11 @@ namespace Quantum
 			movementPack.Direction = direction;
 			Shape2D shape = Shape2D.CreateCircle(Radius);
 
-			var layer = f.Layers.GetLayerMask("Static");
-      var hits = f.Physics2D.OverlapShape(transform->Position, FP._0, shape, layer, options: QueryOptions.HitStatics | QueryOptions.ComputeDetailedInfo);
-      int count = Math.Min(MaxContacts, hits.Count);
-
-      if (hits.Count > 0)
+			var layer = LayerMask;
+			var hits = f.Physics2D.OverlapShape(transform->Position, FP._0, shape, layer,
+				options: QueryOptions.HitStatics | QueryOptions.ComputeDetailedInfo);
+			var count = Math.Min(MaxContacts, hits.Count);
+			if (hits.Count > 0)
 			{
 				Boolean initialized = false;
 				hits.Sort(transform->Position);
@@ -154,12 +162,10 @@ namespace Quantum
 					var localDiff = contactToCenter.Magnitude - Radius;
 
 
-#if DEBUG
 					if (Debug)
 					{
 						Draw.Circle(contactPoint, FP._0_10, ColorRGBA.Red);
 					}
-#endif
 
 					var localNormal = contactToCenter.Normalized;
 
@@ -175,18 +181,14 @@ namespace Quantum
 							var angle = FPVector2.RadiansSkipNormalize(direction.Normalized, localNormal);
 							if (angle >= FP.Rad_90)
 							{
-								var d = FPVector2.Dot(direction, localNormal);
-								var tangentVelocity = direction - localNormal * d;
+								var dotProduct = FPVector2.Dot(direction, localNormal);
+								var tangentVelocity = direction - localNormal * dotProduct;
 								if (tangentVelocity.SqrMagnitude > FP.EN4)
 								{
 									movementPack.Direction = tangentVelocity.Normalized;
 									movementPack.Type = KCCMovementType.Tangent;
 								}
-								else
-								{
-									movementPack.Direction = default;
-									movementPack.Type = KCCMovementType.None;
-								}
+								
 
 							}
 						}
@@ -195,11 +197,13 @@ namespace Quantum
 
 					// any real contact contributes to correction and average normal
 					var localCorrection = localNormal * -localDiff;
-					movementPack.Correction += localCorrection;
+					movementPack.Correction = localCorrection;
 				}
 			}
 
 			return movementPack;
 		}
+
+		
 	}
 }

@@ -22,11 +22,13 @@ MonoBehaviour:
   AllowedPenetration:
     RawValue: 6553
   CorrectionSpeed:
-    RawValue: 1966080
+    RawValue: 655360
   BaseSpeed:
     RawValue: 458752
   Acceleration:
     RawValue: 1966080
   Debug: 0
   Brake:
-    RawValue: 196608000
+    RawValue: 3276800
+  LayerMask:
+    BitMask: 1023

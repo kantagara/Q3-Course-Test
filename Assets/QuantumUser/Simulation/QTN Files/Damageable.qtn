@@ -1,0 +1,4 @@
+component Damageable{
+    FP CurrentHealth;
+    AssetRef<DamageableBase> DamageableBase;
+}

@@ -20,6 +20,7 @@ namespace Quantum.Systems
             
             if (CheckCollision(f, filter, nextPosition))
             {
+                f.Events.BulletHit(filter.EntityRef);
                 f.Destroy(filter.EntityRef);
                 return;
             }
@@ -33,11 +34,12 @@ namespace Quantum.Systems
             var bullet = f.Get<Bullet>(filter.EntityRef);
             var bulletTransform = f.Unsafe.GetPointer<Transform2D>(filter.EntityRef);
             var playerThatShotBullet = bullet.Owner;
-            var collisions = f.Physics2D.LinecastAll(bulletTransform->Position, futurePosition, -1,QueryOptions.HitAll & ~QueryOptions.HitTriggers);
+            var collisions = f.Physics2D.LinecastAll(bulletTransform->Position, futurePosition, int.MaxValue,QueryOptions.HitAll & ~QueryOptions.HitTriggers);
 
             for (var i = 0; i < collisions.Count; i++)
             {
                 var collision = collisions[i];
+                Log.Info(collision.Entity);
                 if(collision.Entity == filter.EntityRef || collision.Entity == playerThatShotBullet)
                     continue;
                 
