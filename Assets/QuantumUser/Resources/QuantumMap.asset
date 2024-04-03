@@ -134,7 +134,7 @@ MonoBehaviour:
     Height:
       RawValue: 0
     VerticalOffset:
-      RawValue: 9830
+      RawValue: 0
     PhysicsMaterial:
       Id:
         Value: 0
