@@ -11,17 +11,17 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: a203efa08a70b9a40b581d6f243b5ef7,
         type: 3}
       propertyPath: m_LocalScale.x
-      value: 130
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a203efa08a70b9a40b581d6f243b5ef7,
         type: 3}
       propertyPath: m_LocalScale.y
-      value: 130
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a203efa08a70b9a40b581d6f243b5ef7,
         type: 3}
       propertyPath: m_LocalScale.z
-      value: 130
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: a203efa08a70b9a40b581d6f243b5ef7,
         type: 3}
@@ -86,39 +86,5 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: a203efa08a70b9a40b581d6f243b5ef7,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 4943190032857136435}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a203efa08a70b9a40b581d6f243b5ef7, type: 3}
---- !u!1 &5451969455533958553 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: a203efa08a70b9a40b581d6f243b5ef7,
-    type: 3}
-  m_PrefabInstance: {fileID: 5145398327313733832}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &4943190032857136435
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5451969455533958553}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f77e0e138e1b1ba4692b511b31f23385, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Mesh: {fileID: -5175619319729487958, guid: a203efa08a70b9a40b581d6f243b5ef7, type: 3}
-  Settings:
-    MutableMode: 0
-    PhysicsMaterial:
-      Id:
-        Value: 0
-    Asset:
-      Id:
-        Value: 0
-    Trigger: 0
-  GizmosOptions: 3
-  SmoothSphereMeshCollisions: 0

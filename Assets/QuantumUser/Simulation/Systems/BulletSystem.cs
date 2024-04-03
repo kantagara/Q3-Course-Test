@@ -4,6 +4,7 @@ namespace Quantum.Systems
 {
     public unsafe class BulletSystem : SystemMainThreadFilter<BulletSystem.Filter>, ISignalCreateBullet
     {
+
         public struct Filter
         {
             public EntityRef EntityRef;
@@ -66,7 +67,6 @@ namespace Quantum.Systems
             );
         }
 
-        
 
         public void CreateBullet(Frame f, EntityRef owner, Weapon weapon)
         {

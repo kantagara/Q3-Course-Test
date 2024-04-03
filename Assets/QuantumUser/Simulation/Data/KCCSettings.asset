@@ -31,4 +31,4 @@ MonoBehaviour:
   Brake:
     RawValue: 3276800
   LayerMask:
-    BitMask: 512
+    BitMask: 1023
