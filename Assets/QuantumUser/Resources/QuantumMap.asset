@@ -87,9 +87,9 @@ MonoBehaviour:
       X:
         RawValue: -1507979
       Y:
-        RawValue: 2509185
+        RawValue: 2732008
     Height:
-      RawValue: 432538
+      RawValue: 0
     VerticalOffset:
       RawValue: 0
     PhysicsMaterial:
@@ -101,9 +101,9 @@ MonoBehaviour:
       RawValue: 0
     BoxExtents:
       X:
-        RawValue: 96993
+        RawValue: 114688
       Y:
-        RawValue: 65536
+        RawValue: 258867
     CapsuleSize:
       X:
         RawValue: 0
@@ -124,7 +124,51 @@ MonoBehaviour:
       IsTrigger: 0
       ColliderIndex: 1
       MutableMode: 0
-  StaticColliders3D: []
+  StaticColliders3D:
+  - Rotation:
+      X:
+        RawValue: -46340
+      Y:
+        RawValue: 0
+      Z:
+        RawValue: 0
+      W:
+        RawValue: 46340
+    Position:
+      X:
+        RawValue: -1509291
+      Y:
+        RawValue: 0
+      Z:
+        RawValue: 2709725
+    PhysicsMaterial:
+      Id:
+        Value: 0
+    ShapeType: 4
+    SphereRadius:
+      RawValue: 0
+    CapsuleRadius:
+      RawValue: 0
+    CapsuleHeight:
+      RawValue: 0
+    BoxExtents:
+      X:
+        RawValue: 0
+      Y:
+        RawValue: 0
+      Z:
+        RawValue: 0
+    SmoothSphereMeshCollisions: 0
+    StaticData:
+      Name: Debris_BrokenCar
+      Tag: Untagged
+      Layer: 0
+      Asset:
+        Id:
+          Value: 0
+      IsTrigger: 0
+      ColliderIndex: 0
+      MutableMode: 0
   MapEntities:
   - Components:
     - rid: 2343711100207366144
@@ -162,7 +206,7 @@ MonoBehaviour:
   - Components:
     - rid: 3513391852818530304
     - rid: 3513391852818530305
-  SerializedTriangleDataUncompressedSize: 8
+  SerializedTriangleDataUncompressedSize: 147716
   references:
     version: 2
     RefIds:

@@ -111,6 +111,21 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 6312697100525578368, guid: 4725175de6981be4c894f70d0b3887c9,
         type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6312697100525578368, guid: 4725175de6981be4c894f70d0b3887c9,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6312697100525578368, guid: 4725175de6981be4c894f70d0b3887c9,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6312697100525578368, guid: 4725175de6981be4c894f70d0b3887c9,
+        type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
@@ -164,7 +179,9 @@ PrefabInstance:
       propertyPath: m_Name
       value: Debris_BrokenCar
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: -2709749132293134467, guid: 4725175de6981be4c894f70d0b3887c9, type: 3}
+    - {fileID: -5634359834867917632, guid: 4725175de6981be4c894f70d0b3887c9, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
