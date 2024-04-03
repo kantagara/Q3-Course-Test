@@ -82,12 +82,12 @@ MonoBehaviour:
       ColliderIndex: 0
       MutableMode: 0
   - Rotation:
-      RawValue: 0
+      RawValue: -205887
     Position:
       X:
-        RawValue: -1507979
+        RawValue: -966084
       Y:
-        RawValue: 2732008
+        RawValue: 1872263
     Height:
       RawValue: 0
     VerticalOffset:
@@ -101,9 +101,9 @@ MonoBehaviour:
       RawValue: 0
     BoxExtents:
       X:
-        RawValue: 114688
+        RawValue: 327680
       Y:
-        RawValue: 258867
+        RawValue: 32768
     CapsuleSize:
       X:
         RawValue: 0
@@ -115,7 +115,7 @@ MonoBehaviour:
       Vertices: []
       Normals: []
     StaticData:
-      Name: Collider
+      Name: GameObject
       Tag: Untagged
       Layer: 0
       Asset:
@@ -124,51 +124,7 @@ MonoBehaviour:
       IsTrigger: 0
       ColliderIndex: 1
       MutableMode: 0
-  StaticColliders3D:
-  - Rotation:
-      X:
-        RawValue: -46340
-      Y:
-        RawValue: 0
-      Z:
-        RawValue: 0
-      W:
-        RawValue: 46340
-    Position:
-      X:
-        RawValue: -1509291
-      Y:
-        RawValue: 0
-      Z:
-        RawValue: 2709725
-    PhysicsMaterial:
-      Id:
-        Value: 0
-    ShapeType: 4
-    SphereRadius:
-      RawValue: 0
-    CapsuleRadius:
-      RawValue: 0
-    CapsuleHeight:
-      RawValue: 0
-    BoxExtents:
-      X:
-        RawValue: 0
-      Y:
-        RawValue: 0
-      Z:
-        RawValue: 0
-    SmoothSphereMeshCollisions: 0
-    StaticData:
-      Name: Debris_BrokenCar
-      Tag: Untagged
-      Layer: 0
-      Asset:
-        Id:
-          Value: 0
-      IsTrigger: 0
-      ColliderIndex: 0
-      MutableMode: 0
+  StaticColliders3D: []
   MapEntities:
   - Components:
     - rid: 2343711100207366144
@@ -206,7 +162,7 @@ MonoBehaviour:
   - Components:
     - rid: 3513391852818530304
     - rid: 3513391852818530305
-  SerializedTriangleDataUncompressedSize: 147716
+  SerializedTriangleDataUncompressedSize: 8
   references:
     version: 2
     RefIds:

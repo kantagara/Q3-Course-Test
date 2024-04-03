@@ -24,7 +24,7 @@ namespace Quantum
         private bool NoObstacleInFront(Frame f, Filter filter)
         {
             var initialLineCast = f.Physics2D.Linecast(filter.Transform->Position,
-                filter.Transform->Position + filter.Transform->Forward);
+                filter.Transform->Position + filter.Transform->Up);
             return !initialLineCast.HasValue;   
         }
 
