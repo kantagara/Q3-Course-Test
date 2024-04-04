@@ -76,6 +76,7 @@ namespace Quantum.Prototypes {
   [Quantum.Prototypes.Prototype(typeof(Quantum.Damageable))]
   public unsafe partial class DamageablePrototype : ComponentPrototype<Quantum.Damageable> {
     public FP CurrentHealth;
+    public FP MaxHealth;
     public AssetRef<DamageableBase> DamageableBase;
     partial void MaterializeUser(Frame frame, ref Quantum.Damageable result, in PrototypeMaterializationContext context);
     public override Boolean AddToEntity(FrameBase f, EntityRef entity, in PrototypeMaterializationContext context) {
@@ -85,6 +86,7 @@ namespace Quantum.Prototypes {
     }
     public void Materialize(Frame frame, ref Quantum.Damageable result, in PrototypeMaterializationContext context = default) {
         result.CurrentHealth = this.CurrentHealth;
+        result.MaxHealth = this.MaxHealth;
         result.DamageableBase = this.DamageableBase;
         MaterializeUser(frame, ref result, in context);
     }

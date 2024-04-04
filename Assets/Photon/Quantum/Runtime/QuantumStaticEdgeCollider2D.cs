@@ -37,35 +37,6 @@ namespace Quantum {
       UpdateFromSourceCollider();
     }
     
-#if UNITY_EDITOR
-    void OnDrawGizmos() {
-      if (Application.isPlaying == false) {
-        UpdateFromSourceCollider();
-      }
-
-      DrawGizmos(false);
-    }
-
-
-    void OnDrawGizmosSelected() {
-      if (Application.isPlaying == false) {
-        UpdateFromSourceCollider();
-      }
-      
-      DrawGizmos(true);
-    }
-
-    void DrawGizmos(bool selected) {
-      
-      if (!QuantumGameGizmos.ShouldDraw(GlobalGizmosSettings.DrawColliderGizmos, selected, false)) {
-        return;
-      }
-
-      GetEdgeGizmosSettings(transform, PositionOffset, RotationOffset, VertexA, VertexB, Height, out var start, out var end, out var height);
-      GizmoUtils.DrawGizmosEdge(start, end, height, GlobalGizmosSettings.GetSelectedColor(GlobalGizmosSettings.StaticColliderColor, selected), style: GlobalGizmosSettings.StaticColliderGizmoStyle);
-    }
-#endif
-    
     public static void GetEdgeGizmosSettings(Transform t, FPVector2 posOffset, FP rotOffset, FPVector2 localStart, FPVector2 localEnd, FP localHeight, out Vector3 start, out Vector3 end, out float height) {
       var scale = t.lossyScale;
       var trs = Matrix4x4.TRS(t.TransformPoint(posOffset.ToUnityVector3()), t.rotation * rotOffset.FlipRotation().ToUnityQuaternionDegrees(), scale);

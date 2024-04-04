@@ -545,16 +545,19 @@ namespace Quantum {
   }
   [StructLayout(LayoutKind.Explicit)]
   public unsafe partial struct Damageable : Quantum.IComponent {
-    public const Int32 SIZE = 16;
+    public const Int32 SIZE = 24;
     public const Int32 ALIGNMENT = 8;
     [FieldOffset(8)]
     public FP CurrentHealth;
+    [FieldOffset(16)]
+    public FP MaxHealth;
     [FieldOffset(0)]
     public AssetRef<DamageableBase> DamageableBase;
     public override Int32 GetHashCode() {
       unchecked { 
         var hash = 21187;
         hash = hash * 31 + CurrentHealth.GetHashCode();
+        hash = hash * 31 + MaxHealth.GetHashCode();
         hash = hash * 31 + DamageableBase.GetHashCode();
         return hash;
       }
@@ -563,6 +566,7 @@ namespace Quantum {
         var p = (Damageable*)ptr;
         AssetRef.Serialize(&p->DamageableBase, serializer);
         FP.Serialize(&p->CurrentHealth, serializer);
+        FP.Serialize(&p->MaxHealth, serializer);
     }
   }
   [StructLayout(LayoutKind.Explicit)]

@@ -1,5 +1,14 @@
 #if !QUANTUM_DEV
 
+#region Assets/Photon/Quantum/Runtime/AssemblyAttributes/QuantumAssemblyAttributeMapBake.cs
+
+// Tag this assembly to receive map bake callbacks, e.g. used to invalidate gizmo cache
+[assembly: Quantum.QuantumMapBakeAssembly]
+
+
+#endregion
+
+
 #region Assets/Photon/Quantum/Runtime/AssemblyAttributes/QuantumAssemblyAttributes.Common.cs
 
 // merged AssemblyAttributes

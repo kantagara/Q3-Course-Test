@@ -1,4 +1,11 @@
 component Damageable{
     FP CurrentHealth;
+    FP MaxHealth;
     AssetRef<DamageableBase> DamageableBase;
+}
+
+event PlayerHealthUpdated{
+    EntityRef Entity;
+    FP CurrentHealth;
+    FP MaxHealth;
 }

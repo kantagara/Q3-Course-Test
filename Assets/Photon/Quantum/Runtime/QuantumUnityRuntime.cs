@@ -240,86 +240,6 @@ namespace Quantum {
         }
       }
     }
-
-#if UNITY_EDITOR
-    private void OnDrawGizmos() {
-      DrawGizmos(selected: false);
-    }
-
-    private void OnDrawGizmosSelected() {
-      DrawGizmos(selected: true);
-    }
-
-    private void DrawGizmos(bool selected) {
-      
-      if (!QuantumGameGizmos.ShouldDraw(GlobalGizmosSettings.DrawJointGizmos, selected)) {
-        return;
-      }
-
-      var entity = GetComponent<QuantumEntityPrototype>();
-
-      if (entity == null || Prototype.JointConfigs == null) {
-        return;
-      }
-
-      FPMathUtils.LoadLookupTables();
-      
-      foreach (var prototype in Prototype.JointConfigs) {
-        
-        if (prototype.JointType == JointType.None) {
-          return;
-        }
-
-        QuantumGizmosJointInfo info;
-
-        switch (prototype.JointType) {
-          case JointType.DistanceJoint:
-            info.Type        = QuantumGizmosJointInfo.GizmosJointType.DistanceJoint2D;
-            info.MinDistance = prototype.MinDistance.AsFloat;
-            break;
-
-          case JointType.SpringJoint:
-            info.Type        = QuantumGizmosJointInfo.GizmosJointType.SpringJoint2D;
-            info.MinDistance = prototype.Distance.AsFloat;
-            break;
-
-          case JointType.HingeJoint:
-            info.Type        = QuantumGizmosJointInfo.GizmosJointType.HingeJoint2D;
-            info.MinDistance = prototype.Distance.AsFloat;
-            break;
-
-          default:
-            throw new NotSupportedException($"Unsupported joint type {prototype.JointType}");
-        }
-
-        info.Selected       = selected;
-        info.JointRot       = transform.rotation;
-        info.RelRotRef      = Quaternion.Inverse(info.JointRot);
-        info.AnchorPos      = transform.position + info.JointRot * prototype.Anchor.ToUnityVector3();
-        info.MaxDistance    = prototype.MaxDistance.AsFloat;
-        info.UseAngleLimits = prototype.UseAngleLimits;
-        info.LowerAngle     = prototype.LowerAngle.AsFloat;
-        info.UpperAngle     = prototype.UpperAngle.AsFloat;
-
-        if (prototype.ConnectedEntity == null) {
-          info.ConnectedRot = Quaternion.identity;
-          info.ConnectedPos = prototype.ConnectedAnchor.ToUnityVector3();
-        } else {
-          info.ConnectedRot = prototype.ConnectedEntity.transform.rotation;
-          info.ConnectedPos = prototype.ConnectedEntity.transform.position + info.ConnectedRot * prototype.ConnectedAnchor.ToUnityVector3();
-          info.RelRotRef    = info.ConnectedRot * info.RelRotRef;
-        }
-
-#if QUANTUM_XY
-        info.Axis = Vector3.back;
-#else
-        info.Axis = Vector3.up;
-#endif
-
-        QuantumGameGizmos.DrawGizmosJointInternal(ref info, GlobalGizmosSettings, GlobalGizmosSettings.JointGizmosStyle);
-      }
-    }
-#endif
   }
 
   [RequireComponent(typeof(QuantumEntityPrototype))]
@@ -356,79 +276,6 @@ namespace Quantum {
         }
       }
     }
-
-#if UNITY_EDITOR
-    private void OnDrawGizmos() {
-      DrawGizmos(selected: false);
-    }
-
-    private void OnDrawGizmosSelected() {
-      DrawGizmos(selected: true);
-    }
-
-    private void DrawGizmos(bool selected) {
-      if (!QuantumGameGizmos.ShouldDraw(GlobalGizmosSettings.DrawJointGizmos, selected)) {
-        return;
-      }
-
-      var entity = GetComponent<QuantumEntityPrototype>();
-
-      if (entity == null || Prototype.JointConfigs == null) {
-        return;
-      }
-
-      FPMathUtils.LoadLookupTables();
-      
-      foreach (var prototype in Prototype.JointConfigs) {
-        if (prototype.JointType == JointType3D.None) {
-          return;
-        }
-
-        QuantumGizmosJointInfo info;
-
-        switch (prototype.JointType) {
-          case JointType3D.DistanceJoint:
-            info.Type        = QuantumGizmosJointInfo.GizmosJointType.DistanceJoint3D;
-            info.MinDistance = prototype.MinDistance.AsFloat;
-            break;
-
-          case JointType3D.SpringJoint:
-            info.Type        = QuantumGizmosJointInfo.GizmosJointType.SpringJoint3D;
-            info.MinDistance = prototype.Distance.AsFloat;
-            break;
-
-          case JointType3D.HingeJoint:
-            info.Type        = QuantumGizmosJointInfo.GizmosJointType.HingeJoint3D;
-            info.MinDistance = prototype.Distance.AsFloat;
-            break;
-
-          default:
-            throw new NotSupportedException($"Unsupported joint type {prototype.JointType}");
-        }
-
-        info.Selected       = selected;
-        info.JointRot       = transform.rotation;
-        info.RelRotRef      = Quaternion.Inverse(info.JointRot);
-        info.AnchorPos      = transform.position + info.JointRot * prototype.Anchor.ToUnityVector3();
-        info.MaxDistance    = prototype.MaxDistance.AsFloat;
-        info.Axis           = prototype.Axis.ToUnityVector3();
-        info.UseAngleLimits = prototype.UseAngleLimits;
-        info.LowerAngle     = prototype.LowerAngle.AsFloat;
-        info.UpperAngle     = prototype.UpperAngle.AsFloat;
-
-        if (prototype.ConnectedEntity  == null) {
-          info.ConnectedRot = Quaternion.identity;
-          info.ConnectedPos = prototype.ConnectedAnchor.ToUnityVector3();
-        } else {
-          info.ConnectedRot = prototype.ConnectedEntity.transform.rotation;
-          info.ConnectedPos = prototype.ConnectedEntity.transform.position + info.ConnectedRot * prototype.ConnectedAnchor.ToUnityVector3();
-          info.RelRotRef    = info.ConnectedRot * info.RelRotRef;
-        }
-
-        QuantumGameGizmos.DrawGizmosJointInternal(ref info, GlobalGizmosSettings, GlobalGizmosSettings.JointGizmosStyle);
-      }
-    }
-#endif
   }
 
   public partial class QPrototypeTransform2D {
@@ -1107,7 +954,6 @@ namespace Quantum {
   using UnityEngine;
   using UnityEngine.SceneManagement;
   using Debug = UnityEngine.Debug;
-  using Object = UnityEngine.Object;
 
   public class QuantumCallbackHandler_UnityCallbacks : IDisposable {
     private Coroutine _coroutine;
@@ -1175,7 +1021,7 @@ namespace Quantum {
       VerboseLog($"Switching scenes from {previousSceneName} to {newSceneName} (unloadFirst: {unloadFirst})");
 
       try {
-        LoadSceneMode loadSceneMode = LoadSceneMode.Single;
+        LoadSceneMode loadSceneMode = LoadSceneMode.Additive;
 
         if (unloadFirst) {
           if (SceneManager.sceneCount == 1) {
@@ -1192,7 +1038,6 @@ namespace Quantum {
         }
 
         PublishCallback(_callbackUnitySceneLoadBegin, newSceneName);
-        Log.Info("HEAR");
         yield return SceneManager.LoadSceneAsync(newSceneName, loadSceneMode);
         var newScene = SceneManager.GetSceneByName(newSceneName);
         if (newScene.IsValid()) {
@@ -1214,7 +1059,6 @@ namespace Quantum {
     private IEnumerator LoadScene(string sceneName) {
       try {
         PublishCallback(_callbackUnitySceneLoadBegin, sceneName);
-        Object.FindObjectOfType<Camera>().enabled = false;
         yield return SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
         SceneManager.SetActiveScene(SceneManager.GetSceneByName(sceneName));
         PublishCallback(_callbackUnitySceneLoadDone, sceneName);
@@ -1887,7 +1731,7 @@ namespace Quantum {
 
 #region Assets/Photon/Quantum/Runtime/Entity/QuantumEntityViewFlags.cs
 
-﻿namespace Quantum {
+namespace Quantum {
   using System;
 
   /// <summary>
@@ -2020,7 +1864,7 @@ namespace Quantum {
     /// <summary>
     /// Is called when the entity view is enabled for the first time.
     /// The <see cref="ViewContext"/> is already set if available.
-    /// Access to <see cref="Game"/>, <see cref="VerifiedFrame"/>, <see cref="PredictedFrame"/> and <see cref="PredictedPreviousFrame"/> is not avalable yet.
+    /// Access to <see cref="Game"/>, <see cref="VerifiedFrame"/>, <see cref="PredictedFrame"/> and <see cref="PredictedPreviousFrame"/> is not available yet.
     /// </summary>
     public virtual void OnInitialize() { }
     /// <summary>
@@ -2407,6 +2251,2798 @@ namespace Quantum.Prototypes.Unity {
     }
   }
 
+}
+
+#endregion
+
+
+#region Assets/Photon/Quantum/Runtime/Gizmos/Config/GizmoIconColorAttribute.cs
+
+namespace Quantum {
+  using System;
+
+  public class GizmoIconColorAttribute : Attribute {
+    public ScriptHeaderBackColor Color { get; }
+    
+    public GizmoIconColorAttribute(ScriptHeaderBackColor color) {
+      Color = color;
+    }
+  }
+}
+
+#endregion
+
+
+#region Assets/Photon/Quantum/Runtime/Gizmos/Config/QuantumGameGizmosSettings.cs
+
+namespace Quantum {
+  using System;
+  using UnityEngine;
+
+  [Serializable]
+  public class QuantumGameGizmosSettings {
+    public const string ID = "QuantumGizmoSettings";
+
+    /// <summary>
+    /// Global scale for all gizmos.
+    /// </summary>
+    [Header("Global Settings"), Range(1, 5)]
+    public float IconScale = 1;
+
+    /// <summary>
+    /// How bright the gizmos are when selected.
+    /// </summary>
+    [Range(1.1f, 2)] public float SelectedBrightness = 1.1f;
+
+    /// <summary>
+    /// Draw the prediction area. Only available at runtime.
+    /// </summary>
+    [Header("Prediction Runtime Gizmos"), GizmoIconColor(ScriptHeaderBackColor.Red)]
+    public QuantumGizmoEntry PredictionArea = new QuantumGizmoEntry(QuantumGizmoColors.TransparentRed) { Enabled = true, DisableFill = true, OnlyDrawSelected = false };
+
+    /// <summary>
+    /// Draw the CharacterController3D and CharacterController2D components.
+    /// </summary>
+    [Header("Physics Gizmos"), GizmoIconColor(ScriptHeaderBackColor.Orange)]
+    public QuantumGizmoEntry CharacterController = new QuantumGizmoEntry(QuantumGizmoColors.TransparentYellow) { Enabled = true, OnlyDrawSelected = false };
+
+    /// <summary>
+    /// Draw the colliders that are currently static.
+    /// </summary>
+    public QuantumGizmoEntry StaticColliders = new QuantumGizmoEntry(QuantumGizmoColors.TransparentSkyBlue) { Enabled = true, OnlyDrawSelected = false };
+
+    /// <summary>
+    /// Draw the colliders that are currently dynamic.
+    /// </summary>
+    public QuantumGizmoEntry DynamicColliders = new QuantumGizmoEntry(QuantumGizmoColors.TransparentLimeGreen) { Enabled = true, OnlyDrawSelected = false };
+
+    /// <summary>
+    /// Draw the colliders that are currently kinematic.
+    /// </summary>
+    public QuantumGizmoEntry KinematicColliders = new QuantumGizmoEntry(QuantumGizmoColors.TransparentWhite) { Enabled = true, OnlyDrawSelected = false };
+
+    /// <summary>
+    /// Draw the colliders that are asleep.
+    /// </summary>
+    public QuantumGizmoEntry AsleepColliders = new QuantumGizmoEntry(QuantumGizmoColors.TransparentLightPurple) { Enabled = true, OnlyDrawSelected = false };
+
+    /// <summary>
+    /// Draw the colliders that are disabled.
+    /// </summary>
+    public QuantumGizmoEntry DisabledColliders = new QuantumGizmoEntry(QuantumGizmoColors.TransparentGray) { Enabled = true, OnlyDrawSelected = false };
+
+    /// <summary>
+    /// Draw the map's physics area.
+    /// </summary>
+    public QuantumGizmoEntry PhysicsArea = new QuantumGizmoEntry(QuantumGizmoColors.LightBlue);
+
+    /// <summary>
+    /// Draw the map's physics buckets.
+    /// </summary>
+    public QuantumGizmoEntry PhysicsBuckets = new QuantumGizmoEntry(QuantumGizmoColors.LightBlue);
+
+    /// <summary>
+    /// Draw the baked static mesh vertices.
+    /// </summary>
+    public QuantumGizmoEntry StaticMeshNormals = new QuantumGizmoEntry(QuantumGizmoColors.Red);
+
+    /// <summary>
+    /// Draw the baked static mesh vertices.
+    /// </summary>
+    public QuantumGizmoEntry StaticMeshTriangles = new QuantumGizmoEntry(QuantumGizmoColors.LightBlue);
+
+    /// <summary>
+    /// Draw the cells of the scene mesh.
+    /// </summary>
+    public QuantumGizmoEntry SceneMeshCells = new QuantumGizmoEntry(QuantumGizmoColors.LightBlue);
+
+    /// <summary>
+    /// Draw the triangles of the scene mesh.
+    /// </summary>
+    public QuantumGizmoEntry SceneMeshTriangles = new QuantumGizmoEntry(QuantumGizmoColors.LightBlue);
+
+    /// <summary>
+    /// Draw the entity's physics joints.
+    /// </summary>
+    public JointGizmoEntry PhysicsJoints = new JointGizmoEntry(
+        QuantumGizmoColors.TransparentLimeGreen,
+        secondaryColor: QuantumGizmoColors.TransparentYellow,
+        warningColor: QuantumGizmoColors.TransparentRed) { Enabled = true, DisableFill = true, OnlyDrawSelected = true };
+
+    /// <summary>
+    /// Should NavMesh components be scaled with the agent radius?
+    /// </summary>
+    [Header("NavMesh Settings")]
+    public Boolean ScaleComponentsWithAgentRadius = true;
+    
+    /// <summary>
+    /// Draw the NavMesh. The QuantumMap game object will trigger DrawOnlySelected.
+    /// </summary>
+    [Header("NavMesh Gizmos"), GizmoIconColor(ScriptHeaderBackColor.Blue)]
+    public NavMeshGizmoEntry NavMesh = new NavMeshGizmoEntry(QuantumGizmoColors.TransparentLightBlue, QuantumGizmoColors.TransparentMaroon) { Enabled = true, OnlyDrawSelected = true };
+    
+    /// <summary>
+    /// Draw the border of the NavMesh.
+    /// </summary>
+    public NavMeshBorderGizmoEntry NavMeshBorders = new NavMeshBorderGizmoEntry(QuantumGizmoColors.Black, false, QuantumGizmoColors.Yellow) { Enabled = true, OnlyDrawSelected = true };
+
+    /// <summary>
+    /// Draw the NavMesh area. The QuantumMap game object will trigger DrawOnlySelected.
+    /// </summary>
+    public QuantumGizmoEntry NavMeshArea = new QuantumGizmoEntry(QuantumGizmoColors.TransparentLightBlue) { OnlyDrawSelected = true };
+
+    /// <summary>
+    /// Draw the NavMesh grid. The QuantumMap game object will trigger DrawOnlySelected.
+    /// </summary>
+    public QuantumGizmoEntry NavMeshGrid = new QuantumGizmoEntry(QuantumGizmoColors.TransparentLightGreen) { OnlyDrawSelected = true };
+
+    /// <summary>
+    /// Draw the NavMesh links.
+    /// </summary>
+    public QuantumGizmoEntry NavMeshLinks = new QuantumGizmoEntry(QuantumGizmoColors.Blue) { OnlyDrawSelected = true };
+
+    /// <summary>
+    /// Draw the vertex normals of the NavMesh.
+    /// </summary>
+    public QuantumGizmoEntry NavMeshVertexNormals = new QuantumGizmoEntry(QuantumGizmoColors.Yellow) { OnlyDrawSelected = true };
+
+    /// <summary>
+    /// Draw the triangle ids of the NavMesh.
+    /// </summary>
+    public QuantumGizmoEntry NavMeshTriangleIds = new QuantumGizmoEntry(QuantumGizmoColors.TransparentLightBlue) { OnlyDrawSelected = true };
+
+    /// <summary>
+    /// Draw the region ids of the NavMesh.
+    /// </summary>
+    public QuantumGizmoEntry NavMeshRegionIds = new QuantumGizmoEntry(QuantumGizmoColors.TransparentMaroon) { OnlyDrawSelected = true };
+
+    /// <summary>
+    /// Draw the numerical vertex ids of the NavMesh.
+    /// </summary>
+    public QuantumGizmoEntry NavMeshVertexIds = new QuantumGizmoEntry(QuantumGizmoColors.Green) { OnlyDrawSelected = true };
+
+    /// <summary>
+    /// Draw the NavMesh pathfinder component. Only available at runtime.
+    /// </summary>
+    [Header("NavMesh Runtime Gizmos"), GizmoIconColor(ScriptHeaderBackColor.Cyan)]
+    // components
+    public NavMeshComponentGizmoEntry NavMeshPathfinder = new NavMeshComponentGizmoEntry(QuantumGizmoColors.Magenta);
+
+    /// <summary>
+    /// Draw the NavMesh steering agent component. Only available at runtime.
+    /// </summary>
+    public NavMeshComponentGizmoEntry NavMeshSteeringAgent = new NavMeshComponentGizmoEntry(QuantumGizmoColors.TransparentGreen);
+
+    /// <summary>
+    /// Draw the NavMesh avoidance agent component. Only available at runtime.
+    /// </summary>
+    public NavMeshComponentGizmoEntry NavMeshAvoidanceAgent = new NavMeshComponentGizmoEntry(QuantumGizmoColors.TransparentBlue);
+
+    /// <summary>
+    /// Draw the NavMesh avoidance obstacles component. Only available at runtime.
+    /// </summary>
+    public NavMeshComponentGizmoEntry NavMeshAvoidanceObstacles = new NavMeshComponentGizmoEntry(QuantumGizmoColors.TransparentRed);
+
+    /// <summary>
+    /// Draw the pathfinder path. Only available at runtime.
+    /// </summary>
+    public QuantumGizmoEntry PathfinderRawPath = new QuantumGizmoEntry(QuantumGizmoColors.Magenta);
+
+    /// <summary>
+    /// Draw the raw pathfinder triangle path. Only available at runtime.
+    /// </summary>
+    public QuantumGizmoEntry PathfinderRawTrianglePath = new QuantumGizmoEntry(QuantumGizmoColors.TransparentMagenta);
+
+    /// <summary>
+    /// Draw the pathfinder funnel. Only available at runtime.
+    /// </summary>
+    public QuantumGizmoEntry PathfinderFunnel = new QuantumGizmoEntry(QuantumGizmoColors.Green);
+
+    private QuantumGizmoEntry GetEntryForBody3D(PhysicsBody3D body) {
+      var entry = default(QuantumGizmoEntry);
+      if (body.IsKinematic) {
+        entry = KinematicColliders;
+      } else if (body.IsSleeping) {
+        entry = AsleepColliders;
+      } else if (!body.Enabled) {
+        entry = DisabledColliders;
+      } else {
+        entry = DynamicColliders;
+      }
+
+      return entry;
+    }
+
+    private QuantumGizmoEntry GetEntryForBody2D(PhysicsBody2D body) {
+      var entry = default(QuantumGizmoEntry);
+      if (body.IsKinematic) {
+        entry = KinematicColliders;
+      } else if (body.IsSleeping) {
+        entry = AsleepColliders;
+      } else if (!body.Enabled) {
+        entry = DisabledColliders;
+      } else {
+        entry = DynamicColliders;
+      }
+
+      return entry;
+    }
+
+    /// <summary>
+    /// Get the gizmo entry for a specific physics3d entity.
+    /// </summary>
+    /// <param name="frame"></param>
+    /// <param name="handle"></param>
+    /// <returns></returns>
+    public unsafe QuantumGizmoEntry GetEntryForPhysicsEntity3D(Frame frame, EntityRef handle) {
+      QuantumGizmoEntry entry;
+      frame.Unsafe.TryGetPointer(handle, out PhysicsBody3D* body);
+      entry = GetEntryForBody3D(*body);
+      return entry;
+    }
+
+    /// <summary>
+    /// Get the gizmo entry for a specific physics2d entity.
+    /// </summary>
+    /// <param name="frame"></param>
+    /// <param name="handle"></param>
+    /// <returns></returns>
+    public unsafe QuantumGizmoEntry GetEntryForPhysicsEntity2D(Frame frame, EntityRef handle) {
+      QuantumGizmoEntry entry;
+      frame.Unsafe.TryGetPointer(handle, out PhysicsBody2D* body);
+      entry = GetEntryForBody2D(*body);
+      return entry;
+    }
+  }
+}
+
+#endregion
+
+
+#region Assets/Photon/Quantum/Runtime/Gizmos/Config/QuantumGizmoEntry.cs
+
+namespace Quantum {
+  using System;
+  using UnityEngine;
+
+  [Serializable]
+  public struct OptionalGizmoBool {
+    [NonSerialized] private bool _hasValue;
+
+    [SerializeField] private bool _value;
+
+    public OptionalGizmoBool(bool value) {
+      _hasValue = true;
+      this._value = value;
+    }
+
+    public bool HasValue => _hasValue;
+
+    public bool Value {
+      get => _hasValue ? _value : default;
+
+      set => _value = value;
+    }
+
+    public static implicit operator bool(OptionalGizmoBool optional) => optional.Value;
+    public static implicit operator OptionalGizmoBool(bool value) => new OptionalGizmoBool(value);
+  }
+
+  /// <summary>
+  /// Individual entry for a specific section of Quantum.
+  /// </summary>
+  [Serializable]
+  public class QuantumGizmoEntry {
+    private const string _hasValue = "._hasValue";
+
+    /// <summary>
+    /// Is this gizmo enabled.
+    /// </summary>
+    public bool Enabled;
+
+    /// <summary>
+    /// The main color of the gizmo.
+    /// </summary>
+    public Color Color;
+
+    /// <summary>
+    /// The scale of the gizmo. Only available for gizmos that support scaling.
+    /// 0 means disabled.
+    /// </summary>
+    [Range(0.1f, 5), DrawIf(nameof(Scale), 0f, CompareOperator.NotEqual, mode: DrawIfMode.Hide)]
+    public float Scale;
+
+    /// <summary>
+    /// Only draw the gizmo when the object is selected.
+    /// </summary>
+    [DrawIf(nameof(OnlyDrawSelected) + _hasValue, true, mode: DrawIfMode.Hide)]
+    public OptionalGizmoBool OnlyDrawSelected;
+
+    /// <summary>
+    /// Draw the gizmo without fill. Only available for gizmos that support fill.
+    /// </summary>
+    [DrawIf(nameof(DisableFill) + _hasValue, true, mode: DrawIfMode.Hide)]
+    public OptionalGizmoBool DisableFill;
+
+    public Color InactiveColor => Color.Desaturate();
+    public Color TransparentColor => Color.Alpha(0.5f);
+
+    public QuantumGizmoStyle Style => DisableFill ? QuantumGizmoStyle.FillDisabled : default;
+
+    public QuantumGizmoEntry(Color color) {
+      Color = color;
+    }
+  }
+
+  [Serializable]
+  public class JointGizmoEntry : QuantumGizmoEntry {
+    public Color SecondaryColor;
+    public Color WarningColor;
+
+    public JointGizmoEntry(Color color, Color secondaryColor, Color warningColor) : base(color) {
+      SecondaryColor = secondaryColor;
+      WarningColor = warningColor;
+    }
+  }
+
+  [Serializable]
+  public class NavMeshComponentGizmoEntry : QuantumGizmoEntry {
+    /// <summary>
+    /// Default size for NavMesh component gizmos.
+    /// </summary>
+    private const float DefaultComponentGizmoSize = 0.5f;
+
+    public NavMeshComponentGizmoEntry(Color color) : base(color) {
+      Scale = DefaultComponentGizmoSize;
+      DisableFill = true;
+      OnlyDrawSelected = false;
+    }
+  }
+
+  [Serializable]
+  public class NavMeshBorderGizmoEntry : QuantumGizmoEntry {
+    public bool DrawNormals;
+    public Color BorderNormalColor;
+
+    public NavMeshBorderGizmoEntry(Color color, bool drawNormals, Color borderNormalColor) : base(color) {
+      DrawNormals = drawNormals;
+      BorderNormalColor = borderNormalColor;
+    }
+  }
+
+  [Serializable]
+  public class NavMeshGizmoEntry : QuantumGizmoEntry {
+    public Color RegionColor;
+
+    public NavMeshGizmoEntry(Color color, Color regionColor) : base(color) {
+      RegionColor = regionColor;
+    }
+  }
+}
+
+#endregion
+
+
+#region Assets/Photon/Quantum/Runtime/Gizmos/QuantumGameGizmos.cs
+
+namespace Quantum {
+#if UNITY_EDITOR
+
+  using UnityEditor;
+  using System.Collections.Generic;
+  using Photon.Analyzer;
+  using UnityEngine;
+  using UnityEngine.SceneManagement;
+  using static UnityEngine.Object;
+  using static QuantumUnityExtensions;
+
+  public partial class QuantumGameGizmos : MapDataBakerCallback {
+    private static QuantumGameGizmosSettings _settings => QuantumGameGizmosSettingsScriptableObject.Global.Settings;
+
+    [StaticField] private static Dictionary<string, GizmoNavmeshData> _navmeshGizmoMap;
+
+    [StaticField] private static readonly Dictionary<MonoBehaviour, StaticMeshColliderGizmoData> _meshGizmoData =
+      new Dictionary<MonoBehaviour, StaticMeshColliderGizmoData>();
+
+    private static QuantumEntityViewUpdater _evu;
+    private static QuantumMapData _mapData;
+
+    static QuantumGameGizmos() {
+      SceneManager.sceneLoaded += (arg0, mode) => {
+        InvalidatePhysicsGizmos();
+      };
+    }
+
+    [StaticFieldResetMethod]
+    public static void InvalidateNavMeshGizmos() {
+      _navmeshGizmoMap?.Clear();
+    }
+
+    [StaticFieldResetMethod]
+    public static void InvalidatePhysicsGizmos() {
+      _meshGizmoData.Clear();
+      _mapData = null;
+    }
+
+    private static QuantumEntityViewUpdater GetEntityViewUpdater() {
+      if (_evu == null) {
+        _evu = FindFirstObjectByType<QuantumEntityViewUpdater>();
+      }
+
+      return _evu;
+    }
+
+    private static QuantumMapData GetMapData() {
+      if (_mapData == null) {
+        _mapData = FindFirstObjectByType<QuantumMapData>();
+      }
+
+      return _mapData;
+    }
+
+    private static bool ShouldDraw(
+      QuantumGizmoEntry entry,
+      bool selected,
+      bool hasStateDrawer = true) {
+      if (entry.Enabled == false)
+        return false;
+
+      bool hasSelectedFlag = entry.OnlyDrawSelected is { HasValue: true, Value: true };
+
+      if (Application.isPlaying) {
+        if (hasStateDrawer) {
+          // state drawer will take over
+          return false;
+        }
+      }
+
+      if (hasSelectedFlag) {
+        return selected;
+      }
+
+      return true;
+    }
+
+    [DrawGizmo(GizmoType.Selected | GizmoType.Active | GizmoType.NonSelected)]
+    static void DrawGizmos(QuantumRunnerBehaviour behaviour, GizmoType gizmoType) {
+      if (behaviour.Runner?.Session == null) {
+        return;
+      }
+
+      if (behaviour.Runner.HideGizmos) {
+        return;
+      }
+
+      if (behaviour.Runner.Session.Game is not QuantumGame game) {
+        return;
+      }
+
+      OnDrawGizmosInternal(
+        game,
+        gizmoType,
+        behaviour.Runner.GizmoSettings ?? QuantumGameGizmosSettingsScriptableObject.Global.Settings
+      );
+    }
+
+    static void OnDrawGizmosInternal(
+      QuantumGame game,
+      GizmoType type,
+      QuantumGameGizmosSettings gizmosSettings) {
+      var frame = game.Frames.Predicted;
+
+      if (frame != null) {
+        DrawMapGizmos(frame.Map, frame);
+
+        OnDrawGizmos_NavMesh(frame, gizmosSettings, type);
+
+        DrawRuntimePhysicsComponents_3D(gizmosSettings, frame);
+        DrawRuntimePhysicsComponents_2D(gizmosSettings, frame);
+
+        OnDrawGizmos_Prediction(frame, type);
+      }
+    }
+
+    public override void OnBeforeBake(QuantumMapData data) {
+    }
+
+    public override void OnBake(QuantumMapData data) {
+      if (_settings.StaticMeshTriangles.Enabled || _settings.StaticMeshNormals.Enabled) {
+        foreach (var behaviour in data.StaticCollider3DReferences) {
+          if (behaviour is QuantumStaticMeshCollider3D or QuantumStaticTerrainCollider3D) {
+            CreateStaticMeshData(behaviour);
+          }
+        }
+      }
+    }
+  }
+#endif
+}
+
+#endregion
+
+
+#region Assets/Photon/Quantum/Runtime/Gizmos/QuantumGameGizmos.EntityPrototype.cs
+
+namespace Quantum {
+#if UNITY_EDITOR
+  using Photon.Deterministic;
+  using UnityEditor;
+  using UnityEngine;
+
+  public partial class QuantumGameGizmos {
+    [DrawGizmo(GizmoType.Selected | GizmoType.Active | GizmoType.NonSelected)]
+    static void DrawGizmos_QuantumEntityPrototype(QuantumEntityPrototype behaviour, GizmoType gizmoType) {
+      bool selected = gizmoType.HasFlag(GizmoType.Selected);
+
+      FPMathUtils.LoadLookupTables();
+
+      try {
+        behaviour.PreSerialize();
+      } catch {
+        // ignored
+      }
+
+      Shape2DConfig config2D = null;
+      Shape3DConfig config3D = null;
+      bool isDynamic2D = false;
+      bool isDynamic3D = false;
+      float height = 0.0f;
+
+      var transform = behaviour.transform;
+
+      Vector3 position2D = transform.position;
+      FP rotation2DDeg = transform.rotation.ToFPRotation2DDegrees();
+      Vector3 position3D = transform.position;
+      Quaternion rotation3D = transform.rotation;
+
+      CharacterController2DConfig configCC2D = null;
+      CharacterController3DConfig configCC3D = null;
+
+      var transformMode = behaviour.TransformMode;
+      var physicsBody = behaviour.PhysicsBody;
+      var physicsCollider = behaviour.PhysicsCollider;
+
+      if (behaviour.PhysicsCollider.IsEnabled) {
+        if (behaviour.TransformMode == QuantumEntityPrototypeTransformMode.Transform2D) {
+          config2D = physicsCollider.ScaledShape2D;
+          isDynamic2D = physicsBody.IsEnabled && !physicsCollider.IsTrigger &&
+                        (physicsBody.Config2D & PhysicsBody2D.ConfigFlags.IsKinematic) == default;
+        } else if (transformMode == QuantumEntityPrototypeTransformMode.Transform3D) {
+          config3D = physicsCollider.ScaledShape3D;
+          isDynamic3D = physicsBody.IsEnabled && !physicsCollider.IsTrigger &&
+                        (physicsBody.Config3D & PhysicsBody3D.ConfigFlags.IsKinematic) == default;
+        }
+      }
+
+      if (behaviour.Transform2DVertical.IsEnabled) {
+#if QUANTUM_XY
+      var verticalScale = transform.lossyScale.z;
+      height = -behaviour.Transform2DVertical.Height.AsFloat * verticalScale;
+      position2D.z -= behaviour.Transform2DVertical.PositionOffset.AsFloat * verticalScale;
+#else
+        var verticalScale = transform.lossyScale.y;
+        height = behaviour.Transform2DVertical.Height.AsFloat * verticalScale;
+        position2D.y += behaviour.Transform2DVertical.PositionOffset.AsFloat * verticalScale;
+#endif
+      }
+
+      // handle overriding from components
+      {
+        var vertical = SafeGetPrototype<Quantum.Prototypes.Transform2DVerticalPrototype>(behaviour);
+        if (vertical != null) {
+#if QUANTUM_XY
+        var verticalScale = transform.lossyScale.z;
+        height = -vertical.Height.AsFloat * verticalScale;
+        position2D.z = -vertical.Position.AsFloat * verticalScale;
+#else
+          var verticalScale = transform.lossyScale.y;
+          height = vertical.Height.AsFloat * verticalScale;
+          position2D.y = vertical.Position.AsFloat * verticalScale;
+#endif
+        }
+
+        var transform2D = SafeGetPrototype<Quantum.Prototypes.Transform2DPrototype>(behaviour);
+        if (transformMode == QuantumEntityPrototypeTransformMode.Transform2D || transform2D != null) {
+          if (transform2D != null) {
+            position2D = transform2D.Position.ToUnityVector3();
+            rotation2DDeg = transform2D.Rotation;
+          }
+
+          config2D = SafeGetPrototype<Quantum.Prototypes.PhysicsCollider2DPrototype>(behaviour)?.ShapeConfig ??
+                     config2D;
+          isDynamic2D |= behaviour.GetComponent<QPrototypePhysicsBody2D>();
+
+          var cc = SafeGetPrototype<Quantum.Prototypes.CharacterController2DPrototype>(behaviour);
+          if (cc != null) {
+            QuantumUnityDB.TryGetGlobalAssetEditorInstance(cc.Config, out configCC2D);
+          }
+        }
+
+        var transform3D = SafeGetPrototype<Quantum.Prototypes.Transform3DPrototype>(behaviour);
+        if (behaviour.TransformMode == QuantumEntityPrototypeTransformMode.Transform3D || transform3D != null) {
+          if (transform3D != null) {
+            position3D = transform3D.Position.ToUnityVector3();
+            rotation3D = UnityEngine.Quaternion.Euler(transform3D.Rotation.ToUnityVector3());
+          }
+
+          config3D = SafeGetPrototype<Quantum.Prototypes.PhysicsCollider3DPrototype>(behaviour)?.ShapeConfig ??
+                     config3D;
+          isDynamic3D |= behaviour.GetComponent<QPrototypePhysicsBody3D>();
+
+          var cc = SafeGetPrototype<Quantum.Prototypes.CharacterController3DPrototype>(behaviour);
+          if (cc != null) {
+            QuantumUnityDB.TryGetGlobalAssetEditorInstance(cc.Config, out configCC3D);
+          }
+        }
+      }
+
+      bool shouldDraw = isDynamic2D
+        ? ShouldDraw(_settings.DynamicColliders, selected, false)
+        : ShouldDraw(_settings.KinematicColliders, selected, false);
+
+      if (config2D != null && shouldDraw) {
+        var color = isDynamic2D
+          ? _settings.DynamicColliders.Color
+          : _settings.KinematicColliders.Color;
+
+        var disableFill = behaviour.PhysicsBody.Config2D.HasFlag(PhysicsBody2D.ConfigFlags.IsKinematic)
+          ? _settings.KinematicColliders.DisableFill
+          : _settings.DynamicColliders.DisableFill;
+
+        var style = disableFill is { HasValue: true, Value: true }
+          ? QuantumGizmoStyle.FillDisabled
+          : default;
+        
+        if (config2D.ShapeType == Shape2DType.Polygon) {
+          if (QuantumUnityDB.TryGetGlobalAsset(config2D.PolygonCollider, out Quantum.PolygonCollider collider)) {
+            DrawShape2DGizmo(
+              Shape2D.CreatePolygon(collider, config2D.PositionOffset,
+                FP.FromRaw((config2D.RotationOffset.RawValue * FP.Raw.Deg2Rad) >> FPLut.PRECISION)),
+              position2D,
+              rotation2DDeg.ToUnityQuaternionDegrees(),
+              color, height, null, style: style);
+          }
+        } else if (config2D.ShapeType == Shape2DType.Compound) {
+          foreach (var shape in config2D.CompoundShapes) {
+            // nested compound shapes are not supported on the editor yet
+            if (shape.ShapeType == Shape2DType.Compound) {
+              continue;
+            }
+
+            if (shape.ShapeType == Shape2DType.Polygon) {
+              if (QuantumUnityDB.TryGetGlobalAsset(shape.PolygonCollider, out Quantum.PolygonCollider collider)) {
+                DrawShape2DGizmo(
+                  Shape2D.CreatePolygon(collider, shape.PositionOffset,
+                    FP.FromRaw((shape.RotationOffset.RawValue * FP.Raw.Deg2Rad) >> FPLut.PRECISION)),
+                  position2D,
+                  rotation2DDeg.ToUnityQuaternionDegrees(),
+                  color, height, null, style: style
+                );
+              }
+            } else {
+              DrawShape2DGizmo(
+                shape.CreateShape(null),
+                position2D,
+                rotation2DDeg.ToUnityQuaternionDegrees(),
+                color,
+                height,
+                null,
+                style: style
+              );
+            }
+          }
+        } else {
+          DrawShape2DGizmo(
+            config2D.CreateShape(null),
+            position2D,
+            rotation2DDeg.ToUnityQuaternionDegrees(),
+            color,
+            height,
+            null,
+            style: style);
+        }
+      }
+
+      bool shouldDrawCharacterController = ShouldDraw(_settings.CharacterController, selected, false);
+
+      if (configCC2D != null && shouldDrawCharacterController) {
+        DrawCharacterController2DGizmo(
+          position2D,
+          configCC2D,
+          _settings.GetSelectedColor(_settings.CharacterController.Color, selected),
+          _settings.GetSelectedColor(_settings.AsleepColliders.Color, selected),
+          disableFill: _settings.CharacterController.DisableFill
+        );
+      }
+
+      bool shouldDraw3D = isDynamic3D
+        ? ShouldDraw(_settings.DynamicColliders, selected, false)
+        : ShouldDraw(_settings.KinematicColliders, selected, false);
+
+      if (config3D != null && shouldDraw3D) {
+        var style = behaviour.PhysicsBody.Config3D.HasFlag(PhysicsBody3D.ConfigFlags.IsKinematic)
+          ? _settings.KinematicColliders.Style
+          : _settings.DynamicColliders.Style;
+
+        var color = isDynamic3D
+          ? _settings.DynamicColliders.Color
+          : _settings.KinematicColliders.Color;
+        if (config3D.ShapeType == Shape3DType.Compound) {
+          foreach (var shape in config3D.CompoundShapes) {
+            // nested compound shapes are not supported on the editor yet
+            if (shape.ShapeType == Shape3DType.Compound) {
+              continue;
+            }
+
+            DrawShape3DGizmo(shape.CreateShape(null), position3D, rotation3D, color, style: style);
+          }
+        } else {
+          DrawShape3DGizmo(config3D.CreateShape(null), position3D, rotation3D, color, style: style);
+        }
+      }
+
+      if (configCC3D != null && shouldDrawCharacterController) {
+        DrawCharacterController3DGizmo(
+          position3D,
+          configCC3D,
+          _settings.GetSelectedColor(_settings.CharacterController.Color, selected),
+          _settings.GetSelectedColor(_settings.AsleepColliders.Color, selected),
+          _settings.CharacterController.DisableFill
+        );
+      }
+    }
+
+    private static T SafeGetPrototype<T>(Behaviour behaviour) where T : ComponentPrototype, new() {
+      var component = behaviour.GetComponent<QuantumUnityComponentPrototype<T>>();
+      if (component == null) {
+        return null;
+      }
+
+      return (T)component.CreatePrototype(null);
+    }
+  }
+#endif
+}
+
+#endregion
+
+
+#region Assets/Photon/Quantum/Runtime/Gizmos/QuantumGameGizmos.MapData.cs
+
+namespace Quantum {
+#if UNITY_EDITOR
+  using System;
+  using System.Collections.Generic;
+  using Photon.Deterministic;
+  using UnityEditor;
+  using UnityEngine;
+
+  public partial class QuantumGameGizmos {
+    [DrawGizmo(GizmoType.Pickable | GizmoType.Selected | GizmoType.NonSelected)]
+    static void DrawGizmos_MapData(QuantumMapData behaviour, GizmoType gizmoType) {
+      if (Application.isPlaying) {
+        return;
+      }
+
+      FPMathUtils.LoadLookupTables();
+      DrawMapGizmos(behaviour.Asset, null);
+
+      var navmeshList = new List<NavMesh>();
+
+      foreach (var navmeshLink in behaviour.Asset.NavMeshLinks) {
+        navmeshList.Add(QuantumUnityDB.GetGlobalAsset(navmeshLink));
+      }
+
+      DrawMapNavMesh(behaviour.Asset, navmeshList, NavMeshRegionMask.Default, _settings);
+    }
+
+    private static unsafe void DrawMapGizmos(Map map, Frame frame) {
+      if (map) {
+        FPMathUtils.LoadLookupTables();
+
+        var center = FPVector3.Zero;
+
+#if QUANTUM_XY
+        center = center.XZY;
+#endif
+
+        var worldSize = FPMath.Min(map.WorldSize, FP.UseableMax);
+        var physicsArea = new FPVector2(worldSize, worldSize);
+
+        if (map.SortingAxis == PhysicsCommon.SortAxis.X) {
+          physicsArea.X = FPMath.Min(physicsArea.X, FP.UseableMax / 2);
+        } else {
+          physicsArea.Y = FPMath.Min(physicsArea.Y, FP.UseableMax / 2);
+        }
+
+        if (_settings.PhysicsArea.Enabled) {
+          GizmoUtils.DrawGizmosBox(
+            center.ToUnityVector3(),
+            physicsArea.ToUnityVector3(),
+            _settings.PhysicsArea.Color
+          );
+        }
+
+        if (_settings.PhysicsBuckets.Enabled) {
+          var bottomLeft = center.ToUnityVector3() - physicsArea.ToUnityVector3() / 2;
+
+          if (map.BucketingAxis == PhysicsCommon.BucketAxis.X) {
+            var bucketSize = physicsArea.X.AsFloat / map.BucketsCount;
+            GizmoUtils.DrawGizmoGrid(
+              bottomLeft,
+              map.BucketsCount,
+              1,
+              bucketSize,
+              physicsArea.Y.AsFloat,
+              _settings.PhysicsBuckets.Color
+            );
+          } else {
+            var bucketSize = physicsArea.Y.AsFloat / map.BucketsCount;
+            GizmoUtils.DrawGizmoGrid(
+              bottomLeft,
+              1,
+              map.BucketsCount,
+              physicsArea.X.AsFloat,
+              bucketSize,
+              _settings.PhysicsBuckets.Color
+            );
+          }
+        }
+        
+        bool selected = false;
+        
+        var mapData = GetMapData();
+        
+        if (mapData) {
+          selected = Selection.activeGameObject == mapData.gameObject;
+        }
+
+        if (ShouldDraw(_settings.NavMeshGrid, selected, false)) {
+          GizmoUtils.DrawGizmosBox(
+            center.ToUnityVector3(),
+            new FPVector2(map.WorldSizeX, map.WorldSizeY).ToUnityVector3(),
+            _settings.NavMeshGrid.Color
+          );
+          
+          var bottomLeft = center.ToUnityVector3() - (-map.WorldOffset).ToUnityVector3();
+          GizmoUtils.DrawGizmoGrid(
+            bottomLeft,
+            map.GridSizeX,
+            map.GridSizeY,
+            map.GridNodeSize,
+            _settings.NavMeshGrid.Color
+          );
+        }
+
+        if (frame is { Physics3D: { SceneMesh: not null } }) {
+          var mesh = frame.Physics3D.SceneMesh;
+          if (mesh != null) {
+            if (_settings.SceneMeshCells.Enabled) {
+              mesh.VisitCells((x, y, z, tris, count) => {
+                if (count > 0) {
+                  var c = mesh.GetNodeCenter(x, y, z).ToUnityVector3();
+                  var s = default(Vector3);
+                  s.x = mesh.CellSize;
+                  s.y = mesh.CellSize;
+                  s.z = mesh.CellSize;
+
+                  GizmoUtils.DrawGizmosBox(
+                    c,
+                    s,
+                    _settings.SceneMeshCells.Color,
+                    style: _settings.SceneMeshCells.Style
+                  );
+                }
+              });
+            }
+
+            if (_settings.SceneMeshTriangles.Enabled) {
+              mesh.VisitCells((x, y, z, tris, count) => {
+                for (int i = 0; i < count; ++i) {
+                  var t = mesh.GetTriangle(tris[i]);
+                  Gizmos.color = _settings.SceneMeshTriangles.Color;
+                  Gizmos.DrawLine(t->A.ToUnityVector3(), t->B.ToUnityVector3());
+                  Gizmos.DrawLine(t->B.ToUnityVector3(), t->C.ToUnityVector3());
+                  Gizmos.DrawLine(t->C.ToUnityVector3(), t->A.ToUnityVector3());
+                }
+              });
+            }
+          }
+        }
+      }
+    }
+
+    static void DrawMapNavMesh(
+      Map map,
+      List<NavMesh> navmeshList,
+      NavMeshRegionMask mask,
+      QuantumGameGizmosSettings gizmosSettings) {
+      var navMeshRegionMask = mask;
+
+      bool selected = false;
+      
+      var mapData = GetMapData();
+      
+      if (mapData) {
+        selected = Selection.activeGameObject == mapData.gameObject;
+      }
+      
+      if (ShouldDraw(_settings.NavMeshArea, selected, false)) {
+        GizmoUtils.DrawGizmosBox(
+          Vector3.zero,
+          new FPVector2(map.WorldSizeX, map.WorldSizeY).ToUnityVector3(),
+          _settings.NavMeshArea.Color
+        );
+      }
+
+      foreach (var navmesh in navmeshList) {
+        if (_settings.NavMesh.Enabled) {
+          CreateAndDrawNavMeshGizmo(navmesh, navMeshRegionMask);
+        }
+
+        if (_settings.NavMeshRegionIds.Enabled ||
+            _settings.NavMeshTriangleIds.Enabled) {
+          for (Int32 i = 0; i < navmesh.Triangles.Length; i++) {
+            var t = navmesh.Triangles[i];
+
+            // ################## NavMesh Triangle Ids ##################
+
+            if (ShouldDraw(_settings.NavMeshTriangleIds, selected, false)) {
+              Handles.color = _settings.NavMeshTriangleIds.Color;
+              Handles.Label(t.Center.ToUnityVector3(true), i.ToString());
+            }
+
+            // ################## NavMesh Triangle Region Ids ##################
+
+            if (ShouldDraw(_settings.NavMeshRegionIds, selected, false)) {
+              if (t.Regions.HasValidRegions) {
+                var s = string.Empty;
+                for (int r = 0; r < map.Regions.Length; r++) {
+                  if (t.Regions.IsRegionEnabled(r)) {
+                    s += $"{map.Regions[r]} ({r})";
+                  }
+                }
+
+                var vertex0 = navmesh.Vertices[t.Vertex0].Point.ToUnityVector3(true);
+                var vertex1 = navmesh.Vertices[t.Vertex1].Point.ToUnityVector3(true);
+                var vertex2 = navmesh.Vertices[t.Vertex2].Point.ToUnityVector3(true);
+                Handles.Label((vertex0 + vertex1 + vertex2) / 3.0f, s);
+              }
+            }
+          }
+        }
+
+        if (_settings.NavMeshVertexNormals.Enabled ||
+            _settings.NavMeshVertexIds.Enabled) {
+          for (Int32 v = 0; v < navmesh.Vertices.Length; ++v) {
+            // ################## NavMesh Vertex Ids ##################
+
+            if (ShouldDraw(_settings.NavMeshVertexIds, selected, false)) {
+              Handles.color = _settings.NavMeshVertexIds.Color;
+              Handles.Label(navmesh.Vertices[v].Point.ToUnityVector3(true), v.ToString());
+            }
+
+            // ################## NavMesh Vertex Normals ##################
+
+            if (ShouldDraw(_settings.NavMeshVertexNormals, selected, false)) {
+              if (navmesh.Vertices[v].Borders.Length >= 2) {
+                var normal = NavMeshVertex.CalculateNormal(v, navmesh, navMeshRegionMask);
+                if (normal != FPVector3.Zero) {
+                  Gizmos.color = _settings.NavMeshVertexNormals.Color;
+                  GizmoUtils.DrawGizmoVector(
+                    navmesh.Vertices[v].Point.ToUnityVector3(true),
+                    navmesh.Vertices[v].Point.ToUnityVector3(true) +
+                    normal.ToUnityVector3(true) * gizmosSettings.IconScale * 0.33f,
+                    GizmoUtils.DefaultArrowHeadLength * gizmosSettings.IconScale * 0.33f);
+                }
+              }
+            }
+          }
+        }
+
+        // ################## NavMesh Links ##################
+
+        if (ShouldDraw(_settings.NavMeshLinks, selected, false)) {
+          for (Int32 i = 0; i < navmesh.Links.Length; i++) {
+            var color = _settings.NavMeshLinks.Color;
+            if (navmesh.Links[i].Region.IsSubset(navMeshRegionMask) == false) {
+              color = Color.gray;
+            }
+
+            Gizmos.color = color;
+            GizmoUtils.DrawGizmoVector(
+              navmesh.Links[i].Start.ToUnityVector3(),
+              navmesh.Links[i].End.ToUnityVector3(),
+              GizmoUtils.DefaultArrowHeadLength * gizmosSettings.IconScale);
+            GizmoUtils.DrawGizmosCircle(navmesh.Links[i].Start.ToUnityVector3(), 0.1f * gizmosSettings.IconScale, color,
+              style: _settings.NavMeshLinks.Style);
+            GizmoUtils.DrawGizmosCircle(navmesh.Links[i].End.ToUnityVector3(), 0.1f * gizmosSettings.IconScale, color,
+              style: _settings.NavMeshLinks.Style);
+          }
+        }
+
+        // ################## NavMesh Borders ##################
+
+        if (ShouldDraw(_settings.NavMeshBorders, selected, false)) {
+          for (Int32 i = 0; i < navmesh.Borders.Length; i++) {
+            Gizmos.color = _settings.NavMeshBorders.Color;
+            var b = navmesh.Borders[i];
+            if (navmesh.IsBorderActive(i, navMeshRegionMask) == false) {
+              // grayed out?
+              continue;
+            }
+
+            Gizmos.DrawLine(b.V0.ToUnityVector3(true), b.V1.ToUnityVector3(true));
+
+            if (_settings.NavMeshBorders.Enabled && _settings.NavMeshBorders.DrawNormals) {
+              Gizmos.color = _settings.NavMeshBorders.BorderNormalColor;
+              var middle = (navmesh.Borders[i].V0.ToUnityVector3(true) + navmesh.Borders[i].V1.ToUnityVector3(true)) *
+                           0.5f;
+              GizmoUtils.DrawGizmoVector(middle,
+                middle + navmesh.Borders[i].Normal.ToUnityVector3(true) * gizmosSettings.IconScale * 0.33f,
+                gizmosSettings.IconScale * 0.33f * GizmoUtils.DefaultArrowHeadLength);
+            }
+          }
+        }
+      }
+    }
+  }
+#endif
+}
+
+#endregion
+
+
+#region Assets/Photon/Quantum/Runtime/Gizmos/QuantumGameGizmos.NavMesh.cs
+
+namespace Quantum {
+  using System;
+  using System.Collections.Generic;
+  using System.Linq;
+  using Photon.Deterministic;
+  using UnityEditor;
+  using UnityEngine;
+  
+  public struct GizmoNavmeshData {
+    public Mesh GizmoMesh;
+    public NavMeshRegionMask CurrentRegionMask;
+  }
+
+#if UNITY_EDITOR
+  public partial class QuantumGameGizmos {
+    static unsafe void OnDrawGizmos_NavMesh(Frame frame, QuantumGameGizmosSettings gizmosSettings, GizmoType type) {
+      var navmeshList = new List<NavMesh>();
+      navmeshList.AddRange(frame.Map.NavMeshes.Values);
+
+      if (frame.DynamicAssetDB.IsEmpty == false) {
+        navmeshList.AddRange(frame.DynamicAssetDB.Assets.OfType<NavMesh>().ToList());
+      }
+
+      DrawMapNavMesh(frame.Map, navmeshList, *frame.NavMeshRegionMask, gizmosSettings);
+      DrawNavigationPaths(frame, gizmosSettings);
+
+      bool tryDrawComponents = _settings.NavMeshPathfinder.Enabled ||
+                               _settings.NavMeshSteeringAgent.Enabled ||
+                               _settings.NavMeshAvoidanceAgent.Enabled;
+
+      if (tryDrawComponents) {
+        DrawRuntimeNavMeshComponents(frame, gizmosSettings);
+      }
+
+      if (_settings.NavMeshAvoidanceObstacles.Enabled) {
+        DrawObstacles(frame, gizmosSettings);
+      }
+    }
+
+    private static unsafe void DrawObstacles(Frame frame, QuantumGameGizmosSettings gizmosSettings) {
+      foreach (var (entity, navmeshObstacles) in frame.GetComponentIterator<NavMeshAvoidanceObstacle>()) {
+        var position = Vector3.zero;
+
+        if (frame.Has<Transform2D>(entity)) {
+          position = frame.Unsafe.GetPointer<Transform2D>(entity)->Position.ToUnityVector3();
+        } else if (frame.Has<Transform3D>(entity)) {
+          position = frame.Unsafe.GetPointer<Transform3D>(entity)->Position.ToUnityVector3();
+        }
+
+        var style = _settings.NavMeshAvoidanceAgent.Style;
+
+        GizmoUtils.DrawGizmosCircle(
+          position,
+          navmeshObstacles.Radius.AsFloat,
+          _settings.NavMeshAvoidanceAgent.Color,
+          style: style
+        );
+
+        if (navmeshObstacles.Velocity != FPVector2.Zero) {
+          GizmoUtils.DrawGizmoVector(
+            position,
+            position + navmeshObstacles.Velocity.XOY.ToUnityVector3().normalized,
+            gizmosSettings.IconScale * _settings.NavMeshAvoidanceAgent.Scale
+          );
+        }
+      }
+    }
+
+
+    private static float GetAgentRadius(NavMesh current) {
+      var agentRadius = 0.25f;
+
+      if (current != null) {
+        agentRadius = current.MinAgentRadius.AsFloat;
+      }
+      
+      return agentRadius;
+    }
+
+    private static void DrawPathfinder(Frame frame, QuantumGameGizmosSettings gizmosSettings, NavMeshPathfinder agent,
+      NavMesh navMesh = null) {
+      var scale = _settings.NavMeshPathfinder.Scale * gizmosSettings.IconScale;
+
+      if (_settings.ScaleComponentsWithAgentRadius) {
+        scale *= GetAgentRadius(navMesh);
+      }
+
+      // Draw target and internal target
+      GizmoUtils.DrawGizmosCircle(
+        agent.InternalTarget.ToUnityVector3(),
+        scale,
+        _settings.NavMeshPathfinder.Color,
+        style: _settings.NavMeshPathfinder.Style
+      );
+
+      if (agent.Target != agent.InternalTarget) {
+        var desaturated = _settings.NavMeshPathfinder.Color.Desaturate();
+
+        GizmoUtils.DrawGizmosCircle(
+          agent.Target.ToUnityVector3(),
+          scale * 0.5f,
+          desaturated,
+          style: _settings.NavMeshPathfinder.Style
+        );
+
+        Gizmos.color = desaturated;
+
+        Gizmos.DrawLine(
+          agent.Target.ToUnityVector3(),
+          agent.InternalTarget.ToUnityVector3()
+        );
+      }
+
+      if (frame == null)
+        return;
+
+      // Draw waypoints
+      for (int i = 0; i < agent.WaypointCount; i++) {
+        var waypoint = agent.GetWaypoint(frame, i);
+        var waypointFlags = agent.GetWaypointFlags(frame, i);
+        if (i > 0) {
+          var lastWaypoint = agent.GetWaypoint(frame, i - 1);
+          Gizmos.color = _settings.NavMeshPathfinder.Color;
+          Gizmos.DrawLine(lastWaypoint.ToUnityVector3(), waypoint.ToUnityVector3());
+        }
+
+        GizmoUtils.DrawGizmosCircle(waypoint.ToUnityVector3(), scale * 0.75f,
+          _settings.NavMeshPathfinder.Color, style: _settings.NavMeshPathfinder.Style);
+        if (i == agent.WaypointIndex) {
+          GizmoUtils.DrawGizmosCircle(waypoint.ToUnityVector3(), scale * 0.8f, Color.black,
+            style: QuantumGizmoStyle.FillDisabled);
+        }
+      }
+    }
+
+    private static void DrawNavigationPaths(Frame frame, QuantumGameGizmosSettings gizmosSettings) {
+      if (frame.Navigation == null)
+        return;
+
+      // Iterate though task contexts:
+      var threadCount = frame.Context.TaskContext.ThreadCount;
+      for (int t = 0; t < threadCount; t++) {
+        // Iterate through path finders:
+        var pf = frame.Navigation.GetDebugInformation(t).Item0;
+        if (pf.RawPathSize >= 2) {
+          if (_settings.PathfinderRawPath.Enabled) {
+            for (int i = 0; i < pf.RawPathSize; i++) {
+              GizmoUtils.DrawGizmosCircle(
+                pf.RawPath[i].Point.ToUnityVector3(true),
+                0.1f * gizmosSettings.IconScale,
+                pf.RawPath[i].Link >= 0 ? Color.black : _settings.PathfinderRawPath.Color
+              );
+              if (i > 0) {
+                Gizmos.color = pf.RawPath[i].Link >= 0 &&
+                               pf.RawPath[i].Link == pf.RawPath[i - 1].Link
+                  ? Color.black
+                  : _settings.PathfinderRawPath.Color;
+
+                Gizmos.DrawLine(
+                  pf.RawPath[i].Point.ToUnityVector3(true),
+                  pf.RawPath[i - 1].Point.ToUnityVector3(true)
+                );
+              }
+            }
+          }
+
+          if (_settings.PathfinderRawTrianglePath.Enabled) {
+            var nmGuid = frame.Navigation.GetDebugInformation(t).Item1;
+            if (!string.IsNullOrEmpty(nmGuid)) {
+              QuantumUnityDB.TryGetGlobalAsset(nmGuid, out Quantum.NavMesh nm);
+              for (int i = 0; i < pf.RawPathSize; i++) {
+                var triangleIndex = pf.RawPath[i].Index;
+                if (triangleIndex >= 0) {
+                  var vertex0 = nm.Vertices[nm.Triangles[triangleIndex].Vertex0].Point.ToUnityVector3(true);
+                  var vertex1 = nm.Vertices[nm.Triangles[triangleIndex].Vertex1].Point.ToUnityVector3(true);
+                  var vertex2 = nm.Vertices[nm.Triangles[triangleIndex].Vertex2].Point.ToUnityVector3(true);
+                  var color = _settings.PathfinderRawTrianglePath.Color;
+                  GizmoUtils.DrawGizmosTriangle(vertex0, vertex1, vertex2,
+                    gizmosSettings.GetSelectedColor(color, true));
+                  Handles.color = color;
+                  Handles.lighting = true;
+                  Handles.DrawAAConvexPolygon(vertex0, vertex1, vertex2);
+                }
+              }
+            }
+          }
+
+          // Draw funnel on top of raw path
+          if (_settings.PathfinderFunnel.Enabled) {
+            for (Int32 i = 0; i < pf.PathSize; i++) {
+              GizmoUtils.DrawGizmosCircle(pf.Path[i].Point.ToUnityVector3(true), 0.05f * gizmosSettings.IconScale,
+                pf.Path[i].Link >= 0 ? Color.green * 0.5f : Color.green);
+              if (i > 0) {
+                var color = _settings.PathfinderFunnel.Color;
+                var altColor = _settings.PathfinderFunnel.TransparentColor;
+
+                Gizmos.color = pf.Path[i].Link >= 0 && pf.Path[i].Link == pf.Path[i - 1].Link ? altColor : color;
+                Gizmos.DrawLine(pf.Path[i].Point.ToUnityVector3(true), pf.Path[i - 1].Point.ToUnityVector3(true));
+              }
+            }
+          }
+        }
+      }
+    }
+
+    /// <summary>
+    ///   Creates a Unity mesh from the navmesh data and renders it as a gizmo. Uses submeshes to draw main mesh, regions and
+    ///   deactivated regions in different colors.
+    ///   The meshes are cached in a static dictionary by their NavMesh.Name. Call InvalidateGizmos() to reset the cache
+    ///   manually.
+    ///   New meshes are created when the region mask changed.
+    /// </summary>
+    public static void CreateAndDrawNavMeshGizmo(NavMesh navmesh, NavMeshRegionMask regionMask) {
+      var mesh = CreateGizmoMesh(navmesh, regionMask);
+
+      DrawNavMeshGizmoMesh(mesh,
+        _settings.NavMesh.Color,
+        _settings.NavMesh.RegionColor
+      );
+    }
+
+    private static Mesh CreateGizmoMesh(NavMesh navmesh, NavMeshRegionMask regionMask) {
+      _navmeshGizmoMap ??= new Dictionary<string, GizmoNavmeshData>();
+
+      if (!_navmeshGizmoMap.TryGetValue(navmesh.Name, out GizmoNavmeshData gizmoNavmeshData) ||
+          gizmoNavmeshData.CurrentRegionMask.Equals(regionMask) == false ||
+          gizmoNavmeshData.GizmoMesh == null) {
+        var mesh = new Mesh { subMeshCount = 3 };
+
+#if QUANTUM_XY
+      mesh.vertices =
+      navmesh.Vertices.Select(x => new Vector3(x.Point.X.AsFloat, x.Point.Z.AsFloat, x.Point.Y.AsFloat)).ToArray();
+#else
+        mesh.vertices = navmesh.Vertices.Select(x => x.Point.ToUnityVector3()).ToArray();
+#endif
+
+        mesh.SetTriangles(
+          navmesh.Triangles.SelectMany(x =>
+            x.Regions.IsMainArea && x.Regions.IsSubset(regionMask)
+              ? new int[] { x.Vertex0, x.Vertex1, x.Vertex2 }
+              : Array.Empty<int>()).ToArray(), 0);
+        mesh.SetTriangles(
+          navmesh.Triangles.SelectMany(x =>
+            x.Regions.HasValidNoneMainRegion && x.Regions.IsSubset(regionMask)
+              ? new int[] { x.Vertex0, x.Vertex1, x.Vertex2 }
+              : Array.Empty<int>()).ToArray(), 1);
+        mesh.SetTriangles(
+          navmesh.Triangles.SelectMany(x =>
+              !x.Regions.IsSubset(regionMask) ? new int[] { x.Vertex0, x.Vertex1, x.Vertex2 } : Array.Empty<int>())
+            .ToArray(), 2);
+        mesh.RecalculateNormals();
+
+        gizmoNavmeshData = new GizmoNavmeshData() { GizmoMesh = mesh, CurrentRegionMask = regionMask };
+        _navmeshGizmoMap[navmesh.Name] = gizmoNavmeshData;
+      }
+
+      return gizmoNavmeshData.GizmoMesh;
+    }
+
+    private static void DrawNavMeshGizmoMesh(Mesh mesh, Color color, Color regionColor) {
+      var originalColor = Gizmos.color;
+
+      bool selected = false;
+
+      var mapData = GetMapData();
+
+      if (mapData != null) {
+        selected = Selection.activeGameObject == _mapData.gameObject;
+      }
+
+      bool shouldDraw = ShouldDraw(_settings.NavMesh, selected, false);
+
+      if (_settings.NavMesh.Enabled && shouldDraw) {
+        Gizmos.color = color;
+
+        if (_settings.NavMesh.Style.DisableFill == false) {
+          Gizmos.DrawMesh(mesh, 0);
+        }
+
+        Gizmos.color = Gizmos.color.Alpha(Gizmos.color.a * 0.75f);
+        Gizmos.DrawWireMesh(mesh, 0);
+        
+        Gizmos.color = regionColor;
+
+        if (_settings.NavMesh.Style.DisableFill == false) {
+          Gizmos.DrawMesh(mesh, 1);
+          Gizmos.color = Gizmos.color.Alpha(Gizmos.color.a * 0.75f);
+        }
+
+        Gizmos.DrawWireMesh(mesh, 1);
+
+        var greyValue = (Gizmos.color.r + Gizmos.color.g + Gizmos.color.b) / 3.0f;
+        Gizmos.color = new Color(greyValue, greyValue, greyValue, Gizmos.color.a);
+        Gizmos.DrawMesh(mesh, 2);
+        Gizmos.DrawWireMesh(mesh, 2);
+        Gizmos.color = originalColor;
+      }
+    }
+
+    private static unsafe void DrawRuntimeNavMeshComponents(
+      Frame frame,
+      QuantumGameGizmosSettings gizmosSettings) {
+      NavMesh current = null;
+
+      var evu = GetEntityViewUpdater();
+
+      foreach (var (entity, agent) in frame.GetComponentIterator<NavMeshPathfinder>()) {
+        var position = Vector3.zero;
+        if (frame.Has<Transform2D>(entity)) {
+          position = frame.Unsafe.GetPointer<Transform2D>(entity)->Position.ToUnityVector3();
+          if (frame.Has<Transform2DVertical>(entity)) {
+            position.y = frame.Unsafe.GetPointer<Transform2DVertical>(entity)->Position.AsFloat;
+          }
+        } else if (frame.Has<Transform3D>(entity)) {
+          position = frame.Unsafe.GetPointer<Transform3D>(entity)->Position.ToUnityVector3();
+        }
+
+        var config = frame.FindAsset<NavMeshAgentConfig>(agent.ConfigId);
+
+        if (current == null || current.Identifier.Guid != agent.NavMeshGuid) {
+          // cache the asset, it's likely other agents use the same 
+          QuantumUnityDB.TryGetGlobalAsset(agent.NavMeshGuid, out current);
+        }
+
+        var agentRadius = GetAgentRadius(current);
+
+        bool selected = false;
+
+        if (evu != null) {
+          selected = Selection.activeGameObject == evu.GetView(entity).gameObject;
+        }
+
+        if (_settings.NavMeshPathfinder.Enabled &&
+            agent.IsActive &&
+            ShouldDraw(_settings.NavMeshPathfinder, selected, false)) {
+          DrawPathfinder(frame, gizmosSettings, agent, current);
+        }
+
+        if (_settings.NavMeshSteeringAgent.Enabled &&
+            ShouldDraw(_settings.NavMeshSteeringAgent, selected, false)) {
+          var scale = _settings.NavMeshSteeringAgent.Scale * gizmosSettings.IconScale;
+
+          if (_settings.ScaleComponentsWithAgentRadius) {
+            scale *= agentRadius;
+          }
+
+          if (frame.Has<NavMeshSteeringAgent>(entity)) {
+            var steeringAgent = frame.Get<NavMeshSteeringAgent>(entity);
+            Gizmos.color = _settings.NavMeshSteeringAgent.Color;
+            GizmoUtils.DrawGizmoVector(
+              position,
+              position + steeringAgent.Velocity.XOY.ToUnityVector3().normalized,
+              scale);
+          }
+
+          if (config.AvoidanceType != Navigation.AvoidanceType.None && frame.Has<NavMeshAvoidanceAgent>(entity)) {
+            GizmoUtils.DrawGizmosCircle(
+              position,
+              config.AvoidanceRadius.AsFloat,
+              _settings.NavMeshSteeringAgent.Color,
+              style:
+              _settings.NavMeshSteeringAgent.Style
+            );
+          }
+
+          GizmoUtils.DrawGizmosCircle(
+            position,
+            agentRadius,
+            agent.IsActive
+              ? _settings.NavMeshSteeringAgent.Color
+              : _settings.NavMeshSteeringAgent.InactiveColor,
+            style: _settings.NavMeshSteeringAgent.Style
+          );
+        }
+
+        if (_settings.NavMeshAvoidanceAgent.Enabled &&
+            ShouldDraw(_settings.NavMeshAvoidanceAgent, selected, false)) {
+          if (config.AvoidanceType != Navigation.AvoidanceType.None && frame.Has<NavMeshAvoidanceAgent>(entity)) {
+            GizmoUtils.DrawGizmosCircle(
+              position,
+              config.AvoidanceRadius.AsFloat,
+              _settings.NavMeshAvoidanceAgent.Color,
+              style: _settings.NavMeshAvoidanceAgent.Style
+            );
+
+            var avoidanceRange = frame.SimulationConfig.Navigation.AvoidanceRange;
+
+            GizmoUtils.DrawGizmosCircle(
+              position,
+              avoidanceRange.AsFloat,
+              _settings.NavMeshAvoidanceAgent.Color,
+              style: QuantumGizmoStyle.FillDisabled
+            );
+          }
+        }
+      }
+    }
+  }
+#endif
+}
+
+#endregion
+
+
+#region Assets/Photon/Quantum/Runtime/Gizmos/QuantumGameGizmos.Physics2D.cs
+
+namespace Quantum {
+  using System;
+  using Photon.Deterministic;
+  using Physics2D;
+  using UnityEditor;
+  using UnityEngine;
+  using Joint = Physics2D.Joint;
+
+#if UNITY_EDITOR
+
+  public partial class QuantumGameGizmos {
+    private static unsafe void DrawRuntimePhysicsComponents_2D(QuantumGameGizmosSettings settings, Frame frame) {
+      // ################## Components: PhysicsCollider2D ##################
+      if (ShouldDraw(_settings.DynamicColliders, false)) {
+        // ################## Components: PhysicsCollider2D ##################
+        foreach (var (handle, collider) in frame.GetComponentIterator<PhysicsCollider2D>()) {
+          var entry = _settings.GetEntryForPhysicsEntity2D(frame, handle);
+          DrawCollider2DGizmo(
+            frame,
+            handle,
+            &collider,
+            entry.Color,
+            entry.Style
+          );
+        }
+      }
+
+      // ################## Components: CharacterController2D ##################
+      if (ShouldDraw(_settings.CharacterController, false)) {
+        foreach (var (entity, cc) in frame.GetComponentIterator<CharacterController2D>()) {
+          if (frame.Unsafe.TryGetPointer(entity, out Transform2D* t) &&
+              frame.TryFindAsset(cc.Config, out CharacterController2DConfig config)) {
+            DrawCharacterController2DGizmo(
+              t->Position.ToUnityVector3(),
+              config,
+              _settings.CharacterController.Color,
+              _settings.AsleepColliders.Color,
+              _settings.CharacterController.DisableFill
+            );
+          }
+        }
+      }
+
+      // ################## Components: PhysicsJoints2D ##################
+      if (ShouldDraw(_settings.PhysicsJoints, false)) {
+        foreach (var (handle, jointsComponent) in frame.Unsafe.GetComponentBlockIterator<PhysicsJoints2D>()) {
+          if (frame.Unsafe.TryGetPointer(handle, out Transform2D* transform) &&
+              jointsComponent->TryGetJoints(frame, out var jointsBuffer, out var jointsCount)) {
+            for (var i = 0; i < jointsCount; i++) {
+              var curJoint = jointsBuffer + i;
+              frame.Unsafe.TryGetPointer(curJoint->ConnectedEntity, out Transform2D* connectedTransform);
+
+              DrawGizmosJoint2D(
+                curJoint,
+                transform,
+                connectedTransform,
+                selected: false,
+                settings,
+                _settings.PhysicsJoints.DisableFill
+              );
+            }
+          }
+        }
+      }
+    }
+
+    public static unsafe void DrawCharacterController2DGizmo(Vector3 position, CharacterController2DConfig config,
+      Color radiusColor, Color extentsColor, bool disableFill) {
+      var style = disableFill ? QuantumGizmoStyle.FillDisabled : default;
+      
+      GizmoUtils.DrawGizmosCircle(position + config.Offset.ToUnityVector3(),
+        config.Radius.AsFloat, radiusColor, style: style);
+      GizmoUtils.DrawGizmosCircle(position + config.Offset.ToUnityVector3(),
+        config.Radius.AsFloat + config.Extent.AsFloat, extentsColor, style: style);
+    }
+
+    public static unsafe void DrawCollider2DGizmo(Frame frame, EntityRef handle, PhysicsCollider2D* collider,
+      Color color, QuantumGizmoStyle style) {
+      if (!frame.Unsafe.TryGetPointer(handle, out Transform2D* t)) {
+        return;
+      }
+
+      var hasTransformVertical = frame.Unsafe.TryGetPointer<Transform2DVertical>(handle, out var tVertical);
+
+      // Set 3d position of 2d object to simulate the vertical offset.
+      var height = 0.0f;
+
+#if QUANTUM_XY
+    if (hasTransformVertical) {
+      height = -tVertical->Height.AsFloat;
+    }
+#else
+      if (hasTransformVertical) {
+        height = tVertical->Height.AsFloat;
+      }
+#endif
+
+      if (collider->Shape.Type == Shape2DType.Compound) {
+        DrawCompoundShape2D(frame, &collider->Shape, t, tVertical, color, height, style);
+      } else {
+        var pos = t->Position.ToUnityVector3();
+        var rot = t->Rotation.ToUnityQuaternion();
+
+#if QUANTUM_XY
+      if (hasTransformVertical) {
+        pos.z = -tVertical->Position.AsFloat;
+      }
+#else
+        if (hasTransformVertical) {
+          pos.y = tVertical->Position.AsFloat;
+        }
+#endif
+
+        DrawShape2DGizmo(collider->Shape, pos, rot, color, height, frame, style);
+      }
+    }
+
+    public static unsafe void DrawShape2DGizmo(Shape2D s, Vector3 pos, Quaternion rot, Color color, float height,
+      Frame currentFrame, QuantumGizmoStyle style = default) {
+      var localOffset = s.LocalTransform.Position.ToUnityVector3();
+      var localRotation = s.LocalTransform.Rotation.ToUnityQuaternion();
+
+      pos += rot * localOffset;
+      rot = rot * localRotation;
+
+      switch (s.Type) {
+        case Shape2DType.Circle:
+          GizmoUtils.DrawGizmosCircle(pos, s.Circle.Radius.AsFloat, color, height: height, style: style);
+          break;
+
+        case Shape2DType.Box:
+          var size = s.Box.Extents.ToUnityVector3() * 2.0f;
+#if QUANTUM_XY
+        size.z = height;
+        pos.z += height * 0.5f;
+#else
+          size.y = height;
+          pos.y += height * 0.5f;
+#endif
+          GizmoUtils.DrawGizmosBox(pos, size, color, rotation: rot, style: style);
+
+          break;
+
+        //TODO: check for the height
+        case Shape2DType.Capsule:
+          GizmoUtils.DrawGizmosCapsule2D(pos, s.Capsule.Radius.AsFloat, s.Capsule.Extent.AsFloat, color, rotation: rot,
+            style: style);
+          break;
+
+        case Shape2DType.Polygon:
+          PolygonCollider p;
+          if (currentFrame != null) {
+            p = currentFrame.FindAsset(s.Polygon.AssetRef);
+          } else {
+            QuantumUnityDB.TryGetGlobalAsset(s.Polygon.AssetRef, out p);
+          }
+
+          if (p != null) {
+            GizmoUtils.DrawGizmoPolygon2D(pos, rot, p.Vertices, height, color, style: style);
+          }
+
+          break;
+
+
+        case Shape2DType.Edge:
+          var extent = rot * Vector3.right * s.Edge.Extent.AsFloat;
+          GizmoUtils.DrawGizmosEdge(pos - extent, pos + extent, height, color);
+          break;
+      }
+    }
+
+    private static unsafe void DrawCompoundShape2D(Frame f, Shape2D* compoundShape, Transform2D* transform,
+      Transform2DVertical* transformVertical, Color color, float height, QuantumGizmoStyle style = default) {
+      Debug.Assert(compoundShape->Type == Shape2DType.Compound);
+
+      if (compoundShape->Compound.GetShapes(f, out var shapesBuffer, out var count)) {
+        for (var i = 0; i < count; i++) {
+          var shape = shapesBuffer + i;
+
+          if (shape->Type == Shape2DType.Compound) {
+            DrawCompoundShape2D(f, shape, transform, transformVertical, color, height, style);
+          } else {
+            var pos = transform->Position.ToUnityVector3();
+            var rot = transform->Rotation.ToUnityQuaternion();
+
+#if QUANTUM_XY
+          if (transformVertical != null) {
+            pos.z = -transformVertical->Position.AsFloat;
+          }
+#else
+            if (transformVertical != null) {
+              pos.y = transformVertical->Position.AsFloat;
+            }
+#endif
+
+            DrawShape2DGizmo(*shape, pos, rot, color, height, f, style);
+          }
+        }
+      }
+    }
+
+    private static unsafe void DrawGizmosJoint2D(
+      Joint* joint,
+      Transform2D* jointTransform,
+      Transform2D* connectedTransform,
+      bool selected,
+      QuantumGameGizmosSettings gizmosSettings,
+      bool disableFill = true) {
+      if (joint->Type == JointType.None) {
+        return;
+      }
+
+      var param = default(QuantumGizmosJointInfo);
+      param.Selected = selected;
+      param.JointRot = jointTransform->Rotation.ToUnityQuaternion();
+      param.AnchorPos = jointTransform->TransformPoint(joint->Anchor).ToUnityVector3();
+
+      switch (joint->Type) {
+        case JointType.DistanceJoint:
+          param.Type = QuantumGizmosJointInfo.GizmosJointType.DistanceJoint2D;
+          param.MinDistance = joint->DistanceJoint.MinDistance.AsFloat;
+          param.MaxDistance = joint->DistanceJoint.MaxDistance.AsFloat;
+          break;
+
+        case JointType.SpringJoint:
+          param.Type = QuantumGizmosJointInfo.GizmosJointType.SpringJoint2D;
+          param.MinDistance = joint->SpringJoint.Distance.AsFloat;
+          break;
+
+        case JointType.HingeJoint:
+          param.Type = QuantumGizmosJointInfo.GizmosJointType.HingeJoint2D;
+          param.RelRotRef = Quaternion.Inverse(param.JointRot);
+          param.UseAngleLimits = joint->HingeJoint.UseAngleLimits;
+          param.LowerAngle = (joint->HingeJoint.LowerLimitRad * FP.Rad2Deg).AsFloat;
+          param.UpperAngle = (joint->HingeJoint.UpperLimitRad * FP.Rad2Deg).AsFloat;
+          break;
+      }
+
+      if (connectedTransform == null) {
+        param.ConnectedRot = Quaternion.identity;
+        param.ConnectedPos = joint->ConnectedAnchor.ToUnityVector3();
+      } else {
+        param.ConnectedRot = connectedTransform->Rotation.ToUnityQuaternion();
+        param.ConnectedPos = connectedTransform->TransformPoint(joint->ConnectedAnchor).ToUnityVector3();
+        param.RelRotRef = (param.ConnectedRot * param.RelRotRef).normalized;
+      }
+
+#if QUANTUM_XY
+      param.Axis = Vector3.back;
+#else
+      param.Axis = Vector3.up;
+#endif
+
+      DrawGizmosJointInternal(ref param, gizmosSettings, disableFill);
+    }
+
+    [DrawGizmo(GizmoType.Selected | GizmoType.Active | GizmoType.NonSelected)]
+    static void DrawGizmos_QuantumStaticPolygonCollider2D(QuantumStaticPolygonCollider2D behaviour,
+      GizmoType gizmoType) {
+      bool selected = gizmoType.HasFlag(GizmoType.Selected);
+
+      if (Application.isPlaying == false) {
+        behaviour.UpdateFromSourceCollider(updateVertices: false);
+      }
+
+      var gs = QuantumGameGizmosSettingsScriptableObject.Global.Settings;
+
+      if (!ShouldDraw(_settings.StaticColliders, selected, false)) {
+        return;
+      }
+
+      if (behaviour.BakeAsStaticEdges2D) {
+        for (var i = 0; i < behaviour.Vertices.Length; i++) {
+          var vertex = behaviour.Vertices[i];
+          var localEnd = behaviour.Vertices[(i + 1) % behaviour.Vertices.Length];
+
+          QuantumStaticEdgeCollider2D.GetEdgeGizmosSettings(
+            behaviour.transform,
+            behaviour.PositionOffset,
+            behaviour.RotationOffset,
+            vertex,
+            localEnd,
+            behaviour.Height,
+            out var start,
+            out var end,
+            out var edgeHeight
+          );
+
+          GizmoUtils.DrawGizmosEdge(
+            start,
+            end,
+            edgeHeight,
+            gs.GetSelectedColor(_settings.StaticColliders.Color, selected),
+            style: _settings.StaticColliders.Style
+          );
+        }
+
+        return;
+      }
+
+      var t = behaviour.transform;
+
+#if QUANTUM_XY
+      var verticalScale = -t.lossyScale.z;
+#else
+      var verticalScale = t.lossyScale.y;
+#endif
+
+      var heightScaled = behaviour.Height.AsFloat * verticalScale;
+      var matrix = Matrix4x4.TRS(
+        t.TransformPoint(behaviour.PositionOffset.ToUnityVector3()),
+        t.rotation * behaviour.RotationOffset.FlipRotation().ToUnityQuaternionDegrees(),
+        t.lossyScale);
+      GizmoUtils.DrawGizmoPolygon2D(matrix, behaviour.Vertices, heightScaled, selected,
+        gs.GetSelectedColor(_settings.StaticColliders.Color, selected),
+        _settings.StaticColliders.Style);
+    }
+
+    [DrawGizmo(GizmoType.Selected | GizmoType.Active | GizmoType.NonSelected)]
+    static void DrawGizmos_QuantumStaticCapsuleCollider2D(QuantumStaticCapsuleCollider2D behaviour,
+      GizmoType gizmoType) {
+      bool selected = gizmoType.HasFlag(GizmoType.Selected);
+      var transform = behaviour.transform;
+
+      if (Application.isPlaying == false) {
+        behaviour.UpdateFromSourceCollider();
+      }
+
+      if (!ShouldDraw(_settings.StaticColliders, selected, false)) {
+        return;
+      }
+
+      var scale = transform.lossyScale;
+      var size = behaviour.Size;
+
+#if QUANTUM_XY
+      var radius = (FPMath.Clamp(size.X,0,size.X) / FP._2).AsFloat * scale.x;
+      var height = (FPMath.Clamp(size.Y - (size.X / FP._2 * FP._2),FP._0, size.Y) / FP._2).AsFloat * scale.y;
+#else
+      var radius = (FPMath.Clamp(size.X, 0, size.X) / FP._2).AsFloat * scale.x;
+      var height = (FPMath.Clamp(size.Y - (size.X / FP._2 * FP._2), FP._0, size.Y) / FP._2).AsFloat * scale.z;
+#endif
+
+      GizmoUtils.DrawGizmosCapsule2D(
+        transform.TransformPoint(behaviour.PositionOffset.ToUnityVector2()),
+        radius,
+        height,
+        _settings.GetSelectedColor(_settings.StaticColliders.Color, selected),
+        style: _settings.StaticColliders.Style
+      );
+    }
+
+    [DrawGizmo(GizmoType.Selected | GizmoType.Active | GizmoType.NonSelected)]
+    static void DrawGizmos_QuantumStaticBoxCollider2D(QuantumStaticBoxCollider2D behaviour,
+      GizmoType gizmoType) {
+      bool selected = gizmoType.HasFlag(GizmoType.Selected);
+
+      if (Application.isPlaying == false) {
+        behaviour.UpdateFromSourceCollider();
+      }
+
+      if (!ShouldDraw(_settings.StaticColliders, selected, false)) {
+        return;
+      }
+
+      var size = behaviour.Size.ToUnityVector3();
+      var height = behaviour.Height;
+      var offset = Vector3.zero;
+
+#if QUANTUM_XY
+    size.z = -height.AsFloat;
+    offset.z = size.z / 2.0f;
+#else
+      size.y = height.AsFloat;
+      offset.y = size.y / 2.0f;
+#endif
+
+      var t = behaviour.transform;
+      var tLossyScale = t.lossyScale;
+
+      var matrix = Matrix4x4.TRS(
+        t.TransformPoint(behaviour.PositionOffset.ToUnityVector3()),
+        t.rotation * behaviour.RotationOffset.FlipRotation().ToUnityQuaternionDegrees(),
+        tLossyScale) * Matrix4x4.Translate(offset);
+
+      GizmoUtils.DrawGizmosBox(
+        matrix,
+        size,
+        _settings.GetSelectedColor(_settings.StaticColliders.Color, selected),
+        style: _settings.StaticColliders.Style
+      );
+    }
+
+    [DrawGizmo(GizmoType.Selected | GizmoType.Active | GizmoType.NonSelected)]
+    static void DrawGizmos_QuantumStaticEdgeCollider2D(QuantumStaticEdgeCollider2D behaviour,
+      GizmoType gizmoType) {
+      bool selected = gizmoType.HasFlag(GizmoType.Selected);
+
+      if (Application.isPlaying == false) {
+        behaviour.UpdateFromSourceCollider();
+      }
+
+      if (!ShouldDraw(_settings.StaticColliders, selected, false)) {
+        return;
+      }
+
+      var transform = behaviour.transform;
+
+      QuantumStaticEdgeCollider2D.GetEdgeGizmosSettings(
+        transform,
+        behaviour.PositionOffset,
+        behaviour.RotationOffset,
+        behaviour.VertexA,
+        behaviour.VertexB,
+        behaviour.Height,
+        out var start,
+        out var end,
+        out var height);
+
+      GizmoUtils.DrawGizmosEdge(
+        start,
+        end,
+        height,
+        _settings.GetSelectedColor(_settings.StaticColliders.Color, selected),
+        style: _settings.StaticColliders.Style
+      );
+    }
+
+    [DrawGizmo(GizmoType.Selected | GizmoType.Active | GizmoType.NonSelected)]
+    static void DrawGizmos_QuantumStaticCircleCollider2D(QuantumStaticCircleCollider2D behaviour,
+      GizmoType gizmoType) {
+      bool selected = gizmoType.HasFlag(GizmoType.Selected);
+      var transform = behaviour.transform;
+
+      if (Application.isPlaying == false) {
+        behaviour.UpdateFromSourceCollider();
+      }
+
+      if (!ShouldDraw(_settings.StaticColliders, selected, false)) {
+        return;
+      }
+
+      var lossyScale = transform.lossyScale;
+      var lossyScale2D = lossyScale.ToFPVector2();
+
+#if QUANTUM_XY
+      var heightScale = -lossyScale.z;
+#else
+      var heightScale = lossyScale.y;
+#endif
+
+      var heightScaled = behaviour.Height.AsFloat * heightScale;
+      var radiusScaled = (behaviour.Radius * FPMath.Max(lossyScale2D.X, lossyScale2D.Y)).AsFloat;
+
+      var t = transform;
+
+      GizmoUtils.DrawGizmosCircle(
+        t.TransformPoint(behaviour.PositionOffset.ToUnityVector3()),
+        radiusScaled,
+        _settings.GetSelectedColor(_settings.StaticColliders.Color, selected),
+        heightScaled,
+        style: _settings.StaticColliders.Style
+      );
+    }
+
+    [DrawGizmo(GizmoType.Selected | GizmoType.Active | GizmoType.NonSelected)]
+    static void DrawGizmos_JointPrototype2D(QPrototypePhysicsJoints2D behaviour, GizmoType gizmoType) {
+      bool selected = gizmoType.HasFlag(GizmoType.Selected);
+
+      if (!ShouldDraw(_settings.PhysicsJoints, selected)) {
+        return;
+      }
+
+      var entity = behaviour.GetComponent<QuantumEntityPrototype>();
+
+      if (entity == null || behaviour.Prototype.JointConfigs == null) {
+        return;
+      }
+
+      FPMathUtils.LoadLookupTables();
+
+      foreach (var prototype in behaviour.Prototype.JointConfigs) {
+        if (prototype.JointType == JointType.None) {
+          return;
+        }
+
+        QuantumGizmosJointInfo info;
+
+        switch (prototype.JointType) {
+          case JointType.DistanceJoint:
+            info.Type = QuantumGizmosJointInfo.GizmosJointType.DistanceJoint2D;
+            info.MinDistance = prototype.MinDistance.AsFloat;
+            break;
+
+          case JointType.SpringJoint:
+            info.Type = QuantumGizmosJointInfo.GizmosJointType.SpringJoint2D;
+            info.MinDistance = prototype.Distance.AsFloat;
+            break;
+
+          case JointType.HingeJoint:
+            info.Type = QuantumGizmosJointInfo.GizmosJointType.HingeJoint2D;
+            info.MinDistance = prototype.Distance.AsFloat;
+            break;
+
+          default:
+            throw new NotSupportedException($"Unsupported joint type {prototype.JointType}");
+        }
+
+        var transform = behaviour.transform;
+
+        info.Selected = selected;
+        info.JointRot = transform.rotation;
+        info.RelRotRef = Quaternion.Inverse(info.JointRot);
+        info.AnchorPos = transform.position + info.JointRot * prototype.Anchor.ToUnityVector3();
+        info.MaxDistance = prototype.MaxDistance.AsFloat;
+        info.UseAngleLimits = prototype.UseAngleLimits;
+        info.LowerAngle = prototype.LowerAngle.AsFloat;
+        info.UpperAngle = prototype.UpperAngle.AsFloat;
+
+        if (prototype.ConnectedEntity == null) {
+          info.ConnectedRot = Quaternion.identity;
+          info.ConnectedPos = prototype.ConnectedAnchor.ToUnityVector3();
+        } else {
+          info.ConnectedRot = prototype.ConnectedEntity.transform.rotation;
+          info.ConnectedPos = prototype.ConnectedEntity.transform.position +
+                              info.ConnectedRot * prototype.ConnectedAnchor.ToUnityVector3();
+          info.RelRotRef = info.ConnectedRot * info.RelRotRef;
+        }
+
+#if QUANTUM_XY
+        info.Axis = Vector3.back;
+#else
+        info.Axis = Vector3.up;
+#endif
+
+        DrawGizmosJointInternal(ref info, _settings, _settings.PhysicsJoints.DisableFill);
+      }
+    }
+  }
+#endif
+}
+
+#endregion
+
+
+#region Assets/Photon/Quantum/Runtime/Gizmos/QuantumGameGizmos.Physics3D.cs
+
+namespace Quantum {
+#if UNITY_EDITOR
+  using System;
+  using Photon.Deterministic;
+  using Physics3D;
+  using UnityEditor;
+  using UnityEngine;
+  
+  public class StaticMeshColliderGizmoData {
+    public Vector3[] TrianglePoints = Array.Empty<Vector3>();
+    public int[] TriangleSegments = Array.Empty<int>();
+    public Vector3[] NormalPoints = Array.Empty<Vector3>();
+  }
+  
+  public struct QuantumGizmosJointInfo {
+    public enum GizmosJointType {
+      None = 0,
+
+      DistanceJoint2D = 1,
+      DistanceJoint3D = 2,
+
+      SpringJoint2D = 3,
+      SpringJoint3D = 4,
+
+      HingeJoint2D = 5,
+      HingeJoint3D = 6,
+    }
+
+    public GizmosJointType Type;
+    public bool Selected;
+
+    public Vector3 AnchorPos;
+    public Vector3 ConnectedPos;
+
+    public Quaternion JointRot;
+    public Quaternion ConnectedRot;
+    public Quaternion RelRotRef;
+
+    public float MinDistance;
+    public float MaxDistance;
+
+    public Vector3 Axis;
+
+    public bool UseAngleLimits;
+    public float LowerAngle;
+    public float UpperAngle;
+  }
+  
+  public partial class QuantumGameGizmos {
+    private static StaticMeshColliderGizmoData GetOrCreateGizmoData(MonoBehaviour behaviour) {
+      if (!_meshGizmoData.TryGetValue(behaviour, out var data)) {
+        data = new StaticMeshColliderGizmoData();
+        CreateStaticMeshData(behaviour);
+      }
+
+      return data;
+    }
+
+    private static void CreateStaticMeshData(MonoBehaviour behaviour) {
+      var data = new StaticMeshColliderGizmoData();
+
+      MeshTriangleVerticesCcw meshTriangles = null;
+      var mapData = GetMapData();
+
+      if (mapData.StaticCollider3DReferences.Contains(behaviour) == false) {
+        // don't draw gizmo if the collider has not been baked into the map
+        _meshGizmoData.Remove(behaviour);
+        return;
+      }
+
+      // just read current mesh data, don't bake it
+      switch (behaviour) {
+        case QuantumStaticMeshCollider3D collider3D:
+          meshTriangles = collider3D.CreateMeshTriangles();
+          break;
+        case QuantumStaticTerrainCollider3D terrainCollider3D:
+          meshTriangles = terrainCollider3D.Asset.CreateMeshTriangles();
+          break;
+      }
+
+      if (meshTriangles is { Triangles: null }) {
+        return;
+      }
+
+      ComputeTriangleGizmos(meshTriangles, ref data.TrianglePoints, ref data.TriangleSegments);
+      ComputeNormalGizmos(meshTriangles, ref data.NormalPoints);
+
+      _meshGizmoData[behaviour] = data;
+    }
+
+    private static void ComputeTriangleGizmos(
+      MeshTriangleVerticesCcw mesh,
+      ref Vector3[] triPoints,
+      ref int[] triSegments) {
+      var gizmosTrianglePointsCount = mesh.Vertices.Length;
+      if (triPoints == null || triPoints.Length < gizmosTrianglePointsCount) {
+        triPoints = new Vector3[gizmosTrianglePointsCount];
+      }
+
+      for (int i = 0; i < mesh.Vertices.Length; i++) {
+        triPoints[i] = mesh.Vertices[i].ToUnityVector3();
+      }
+
+      var gizmosTriangleSegmentsCount = mesh.Triangles.Length * 6;
+      if (triSegments == null || triSegments.Length != gizmosTriangleSegmentsCount) {
+        triSegments = new int[gizmosTriangleSegmentsCount];
+      }
+
+      for (int i = 0; i < mesh.Triangles.Length; i++) {
+        var tri = mesh.Triangles[i];
+        var segmentIdx = 6 * i;
+
+        triSegments[segmentIdx++] = tri.VertexA;
+        triSegments[segmentIdx++] = tri.VertexB;
+
+        triSegments[segmentIdx++] = tri.VertexB;
+        triSegments[segmentIdx++] = tri.VertexC;
+
+        triSegments[segmentIdx++] = tri.VertexC;
+        triSegments[segmentIdx] = tri.VertexA;
+      }
+    }
+
+    private static void ComputeNormalGizmos(MeshTriangleVerticesCcw mesh, ref Vector3[] normalPoints) {
+      var gizmosNormalsPointsCount = mesh.Triangles.Length * 2;
+      if (normalPoints == null || normalPoints.Length < gizmosNormalsPointsCount) {
+        normalPoints = new Vector3[gizmosNormalsPointsCount];
+      }
+
+      for (int i = 0; i < mesh.Triangles.Length; i++) {
+        var tri = mesh.Triangles[i];
+
+        var vA = mesh.Vertices[tri.VertexA].ToUnityVector3();
+        var vB = mesh.Vertices[tri.VertexB].ToUnityVector3();
+        var vC = mesh.Vertices[tri.VertexC].ToUnityVector3();
+
+        var center = (vA + vB + vC) / 3f;
+        var normal = Vector3.Cross(vB - vA, vA - vC).normalized;
+
+        var pointIdx = 2 * i;
+        normalPoints[pointIdx++] = center;
+        normalPoints[pointIdx] = center + normal;
+      }
+    }
+
+    private static unsafe void DrawRuntimePhysicsComponents_3D(QuantumGameGizmosSettings settings, Frame frame) {
+      // ################## Components: PhysicsCollider3D ##################
+      if (ShouldDraw(_settings.DynamicColliders, false)) {
+        foreach (var (handle, collider) in frame.GetComponentIterator<PhysicsCollider3D>()) {
+          var entry = _settings.GetEntryForPhysicsEntity3D(frame, handle);
+          DrawCollider3DGizmo(
+            frame,
+            handle,
+            &collider,
+            entry.Color,
+            entry.DisableFill
+          );
+        }
+      }
+
+      // ################## Components: CharacterController3D ##################
+      if (ShouldDraw(_settings.CharacterController, false)) {
+        foreach (var (entity, cc) in frame.GetComponentIterator<CharacterController3D>()) {
+          if (frame.Unsafe.TryGetPointer(entity, out Transform3D* t) &&
+              frame.TryFindAsset(cc.Config, out CharacterController3DConfig config)) {
+            DrawCharacterController3DGizmo(
+              t->Position.ToUnityVector3(),
+              config,
+              _settings.CharacterController.Color,
+              _settings.CharacterController.InactiveColor,
+              _settings.CharacterController.DisableFill
+            );
+          }
+        }
+      }
+
+      // ################## Components: PhysicsJoints3D ##################
+      if (ShouldDraw(_settings.PhysicsJoints, false)) {
+        foreach (var (handle, jointsComponent) in frame.Unsafe.GetComponentBlockIterator<PhysicsJoints3D>()) {
+          if (frame.Unsafe.TryGetPointer(handle, out Transform3D* transform) &&
+              jointsComponent->TryGetJoints(frame, out var jointsBuffer, out var jointsCount)) {
+            for (var i = 0; i < jointsCount; i++) {
+              var curJoint = jointsBuffer + i;
+
+              frame.Unsafe.TryGetPointer(curJoint->ConnectedEntity, out Transform3D* connectedTransform);
+
+              DrawGizmosJoint3D(
+                curJoint,
+                transform,
+                connectedTransform,
+                selected: false,
+                settings,
+                _settings.PhysicsJoints.DisableFill
+              );
+            }
+          }
+        }
+      }
+    }
+
+    [DrawGizmo(GizmoType.Selected | GizmoType.Active | GizmoType.NonSelected)]
+    static void DrawGizmos_QuantumStaticSphereCollider3D(QuantumStaticSphereCollider3D behaviour, GizmoType gizmoType) {
+      bool selected = gizmoType.HasFlag(GizmoType.Selected);
+
+      if (Application.isPlaying == false) {
+        behaviour.UpdateFromSourceCollider();
+      }
+
+      if (!ShouldDraw(_settings.StaticColliders, selected, false)) {
+        return;
+      }
+
+      var transform = behaviour.transform;
+
+      // the radius with which the sphere with be baked into the map
+      var scale = transform.lossyScale;
+      var radiusScale = Mathf.Max(Mathf.Max(scale.x, scale.y), scale.z);
+      var radius = behaviour.Radius.AsFloat * radiusScale;
+
+      GizmoUtils.DrawGizmosSphere(
+        transform.TransformPoint(behaviour.PositionOffset.ToUnityVector3()),
+        radius,
+        _settings.GetSelectedColor(_settings.StaticColliders.Color, selected),
+        style: _settings.StaticColliders.DisableFill ? QuantumGizmoStyle.FillDisabled : default
+      );
+    }
+
+    [DrawGizmo(GizmoType.Selected | GizmoType.Active | GizmoType.NonSelected)]
+    static void DrawGizmos_QuantumStaticCapsuleCollider3D(QuantumStaticCapsuleCollider3D behaviour,
+      GizmoType gizmoType) {
+      bool selected = gizmoType.HasFlag(GizmoType.Selected);
+
+      if (Application.isPlaying == false) {
+        behaviour.UpdateFromSourceCollider();
+      }
+
+      if (!ShouldDraw(_settings.StaticColliders, selected, false)) {
+        return;
+      }
+
+      var t = behaviour.transform;
+      var scale = t.lossyScale;
+      var radiusScale = Mathf.Max(scale.x, scale.z);
+      var extentScale = scale.y;
+
+      var matrix = Matrix4x4.TRS(
+        t.TransformPoint(behaviour.PositionOffset.ToUnityVector3()),
+        Quaternion.Euler(t.rotation.eulerAngles + behaviour.RotationOffset.ToUnityVector3()),
+        Vector3.one);
+
+      var radius = Math.Max(behaviour.Radius.AsFloat, 0) * radiusScale;
+      var extent = Math.Max((behaviour.Height.AsFloat / 2.0f) - radius, 0) * extentScale;
+
+      GizmoUtils.DrawGizmosCapsule(
+        matrix,
+        radius,
+        extent,
+        _settings.GetSelectedColor(_settings.StaticColliders.Color, selected),
+        style: _settings.StaticColliders.DisableFill ? QuantumGizmoStyle.FillDisabled : default
+      );
+    }
+
+    [DrawGizmo(GizmoType.Selected | GizmoType.Active | GizmoType.NonSelected)]
+    static void DrawGizmos_QuantumStaticBoxCollider3D(QuantumStaticBoxCollider3D behaviour, GizmoType gizmoType) {
+      bool selected = gizmoType.HasFlag(GizmoType.Selected);
+
+      if (Application.isPlaying == false) {
+        behaviour.UpdateFromSourceCollider();
+      }
+
+      if (!ShouldDraw(_settings.StaticColliders, selected, false)) {
+        return;
+      }
+
+      var t = behaviour.transform;
+
+      var matrix = Matrix4x4.TRS(
+        t.TransformPoint(behaviour.PositionOffset.ToUnityVector3()),
+        Quaternion.Euler(t.rotation.eulerAngles + behaviour.RotationOffset.ToUnityVector3()),
+        t.lossyScale);
+
+      GizmoUtils.DrawGizmosBox(
+        matrix,
+        behaviour.Size.ToUnityVector3(),
+        _settings.GetSelectedColor(_settings.StaticColliders.Color, selected),
+        style: _settings.StaticColliders.DisableFill ? QuantumGizmoStyle.FillDisabled : default
+      );
+    }
+
+    [DrawGizmo(GizmoType.Selected | GizmoType.Active | GizmoType.NonSelected)]
+    static void DrawGizmos_JointPrototype3D(QPrototypePhysicsJoints3D behaviour, GizmoType gizmoType) {
+      bool selected = gizmoType.HasFlag(GizmoType.Selected);
+      if (!ShouldDraw(_settings.PhysicsJoints, selected)) {
+        return;
+      }
+
+      var entity = behaviour.GetComponent<QuantumEntityPrototype>();
+
+      if (entity == null || behaviour.Prototype.JointConfigs == null) {
+        return;
+      }
+
+      FPMathUtils.LoadLookupTables();
+
+      foreach (var prototype in behaviour.Prototype.JointConfigs) {
+        if (prototype.JointType == JointType3D.None) {
+          return;
+        }
+
+        QuantumGizmosJointInfo info;
+
+        switch (prototype.JointType) {
+          case JointType3D.DistanceJoint:
+            info.Type = QuantumGizmosJointInfo.GizmosJointType.DistanceJoint3D;
+            info.MinDistance = prototype.MinDistance.AsFloat;
+            break;
+
+          case JointType3D.SpringJoint:
+            info.Type = QuantumGizmosJointInfo.GizmosJointType.SpringJoint3D;
+            info.MinDistance = prototype.Distance.AsFloat;
+            break;
+
+          case JointType3D.HingeJoint:
+            info.Type = QuantumGizmosJointInfo.GizmosJointType.HingeJoint3D;
+            info.MinDistance = prototype.Distance.AsFloat;
+            break;
+
+          default:
+            throw new NotSupportedException($"Unsupported joint type {prototype.JointType}");
+        }
+
+        var transform = behaviour.transform;
+
+        info.Selected = selected;
+        info.JointRot = transform.rotation;
+        info.RelRotRef = Quaternion.Inverse(info.JointRot);
+        info.AnchorPos = transform.position + info.JointRot * prototype.Anchor.ToUnityVector3();
+        info.MaxDistance = prototype.MaxDistance.AsFloat;
+        info.Axis = prototype.Axis.ToUnityVector3();
+        info.UseAngleLimits = prototype.UseAngleLimits;
+        info.LowerAngle = prototype.LowerAngle.AsFloat;
+        info.UpperAngle = prototype.UpperAngle.AsFloat;
+
+        if (prototype.ConnectedEntity == null) {
+          info.ConnectedRot = Quaternion.identity;
+          info.ConnectedPos = prototype.ConnectedAnchor.ToUnityVector3();
+        } else {
+          info.ConnectedRot = prototype.ConnectedEntity.transform.rotation;
+          info.ConnectedPos = prototype.ConnectedEntity.transform.position +
+                              info.ConnectedRot * prototype.ConnectedAnchor.ToUnityVector3();
+          info.RelRotRef = info.ConnectedRot * info.RelRotRef;
+        }
+
+        DrawGizmosJointInternal(ref info, _settings, _settings.PhysicsJoints.DisableFill);
+      }
+    }
+
+    private static unsafe void DrawGizmosJoint3D(Joint3D* joint, Transform3D* jointTransform,
+      Transform3D* connectedTransform, bool selected, QuantumGameGizmosSettings gizmosSettings,
+      bool fill = false) {
+      if (joint->Type == JointType3D.None) {
+        return;
+      }
+
+      var param = default(QuantumGizmosJointInfo);
+      param.Selected = selected;
+      param.JointRot = jointTransform->Rotation.ToUnityQuaternion();
+      param.AnchorPos = jointTransform->TransformPoint(joint->Anchor).ToUnityVector3();
+
+      switch (joint->Type) {
+        case JointType3D.DistanceJoint:
+          param.Type = QuantumGizmosJointInfo.GizmosJointType.DistanceJoint3D;
+          param.MinDistance = joint->DistanceJoint.MinDistance.AsFloat;
+          param.MaxDistance = joint->DistanceJoint.MaxDistance.AsFloat;
+          break;
+
+        case JointType3D.SpringJoint:
+          param.Type = QuantumGizmosJointInfo.GizmosJointType.SpringJoint3D;
+          param.MinDistance = joint->SpringJoint.Distance.AsFloat;
+          break;
+
+        case JointType3D.HingeJoint:
+          param.Type = QuantumGizmosJointInfo.GizmosJointType.HingeJoint3D;
+          param.RelRotRef = joint->HingeJoint.RelativeRotationReference.ToUnityQuaternion();
+          param.Axis = joint->HingeJoint.Axis.ToUnityVector3();
+          param.UseAngleLimits = joint->HingeJoint.UseAngleLimits;
+          param.LowerAngle = (joint->HingeJoint.LowerLimitRad * FP.Rad2Deg).AsFloat;
+          param.UpperAngle = (joint->HingeJoint.UpperLimitRad * FP.Rad2Deg).AsFloat;
+          break;
+      }
+
+      if (connectedTransform == null) {
+        param.ConnectedRot = Quaternion.identity;
+        param.ConnectedPos = joint->ConnectedAnchor.ToUnityVector3();
+      } else {
+        param.ConnectedRot = connectedTransform->Rotation.ToUnityQuaternion();
+        param.ConnectedPos = connectedTransform->TransformPoint(joint->ConnectedAnchor).ToUnityVector3();
+      }
+
+      DrawGizmosJointInternal(ref param, gizmosSettings, fill);
+    }
+
+    private static void DrawGizmosJointInternal(
+      ref QuantumGizmosJointInfo p,
+      QuantumGameGizmosSettings settings,
+      bool disableFill = false) {
+      const float anchorRadiusFactor = 0.1f;
+      const float barHalfLengthFactor = 0.1f;
+      const float hingeRefAngleBarLengthFactor = 0.5f;
+
+      // how much weaker the alpha of the color of hinge disc is relative to the its rim's alpha
+      const float solidDiscAlphaRatio = 0.25f;
+
+      if (p.Type == QuantumGizmosJointInfo.GizmosJointType.None) {
+        return;
+      }
+
+      var gizmosScale = settings.IconScale;
+
+      var jointEntry = _settings.PhysicsJoints;
+
+      var primColor = jointEntry.Color;
+      var secColor = jointEntry.SecondaryColor;
+      var warningColor = jointEntry.WarningColor;
+
+      if (p.Selected) {
+        primColor = primColor.Brightness(settings.SelectedBrightness);
+        secColor = secColor.Brightness(settings.SelectedBrightness);
+        warningColor = warningColor.Brightness(settings.SelectedBrightness);
+      }
+
+      var style = disableFill ? QuantumGizmoStyle.FillDisabled : default;
+      
+      GizmoUtils.DrawGizmosSphere(p.AnchorPos, gizmosScale * anchorRadiusFactor, secColor, style: style);
+      GizmoUtils.DrawGizmosSphere(p.ConnectedPos, gizmosScale * anchorRadiusFactor, secColor, style: style);
+
+      Gizmos.color = secColor;
+      Gizmos.DrawLine(p.AnchorPos, p.ConnectedPos);
+
+      switch (p.Type) {
+        case QuantumGizmosJointInfo.GizmosJointType.DistanceJoint2D:
+        case QuantumGizmosJointInfo.GizmosJointType.DistanceJoint3D: {
+          var connectedToAnchorDir = Vector3.Normalize(p.AnchorPos - p.ConnectedPos);
+          var minDistanceMark = p.ConnectedPos + connectedToAnchorDir * p.MinDistance;
+          var maxDistanceMark = p.ConnectedPos + connectedToAnchorDir * p.MaxDistance;
+
+          Gizmos.color = Handles.color = primColor;
+
+          Gizmos.DrawLine(minDistanceMark, maxDistanceMark);
+          GizmoUtils.DrawGizmoDisc(minDistanceMark, connectedToAnchorDir, barHalfLengthFactor, primColor, style: style);
+          GizmoUtils.DrawGizmoDisc(maxDistanceMark, connectedToAnchorDir, barHalfLengthFactor, primColor, style: style);
+
+          Gizmos.color = Handles.color = Color.white;
+
+          break;
+        }
+
+        case QuantumGizmosJointInfo.GizmosJointType.SpringJoint2D:
+        case QuantumGizmosJointInfo.GizmosJointType.SpringJoint3D: {
+          var connectedToAnchorDir = Vector3.Normalize(p.AnchorPos - p.ConnectedPos);
+          var distanceMark = p.ConnectedPos + connectedToAnchorDir * p.MinDistance;
+
+          Gizmos.color = Handles.color = primColor;
+
+          Gizmos.DrawLine(p.ConnectedPos, distanceMark);
+          GizmoUtils.DrawGizmoDisc(distanceMark, connectedToAnchorDir, barHalfLengthFactor, primColor, style: style);
+
+          Gizmos.color = Handles.color = Color.white;
+
+          break;
+        }
+
+        case QuantumGizmosJointInfo.GizmosJointType.HingeJoint2D: {
+          var hingeRefAngleBarLength = hingeRefAngleBarLengthFactor * gizmosScale;
+          var connectedAnchorRight = p.ConnectedRot * Vector3.right;
+          var anchorRight = p.JointRot * Vector3.right;
+
+          Gizmos.color = secColor;
+          Gizmos.DrawRay(p.AnchorPos, anchorRight * hingeRefAngleBarLength);
+
+          Gizmos.color = primColor;
+          Gizmos.DrawRay(p.ConnectedPos, connectedAnchorRight * hingeRefAngleBarLength);
+
+#if QUANTUM_XY
+          var planeNormal = -Vector3.forward;
+#else
+          var planeNormal = Vector3.up;
+#endif
+
+          if (p.UseAngleLimits) {
+            var fromDir = Quaternion.AngleAxis(p.LowerAngle, planeNormal) * connectedAnchorRight;
+            var angleRange = p.UpperAngle - p.LowerAngle;
+            var arcColor = angleRange < 0.0f ? warningColor : primColor;
+            GizmoUtils.DrawGizmoArc(p.ConnectedPos, planeNormal, fromDir, angleRange, hingeRefAngleBarLength, arcColor,
+              solidDiscAlphaRatio, style: style);
+          } else {
+            // Draw full disc
+            GizmoUtils.DrawGizmoDisc(p.ConnectedPos, planeNormal, hingeRefAngleBarLength, primColor,
+              solidDiscAlphaRatio, style: style);
+          }
+
+          Gizmos.color = Handles.color = Color.white;
+
+          break;
+        }
+
+        case QuantumGizmosJointInfo.GizmosJointType.HingeJoint3D: {
+          var hingeRefAngleBarLength = hingeRefAngleBarLengthFactor * gizmosScale;
+
+          var hingeAxisLocal = p.Axis.sqrMagnitude > float.Epsilon ? p.Axis.normalized : Vector3.right;
+          var hingeAxisWorld = p.JointRot * hingeAxisLocal;
+          var hingeOrtho = Vector3.Cross(hingeAxisWorld, p.JointRot * Vector3.up);
+
+          hingeOrtho = hingeOrtho.sqrMagnitude > float.Epsilon
+            ? hingeOrtho.normalized
+            : Vector3.Cross(hingeAxisWorld, p.JointRot * Vector3.forward).normalized;
+
+          Gizmos.color = Handles.color = primColor;
+
+          Gizmos.DrawRay(p.AnchorPos, hingeOrtho * hingeRefAngleBarLength);
+          Handles.ArrowHandleCap(0, p.ConnectedPos, Quaternion.FromToRotation(Vector3.forward, hingeAxisWorld),
+            hingeRefAngleBarLengthFactor * 1.5f, EventType.Repaint);
+
+          if (p.UseAngleLimits) {
+            var refAngle = ComputeRelativeAngleHingeJoint(hingeAxisWorld, p.JointRot, p.ConnectedRot, p.RelRotRef);
+            var refOrtho = Quaternion.AngleAxis(refAngle, hingeAxisWorld) * hingeOrtho;
+            var fromDir = Quaternion.AngleAxis(-p.LowerAngle, hingeAxisWorld) * refOrtho;
+            var angleRange = p.UpperAngle - p.LowerAngle;
+            var arcColor = angleRange < 0.0f ? warningColor : primColor;
+            GizmoUtils.DrawGizmoArc(p.ConnectedPos, hingeAxisWorld, fromDir, -angleRange, hingeRefAngleBarLength,
+              arcColor, solidDiscAlphaRatio, style: style);
+          } else {
+            // Draw full disc
+            GizmoUtils.DrawGizmoDisc(p.ConnectedPos, hingeAxisWorld, hingeRefAngleBarLength, primColor,
+              solidDiscAlphaRatio, style: style);
+          }
+
+          Gizmos.color = Handles.color = Color.white;
+
+          break;
+        }
+      }
+    }
+
+    private static float ComputeRelativeAngleHingeJoint(Vector3 hingeAxis, Quaternion rotJoint,
+      Quaternion rotConnectedAnchor, Quaternion relRotRef) {
+      var rotDiff = rotConnectedAnchor * Quaternion.Inverse(rotJoint);
+      var relRot = rotDiff * Quaternion.Inverse(relRotRef);
+
+      var rotVector = new Vector3(relRot.x, relRot.y, relRot.z);
+      var sinHalfRadAbs = rotVector.magnitude;
+      var cosHalfRad = relRot.w;
+
+      var hingeAngleRad = 2 * Mathf.Atan2(sinHalfRadAbs, Mathf.Sign(Vector3.Dot(rotVector, hingeAxis)) * cosHalfRad);
+
+      // clamp to range [-Pi, Pi]
+      if (hingeAngleRad < -Mathf.PI) {
+        hingeAngleRad += 2 * Mathf.PI;
+      }
+
+      if (hingeAngleRad > Mathf.PI) {
+        hingeAngleRad -= 2 * Mathf.PI;
+      }
+
+      return hingeAngleRad * Mathf.Rad2Deg;
+    }
+
+    public static unsafe void DrawShape3DGizmo(Shape3D s, Vector3 position, Quaternion rotation, Color color,
+      QuantumGizmoStyle style = default) {
+      var localOffset = s.LocalTransform.Position.ToUnityVector3();
+      var localRotation = s.LocalTransform.Rotation.ToUnityQuaternion();
+
+      position += rotation * localOffset;
+      rotation *= localRotation;
+
+      switch (s.Type) {
+        case Shape3DType.Sphere:
+          GizmoUtils.DrawGizmosSphere(position, s.Sphere.Radius.AsFloat, color, style: style);
+          break;
+        case Shape3DType.Box:
+          GizmoUtils.DrawGizmosBox(position, s.Box.Extents.ToUnityVector3() * 2, color, style: style,
+            rotation: rotation);
+          break;
+        case Shape3DType.Capsule:
+          GizmoUtils.DrawGizmosCapsule(position, s.Capsule.Radius.AsFloat, s.Capsule.Extent.AsFloat, color,
+            style: style, rotation: rotation);
+          break;
+      }
+    }
+
+    public static unsafe void DrawCollider3DGizmo(Frame frame, EntityRef handle, PhysicsCollider3D* collider,
+      Color color, bool disableFill) {
+      var style = disableFill ? QuantumGizmoStyle.FillDisabled : default;
+      
+      if (!frame.Unsafe.TryGetPointer(handle, out Transform3D* transform)) {
+        return;
+      }
+
+      if (collider->Shape.Type == Shape3DType.Compound) {
+        DrawCompoundShape3D(frame, &collider->Shape, transform, color, style);
+      } else {
+        DrawShape3DGizmo(collider->Shape, transform->Position.ToUnityVector3(),
+          transform->Rotation.ToUnityQuaternion(), color, style);
+      }
+    }
+
+    public static unsafe void DrawCharacterController3DGizmo(Vector3 position, CharacterController3DConfig config,
+      Color radiusColor, Color extentsColor, bool disableFill) {
+      var style = disableFill ? QuantumGizmoStyle.FillDisabled : default;
+      
+      GizmoUtils.DrawGizmosSphere(position + config.Offset.ToUnityVector3(),
+        config.Radius.AsFloat, radiusColor, style: style);
+      GizmoUtils.DrawGizmosSphere(position + config.Offset.ToUnityVector3(),
+        config.Radius.AsFloat + config.Extent.AsFloat, extentsColor, style: style);
+    }
+
+
+    private static unsafe void DrawCompoundShape3D(Frame f, Shape3D* compoundShape, Transform3D* transform, Color color,
+      QuantumGizmoStyle style = default) {
+      Debug.Assert(compoundShape->Type == Shape3DType.Compound);
+
+      if (compoundShape->Compound.GetShapes(f, out var shapesBuffer, out var count)) {
+        for (var i = 0; i < count; i++) {
+          var shape = shapesBuffer + i;
+
+          if (shape->Type == Shape3DType.Compound) {
+            DrawCompoundShape3D(f, shape, transform, color, style);
+          } else {
+            DrawShape3DGizmo(*shape, transform->Position.ToUnityVector3(), transform->Rotation.ToUnityQuaternion(),
+              color, style);
+          }
+        }
+      }
+    }
+
+    [DrawGizmo(GizmoType.Selected | GizmoType.Active | GizmoType.NonSelected)]
+    static void DrawGizmos_QuantumStaticMeshCollider3D(QuantumStaticMeshCollider3D behaviour, GizmoType gizmoType) {
+      DrawStaticMeshCollider(behaviour, gizmoType);
+    }
+
+    private static void DrawStaticMeshCollider(MonoBehaviour behaviour, GizmoType gizmoType) {
+      bool selected = gizmoType.HasFlag(GizmoType.Selected);
+
+      if (_settings.StaticMeshTriangles.Enabled == false && _settings.StaticMeshNormals.Enabled == false) {
+        return;
+      }
+
+      var meshData = GetOrCreateGizmoData(behaviour);
+
+      if (_settings.StaticMeshTriangles.Enabled) {
+        Handles.color = _settings.GetSelectedColor(_settings.StaticMeshTriangles.Color, selected);
+        Handles.matrix = Matrix4x4.identity;
+
+        Handles.DrawLines(meshData.TrianglePoints, meshData.TriangleSegments);
+        Handles.color = Color.white;
+      }
+
+      if (_settings.StaticMeshNormals.Enabled) {
+        Handles.color = _settings.GetSelectedColor(_settings.StaticMeshNormals.Color, selected);
+        Handles.matrix = Matrix4x4.identity;
+
+        Handles.DrawLines(meshData.NormalPoints);
+        Handles.color = Color.white;
+      }
+    }
+
+#if QUANTUM_ENABLE_TERRAIN && !QUANTUM_DISABLE_TERRAIN
+    [DrawGizmo(GizmoType.Selected | GizmoType.Active | GizmoType.NonSelected)]
+    static void DrawGizmos_StaticTerrainCollider3D(QuantumStaticTerrainCollider3D behaviour, GizmoType gizmoType) {
+      DrawStaticMeshCollider(behaviour, gizmoType);
+    }
+#endif
+  }
+#endif
+}
+
+#endregion
+
+
+#region Assets/Photon/Quantum/Runtime/Gizmos/QuantumGameGizmos.Prediction.cs
+
+namespace Quantum {
+#if UNITY_EDITOR
+  using Photon.Deterministic;
+  using UnityEditor;
+  public partial class QuantumGameGizmos {
+    private static void OnDrawGizmos_Prediction(Frame frame, GizmoType type) {
+      if (frame.Context.Culling != null) {
+        bool selected = type.HasFlag(GizmoType.Selected);
+        if (!ShouldDraw(_settings.PredictionArea, selected)) {
+          return;
+        }
+
+        var context = frame.Context;
+        if (context.PredictionAreaRadius != FP.UseableMax) {
+#if QUANTUM_XY
+          // The Quantum simulation does not know about QUANTUM_XY and always keeps the vector2 Y component in the vector3 Z component.
+          var predictionAreaCenter =
+              new UnityEngine.Vector3(context.PredictionAreaCenter.X.AsFloat, context.PredictionAreaCenter.Z.AsFloat, 0);
+#else
+          var predictionAreaCenter = context.PredictionAreaCenter.ToUnityVector3();
+#endif
+          GizmoUtils.DrawGizmosSphere(
+            predictionAreaCenter,
+            context.PredictionAreaRadius.AsFloat,
+            _settings.PredictionArea.Color
+          );
+        }
+      }
+    }
+  }
+#endif
+}
+
+#endregion
+
+
+#region Assets/Photon/Quantum/Runtime/Gizmos/QuantumGizmoColors.cs
+
+namespace Quantum {
+  using UnityEngine;
+
+  public static class QuantumGizmoColors {
+    public static Color Black = Color.black;
+    public static Color Yellow = Color.yellow;
+    public static Color Magenta = Color.magenta;
+    public static Color Blue = Color.blue;
+    public static Color Green = Color.green;
+    public static Color White = Color.white;
+    public static Color Red = Color.red;
+    public static Color Cyan = Color.cyan;
+    public static Color Gray = Color.gray;
+
+    public static Color LightGreen = new Color(0.4f, 1.0f, 0.7f);
+    public static Color LimeGreen = new Color(0.4925605f, 0.9176471f, 0.5050631f);
+    public static Color LightBlue = new Color(0.0f, 0.75f, 1.0f);
+    public static Color SkyBlue = new Color(0.4705882f, 0.7371198f, 1.0f);
+    public static Color Maroon = new Color(1.0f, 0.0f, 0.5f, 0.5f);
+    public static Color LightPurple = new Color(0.5192922f, 0.4622621f, 0.6985294f);
+    
+    public static Color TransparentCyan = Cyan.Alpha(0.5f);
+    public static Color TransparentMagenta = Magenta.Alpha(0.5f);
+    public static Color TransparentGray = Gray.Alpha(0.5f);
+    public static Color TransparentLightPurple = LightPurple.Alpha(0.5f);
+    public static Color TransparentYellow = Yellow.Alpha(0.5f);
+    public static Color TransparentWhite = White.Alpha(0.5f);
+    public static Color TransparentLimeGreen = LimeGreen.Alpha(0.5f);
+    public static Color TransparentGreen = Green.Alpha(0.5f);
+    public static Color TransparentSkyBlue = SkyBlue.Alpha(0.5f);
+    public static Color TransparentLightBlue = LightBlue.Alpha(0.5f);
+    public static Color TransparentLightGreen = LightGreen.Alpha(0.5f);
+    public static Color TransparentBlue = Blue.Alpha(0.5f);
+    public static Color TransparentMaroon = Maroon.Alpha(0.5f);
+    public static Color TransparentRed = Red.Alpha(0.5f);
+    public static Color DesaturatedMagenta = Magenta.Desaturate(0.5f);
+
+    public static Color GetSelectedColor(this QuantumGameGizmosSettings settings, Color color, bool selected) {
+      return selected ? color.Brightness(settings.SelectedBrightness) : color;
+    }
+    
+    public static Color Desaturate(this Color c, float t = .25f) {
+      return Color.Lerp(new Color(c.grayscale, c.grayscale, c.grayscale), c, t);
+    }
+    
+    public static Color Darken(this Color color, float percentage = .25f)
+    {
+      percentage = Mathf.Clamp01(percentage);
+        
+      color.r *= 1 - percentage;
+      color.g *= 1 - percentage;
+      color.b *= 1 - percentage;
+
+      return color;
+    }
+  }
 }
 
 #endregion
@@ -4132,1021 +6768,6 @@ namespace Quantum {
 #endregion
 
 
-#region Assets/Photon/Quantum/Runtime/QuantumGameGizmos.cs
-
-namespace Quantum {
-  using System;
-  using System.Collections.Generic;
-  using System.Linq;
-  using Photon.Deterministic;
-  using Physics3D;
-  using UnityEditor;
-  using UnityEngine;
-  using Joint = Physics2D.Joint;
-  using JointType = Physics2D.JointType; 
- 
-#if UNITY_EDITOR
-  public static class QuantumGameGizmos {
-    private static Color Desaturate(Color c, float t) {
-      return Color.Lerp(new Color(c.grayscale, c.grayscale, c.grayscale), c, t);
-    }
-
-    public static bool ShouldDraw(QuantumGameGizmosMode mode, bool selected, bool hasStateDrawer = true) {
-      if (Application.isPlaying) {
-        if (hasStateDrawer) {
-          // state drawer will take over
-          return false;
-        } else if ((mode & QuantumGameGizmosMode.OnApplicationPlaying) == default) {
-          // needs to be set in order to get to OnDraw/OnSelected
-          return false;
-        }
-      }
-
-      if (selected) {
-        return (mode & QuantumGameGizmosMode.OnSelected) == QuantumGameGizmosMode.OnSelected;
-      } else {
-        return (mode & QuantumGameGizmosMode.OnDraw) == QuantumGameGizmosMode.OnDraw;
-      }
-    }
-
-    public static unsafe void OnDrawGizmos(QuantumGame game, QuantumGameGizmosSettings gizmosSettings) {
-
-      var frame = game.Frames.Predicted;
-
-      if (frame != null) {
-        #region Components
-
-        if ((gizmosSettings.DrawColliderGizmos & QuantumGameGizmosMode.OnApplicationPlaying) != 0) {
-          // ################## Components: PhysicsCollider2D ##################
-
-          foreach (var (handle, collider) in frame.GetComponentIterator<PhysicsCollider2D>()) {
-            DrawCollider2DGizmo(frame, handle, &collider, GetCollider2DColor(frame, handle, gizmosSettings), gizmosSettings.ColliderGizmosStyle);
-          }
-
-          // ################## Components: PhysicsCollider3D ##################
-
-          foreach (var (handle, collider) in frame.GetComponentIterator<PhysicsCollider3D>()) {
-            DrawCollider3DGizmo(frame, handle, &collider, GetCollider3DColor(frame, handle, gizmosSettings), gizmosSettings.ColliderGizmosStyle);
-          }
-
-          // ################## Components: CharacterController2D ##################
-
-          foreach (var (entity, cc) in frame.GetComponentIterator<CharacterController2D>()) {
-            if (frame.Unsafe.TryGetPointer(entity, out Transform2D* t) &&
-                frame.TryFindAsset(cc.Config, out CharacterController2DConfig config)) {
-              DrawCharacterController2DGizmo(t->Position.ToUnityVector3(), config, gizmosSettings.CharacterControllerColor, gizmosSettings.AsleepColliderColor, gizmosSettings.ColliderGizmosStyle);
-            }
-          }
-
-          // ################## Components: CharacterController3D ##################
-
-          foreach (var (entity, cc) in frame.GetComponentIterator<CharacterController3D>()) {
-            if (frame.Unsafe.TryGetPointer(entity, out Transform3D* t) &&
-                frame.TryFindAsset(cc.Config, out CharacterController3DConfig config)) {
-              DrawCharacterController3DGizmo(t->Position.ToUnityVector3(), config, gizmosSettings.CharacterControllerColor, gizmosSettings.AsleepColliderColor, gizmosSettings.ColliderGizmosStyle);
-            }
-          }
-        }
-
-        // ################## Components: PhysicsJoints2D ##################
-
-        if ((gizmosSettings.DrawJointGizmos & QuantumGameGizmosMode.OnApplicationPlaying) != 0) {
-          foreach (var (handle, jointsComponent) in frame.Unsafe.GetComponentBlockIterator<PhysicsJoints2D>()) {
-            if (frame.Unsafe.TryGetPointer(handle, out Transform2D* transform) && jointsComponent->TryGetJoints(frame, out var jointsBuffer, out var jointsCount)) {
-              for (var i = 0; i < jointsCount; i++) {
-                var curJoint = jointsBuffer + i;
-                frame.Unsafe.TryGetPointer(curJoint->ConnectedEntity, out Transform2D* connectedTransform);
-                DrawGizmosJoint2D(curJoint, transform, connectedTransform, selected: false, gizmosSettings, gizmosSettings.JointGizmosStyle);
-              }
-            }
-          }
-        }
-
-        // ################## Components: PhysicsJoints3D ##################
-
-        if ((gizmosSettings.DrawJointGizmos & QuantumGameGizmosMode.OnApplicationPlaying) != 0) {
-          foreach (var (handle, jointsComponent) in frame.Unsafe.GetComponentBlockIterator<PhysicsJoints3D>()) {
-            if (frame.Unsafe.TryGetPointer(handle, out Transform3D* transform) && jointsComponent->TryGetJoints(frame, out var jointsBuffer, out var jointsCount)) {
-              for (var i = 0; i < jointsCount; i++) {
-                var curJoint = jointsBuffer + i;
-                frame.Unsafe.TryGetPointer(curJoint->ConnectedEntity, out Transform3D* connectedTransform);
-                DrawGizmosJoint3D(curJoint, transform, connectedTransform, selected: false, gizmosSettings, gizmosSettings.JointGizmosStyle);
-              }
-            }
-          }
-        }
-
-
-        // ################## Components: NavMesh Agent Components ##################
-        Quantum.NavMesh currentNavmeshAsset = null;
-
-        if (gizmosSettings.DrawNavMeshPathfinder || gizmosSettings.DrawNavMeshSteeringAgent || gizmosSettings.DrawNavMeshAvoidanceAgent) {
-          foreach (var (entity, navmeshPathfinderAgent) in frame.GetComponentIterator<NavMeshPathfinder>()) {
-            var position = Vector3.zero;
-            if (frame.Has<Transform2D>(entity)) {
-              position = frame.Unsafe.GetPointer<Transform2D>(entity)->Position.ToUnityVector3();
-              if (frame.Has<Transform2DVertical>(entity)) {
-                position.y = frame.Unsafe.GetPointer<Transform2DVertical>(entity)->Position.AsFloat;
-              }
-            } else if (frame.Has<Transform3D>(entity)) {
-              position = frame.Unsafe.GetPointer<Transform3D>(entity)->Position.ToUnityVector3();
-            }
-
-            var config = frame.FindAsset<NavMeshAgentConfig>(navmeshPathfinderAgent.ConfigId);
-
-            var agentRadius = 0.25f;
-            if (currentNavmeshAsset == null || currentNavmeshAsset.Identifier.Guid != navmeshPathfinderAgent.NavMeshGuid) {
-              // cache the asset, it's likely other agents use the same 
-              QuantumUnityDB.TryGetGlobalAsset(navmeshPathfinderAgent.NavMeshGuid, out currentNavmeshAsset);
-            }
-
-            if (currentNavmeshAsset != null) {
-              agentRadius = currentNavmeshAsset.MinAgentRadius.AsFloat;
-            }
-
-            var gizmoScaledSize = gizmosSettings.GizmoIconScale.AsFloat * gizmosSettings.NavMeshComponentGizmoSize;
-            if (gizmosSettings.NavMeshComponentScaleWithAgentRadius) {
-              gizmoScaledSize *= agentRadius;
-            }
-
-            if (gizmosSettings.DrawNavMeshPathfinder && navmeshPathfinderAgent.IsActive) {
-              // Draw target and internal target
-              GizmoUtils.DrawGizmosCircle(navmeshPathfinderAgent.InternalTarget.ToUnityVector3(), gizmoScaledSize, Color.magenta, style: gizmosSettings.NavMeshComponentGizmoStyle);
-              if (navmeshPathfinderAgent.Target != navmeshPathfinderAgent.InternalTarget) {
-                var desaturatedColor = Desaturate(Color.magenta, 0.25f);
-                GizmoUtils.DrawGizmosCircle(navmeshPathfinderAgent.Target.ToUnityVector3(), gizmoScaledSize * 0.5f, desaturatedColor, style: gizmosSettings.NavMeshComponentGizmoStyle);
-                Gizmos.color = desaturatedColor;
-                Gizmos.DrawLine(navmeshPathfinderAgent.Target.ToUnityVector3(), navmeshPathfinderAgent.InternalTarget.ToUnityVector3());
-              }
-
-              // Draw waypoints
-              for (int i = 0; i < navmeshPathfinderAgent.WaypointCount; i++) {
-                var waypoint      = navmeshPathfinderAgent.GetWaypoint(frame, i);
-                var waypointFlags = navmeshPathfinderAgent.GetWaypointFlags(frame, i);
-                if (i > 0) {
-                  var lastWaypoint = navmeshPathfinderAgent.GetWaypoint(frame, i - 1);
-                  Gizmos.color = gizmosSettings.NavMeshPathfinderColor;
-                  Gizmos.DrawLine(lastWaypoint.ToUnityVector3(), waypoint.ToUnityVector3());
-                }
-
-                GizmoUtils.DrawGizmosCircle(waypoint.ToUnityVector3(), gizmoScaledSize * 0.75f, gizmosSettings.NavMeshPathfinderColor, style: gizmosSettings.NavMeshComponentGizmoStyle);
-                if (i == navmeshPathfinderAgent.WaypointIndex) {
-                  GizmoUtils.DrawGizmosCircle(waypoint.ToUnityVector3(), gizmoScaledSize * 0.8f, Color.black, style: QuantumGizmoStyle.FillDisabled);
-                }
-              }
-            }
-
-            if (gizmosSettings.DrawNavMeshSteeringAgent) {
-              if (frame.Has<NavMeshSteeringAgent>(entity)) {
-                var steeringAgent = frame.Get<NavMeshSteeringAgent>(entity);
-                Gizmos.color = gizmosSettings.NavMeshSteeringAgentColor;
-                GizmoUtils.DrawGizmoVector(position, position + steeringAgent.Velocity.XOY.ToUnityVector3().normalized, gizmoScaledSize);
-              }
-
-              if (config.AvoidanceType != Navigation.AvoidanceType.None && frame.Has<NavMeshAvoidanceAgent>(entity)) {
-                GizmoUtils.DrawGizmosCircle(position, config.AvoidanceRadius.AsFloat, gizmosSettings.NavMeshSteeringAgentColor, style: gizmosSettings.NavMeshComponentGizmoStyle);
-              }
-
-              GizmoUtils.DrawGizmosCircle(position, agentRadius, navmeshPathfinderAgent.IsActive ? gizmosSettings.NavMeshSteeringAgentColor : Desaturate(gizmosSettings.NavMeshSteeringAgentColor, 0.25f), style: gizmosSettings.NavMeshComponentGizmoStyle);
-            }
-
-            if (gizmosSettings.DrawNavMeshAvoidanceAgent) {
-              if (config.AvoidanceType != Navigation.AvoidanceType.None && frame.Has<NavMeshAvoidanceAgent>(entity)) {
-                GizmoUtils.DrawGizmosCircle(position, config.AvoidanceRadius.AsFloat, gizmosSettings.NavMeshAvoidanceAgentColor, style: gizmosSettings.NavMeshComponentGizmoStyle);
-                var avoidanceRange = frame.SimulationConfig.Navigation.AvoidanceRange;
-                GizmoUtils.DrawGizmosCircle(position, avoidanceRange.AsFloat, gizmosSettings.NavMeshAvoidanceAgentColor, style: QuantumGizmoStyle.FillDisabled);
-              }
-            }
-          }
-        }
-
-        if (gizmosSettings.DrawNavMeshAvoidanceObstacle) {
-          foreach (var (entity, navmeshObstacles) in frame.GetComponentIterator<NavMeshAvoidanceObstacle>()) {
-            var position = Vector3.zero;
-
-            if (frame.Has<Transform2D>(entity)) {
-              position = frame.Unsafe.GetPointer<Transform2D>(entity)->Position.ToUnityVector3();
-            } else if (frame.Has<Transform3D>(entity)) {
-              position = frame.Unsafe.GetPointer<Transform3D>(entity)->Position.ToUnityVector3();
-            }
-
-            GizmoUtils.DrawGizmosCircle(position, navmeshObstacles.Radius.AsFloat, gizmosSettings.NavMeshAvoidanceAgentColor, style: gizmosSettings.NavMeshComponentGizmoStyle);
-
-            if (navmeshObstacles.Velocity != FPVector2.Zero) {
-              GizmoUtils.DrawGizmoVector(position, position + navmeshObstacles.Velocity.XOY.ToUnityVector3().normalized, gizmosSettings.GizmoIconScale.AsFloat * gizmosSettings.NavMeshComponentGizmoSize);
-            }
-          }
-        }
-
-        #endregion
-
-        #region Navmesh And Pathfinder
-
-        // ################## NavMeshes ##################
-
-        if (gizmosSettings.DrawNavMesh) {
-          var listOfNavmeshes = new List<Quantum.NavMesh>();
-          if (gizmosSettings.DrawNavMesh) {
-            listOfNavmeshes.AddRange(frame.Map.NavMeshes.Values);
-          }
-
-          if (frame.DynamicAssetDB.IsEmpty == false) {
-            listOfNavmeshes.AddRange(frame.DynamicAssetDB.Assets.Where(a => a is NavMesh).Select(a => (NavMesh)a).ToList());
-          }
-
-          foreach (var navmesh in listOfNavmeshes) {
-            QuantumNavMesh.CreateAndDrawGizmoMesh(navmesh, *frame.NavMeshRegionMask, gizmosSettings);
-
-            for (Int32 i = 0; i < navmesh.Triangles.Length; i++) {
-              var t = navmesh.Triangles[i];
-
-              if (gizmosSettings.DrawNavMeshRegionIds) {
-                if (t.Regions.HasValidRegions) {
-                  var s = string.Empty;
-                  for (int r = 0; r < frame.Map.Regions.Length; r++) {
-                    if (t.Regions.IsRegionEnabled(r)) {
-                      s += $"{frame.Map.Regions[r]} ({r})";
-                    }
-                  }
-
-                  var vertex0 = navmesh.Vertices[t.Vertex0].Point.ToUnityVector3(true);
-                  var vertex1 = navmesh.Vertices[t.Vertex1].Point.ToUnityVector3(true);
-                  var vertex2 = navmesh.Vertices[t.Vertex2].Point.ToUnityVector3(true);
-                  Handles.Label((vertex0 + vertex1 + vertex2) / 3.0f, s);
-                }
-              }
-            }
-
-            if (gizmosSettings.DrawNavMeshVertexNormals) {
-              Gizmos.color = Color.blue;
-              for (Int32 v = 0; v < navmesh.Vertices.Length; ++v) {
-                if (navmesh.Vertices[v].Borders.Length >= 2) {
-                  var normal = NavMeshVertex.CalculateNormal(v, navmesh, *frame.NavMeshRegionMask);
-                  if (normal != FPVector3.Zero) {
-                    GizmoUtils.DrawGizmoVector(navmesh.Vertices[v].Point.ToUnityVector3(true),
-                      navmesh.Vertices[v].Point.ToUnityVector3(true) +
-                      normal.ToUnityVector3(true) * gizmosSettings.GizmoIconScale.AsFloat * 0.33f,
-                      GizmoUtils.DefaultArrowHeadLength * gizmosSettings.GizmoIconScale.AsFloat * 0.33f);
-                  }
-                }
-              }
-            }
-
-            if (gizmosSettings.DrawNavMeshLinks) {
-              for (Int32 i = 0; i < navmesh.Links.Length; i++) {
-                var color = Color.blue;
-                var link  = navmesh.Links[i];
-                if (navmesh.Links[i].Region.IsSubset(*frame.NavMeshRegionMask) == false) {
-                  color = Color.gray;
-                }
-
-                Gizmos.color = color;
-                GizmoUtils.DrawGizmoVector(
-                  navmesh.Links[i].Start.ToUnityVector3(),
-                  navmesh.Links[i].End.ToUnityVector3(),
-                  GizmoUtils.DefaultArrowHeadLength * gizmosSettings.GizmoIconScale.AsFloat);
-                GizmoUtils.DrawGizmosCircle(navmesh.Links[i].Start.ToUnityVector3(), 0.1f * gizmosSettings.GizmoIconScale.AsFloat, color, style: gizmosSettings.ColliderGizmosStyle);
-                GizmoUtils.DrawGizmosCircle(navmesh.Links[i].End.ToUnityVector3(), 0.1f * gizmosSettings.GizmoIconScale.AsFloat, color, style: gizmosSettings.ColliderGizmosStyle);
-              }
-            }
-          }
-        }
-
-        // ################## NavMesh Borders ##################
-
-        if (gizmosSettings.DrawNavMeshBorders) {
-          Gizmos.color = Color.blue;
-          var navmeshes = frame.Map.NavMeshes.Values;
-          foreach (var navmesh in navmeshes) {
-            for (Int32 i = 0; i < navmesh.Borders.Length; i++) {
-              var b = navmesh.Borders[i];
-              if (navmesh.IsBorderActive(i, *frame.NavMeshRegionMask) == false) {
-                // grayed out?
-                continue;
-              }
-
-              Gizmos.color = Color.black;
-              Gizmos.DrawLine(b.V0.ToUnityVector3(true), b.V1.ToUnityVector3(true));
-
-              //// How to do a thick line? Multiple GizmoDrawLine also possible.
-              //var color = QuantumGameGizmosSettings.Instance.GetNavMeshColor(b.Regions);
-              //UnityEditor.Handles.color = color;
-              //UnityEditor.Handles.lighting = true;
-              //UnityEditor.Handles.DrawAAConvexPolygon(
-              //  b.V0.ToUnityVector3(true), 
-              //  b.V1.ToUnityVector3(true), 
-              //  b.V1.ToUnityVector3(true) + Vector3.up * 0.05f,
-              //  b.V0.ToUnityVector3(true) + Vector3.up * 0.05f);
-            }
-          }
-        }
-
-        // ################## NavMesh Triangle Ids ##################
-
-        if (gizmosSettings.DrawNavMeshTriangleIds) {
-          Handles.color = Color.white;
-          var navmeshes = frame.Map.NavMeshes.Values;
-          foreach (var navmesh in navmeshes) {
-            for (Int32 i = 0; i < navmesh.Triangles.Length; i++) {
-              Handles.Label(navmesh.Triangles[i].Center.ToUnityVector3(true), i.ToString());
-            }
-          }
-        }
-
-        // ################## Pathfinder ##################
-
-        if (frame.Navigation != null) {
-          // Iterate though task contexts:
-          var threadCount = frame.Context.TaskContext.ThreadCount;
-          for (int t = 0; t < threadCount; t++) {
-            // Iterate through path finders:
-            var pf = frame.Navigation.GetDebugInformation(t).Item0;
-            if (pf.RawPathSize >= 2) {
-              if (gizmosSettings.DrawPathfinderRawPath) {
-                for (Int32 i = 0; i < pf.RawPathSize; i++) {
-                  GizmoUtils.DrawGizmosCircle(pf.RawPath[i].Point.ToUnityVector3(true), 0.1f * gizmosSettings.GizmoIconScale.AsFloat, pf.RawPath[i].Link >= 0 ? Color.black : Color.magenta);
-                  if (i > 0) {
-                    Gizmos.color = pf.RawPath[i].Link >= 0 && pf.RawPath[i].Link == pf.RawPath[i - 1].Link ? Color.black : Color.magenta;
-                    Gizmos.DrawLine(pf.RawPath[i].Point.ToUnityVector3(true), pf.RawPath[i - 1].Point.ToUnityVector3(true));
-                  }
-                }
-              }
-
-              if (gizmosSettings.DrawPathfinderRawTrianglePath) {
-                var nmGuid = frame.Navigation.GetDebugInformation(t).Item1;
-                if (!string.IsNullOrEmpty(nmGuid)) {
-                  QuantumUnityDB.TryGetGlobalAsset(nmGuid, out Quantum.NavMesh nm);
-                  for (Int32 i = 0; i < pf.RawPathSize; i++) {
-                    var triangleIndex = pf.RawPath[i].Index;
-                    if (triangleIndex >= 0) {
-                      var vertex0 = nm.Vertices[nm.Triangles[triangleIndex].Vertex0].Point.ToUnityVector3(true);
-                      var vertex1 = nm.Vertices[nm.Triangles[triangleIndex].Vertex1].Point.ToUnityVector3(true);
-                      var vertex2 = nm.Vertices[nm.Triangles[triangleIndex].Vertex2].Point.ToUnityVector3(true);
-                      var color   = Color.magenta.Alpha(0.25f);
-                      GizmoUtils.DrawGizmosTriangle(vertex0, vertex1, vertex2, gizmosSettings.GetSelectedColor(color, true));
-                      Handles.color    = color;
-                      Handles.lighting = true;
-                      Handles.DrawAAConvexPolygon(vertex0, vertex1, vertex2);
-                    }
-                  }
-                }
-              }
-
-              // Draw funnel on top of raw path
-              if (gizmosSettings.DrawPathfinderFunnel) {
-                for (Int32 i = 0; i < pf.PathSize; i++) {
-                  GizmoUtils.DrawGizmosCircle(pf.Path[i].Point.ToUnityVector3(true), 0.05f * gizmosSettings.GizmoIconScale.AsFloat, pf.Path[i].Link >= 0 ? Color.green * 0.5f : Color.green);
-                  if (i > 0) {
-                    Gizmos.color = pf.Path[i].Link >= 0 && pf.Path[i].Link == pf.Path[i - 1].Link ? Color.green * 0.5f : Color.green;
-                    Gizmos.DrawLine(pf.Path[i].Point.ToUnityVector3(true), pf.Path[i - 1].Point.ToUnityVector3(true));
-                  }
-                }
-              }
-            }
-          }
-        }
-
-        #endregion
-
-        #region Various
-
-        // ################## Prediction Area ##################
-
-        if (gizmosSettings.DrawPredictionArea && frame.Context.Culling != null) {
-          var context = frame.Context;
-          if (context.PredictionAreaRadius != FP.UseableMax) {
-#if QUANTUM_XY
-          // The Quantum simulation does not know about QUANTUM_XY and always keeps the vector2 Y component in the vector3 Z component.
-          var predictionAreaCenter = new UnityEngine.Vector3(context.PredictionAreaCenter.X.AsFloat, context.PredictionAreaCenter.Z.AsFloat, 0);
-#else
-            var predictionAreaCenter = context.PredictionAreaCenter.ToUnityVector3();
-#endif
-            GizmoUtils.DrawGizmosSphere(predictionAreaCenter, context.PredictionAreaRadius.AsFloat, gizmosSettings.PredictionAreaColor);
-          }
-        }
-
-        #endregion
-      }
-    }
-
-    public static unsafe void DrawCharacterController2DGizmo(Vector3 position, CharacterController2DConfig config, Color radiusColor, Color extentsColor, QuantumGizmoStyle style) {
-      GizmoUtils.DrawGizmosCircle(position + config.Offset.ToUnityVector3(),
-        config.Radius.AsFloat, radiusColor, style: style);
-      GizmoUtils.DrawGizmosCircle(position + config.Offset.ToUnityVector3(),
-        config.Radius.AsFloat + config.Extent.AsFloat, extentsColor, style: style);
-    }
-
-    public static unsafe void DrawCharacterController3DGizmo(Vector3 position, CharacterController3DConfig config, Color radiusColor, Color extentsColor, QuantumGizmoStyle style) {
-      GizmoUtils.DrawGizmosSphere(position + config.Offset.ToUnityVector3(),
-        config.Radius.AsFloat, radiusColor, style: style);
-      GizmoUtils.DrawGizmosSphere(position + config.Offset.ToUnityVector3(),
-        config.Radius.AsFloat + config.Extent.AsFloat, extentsColor, style: style);
-    }
-    
-    private static unsafe Color GetCollider2DColor(Frame frame, EntityRef handle, QuantumGameGizmosSettings gizmosSettings) {
-      if (frame.Unsafe.TryGetPointer(handle, out PhysicsBody2D* body)) {
-        if (body->IsKinematic) {
-          return gizmosSettings.KinematicColliderColor;
-        } else if (body->IsSleeping) {
-          return gizmosSettings.AsleepColliderColor;
-        } else if (!body->Enabled) {
-          return gizmosSettings.DisabledColliderColor;
-        } else {
-          return gizmosSettings.DynamicColliderColor;
-        }
-      } else {
-        return gizmosSettings.KinematicColliderColor;
-      }
-    }
-    
-    private static unsafe Color GetCollider3DColor(Frame frame, EntityRef handle, QuantumGameGizmosSettings gizmosSettings) {
-      if (frame.Unsafe.TryGetPointer(handle, out PhysicsBody3D* body)) {
-        if (body->IsKinematic) {
-          return gizmosSettings.KinematicColliderColor;
-        } else if (body->IsSleeping) {
-          return gizmosSettings.AsleepColliderColor;
-        } else if (!body->Enabled) {
-          return gizmosSettings.DisabledColliderColor;
-        } else {
-          return gizmosSettings.DynamicColliderColor;
-        }
-      } else {
-        return gizmosSettings.KinematicColliderColor;
-      }
-    }
-    
-    public static unsafe void DrawCollider3DGizmo(Frame frame, EntityRef handle, PhysicsCollider3D* collider, Color color, QuantumGizmoStyle style) {
-      if (!frame.Unsafe.TryGetPointer(handle, out Transform3D* transform)) {
-        return;
-      }
-
-      if (collider->Shape.Type == Shape3DType.Compound) {
-        DrawCompoundShape3D(frame, &collider->Shape, transform, color, style);
-      } else {
-        DrawShape3DGizmo(collider->Shape, transform->Position.ToUnityVector3(),
-          transform->Rotation.ToUnityQuaternion(), color, style);
-      }
-    }
-    
-    public static unsafe void DrawCollider2DGizmo(Frame frame, EntityRef handle, PhysicsCollider2D* collider, Color color, QuantumGizmoStyle style) {
-      if (!frame.Unsafe.TryGetPointer(handle, out Transform2D* t)) {
-        return;
-      }
-      
-      var hasTransformVertical = frame.Unsafe.TryGetPointer<Transform2DVertical>(handle, out var tVertical);
-      
-      // Set 3d position of 2d object to simulate the vertical offset.
-      var height = 0.0f;
-
-#if QUANTUM_XY
-    if (hasTransformVertical) {
-      height = -tVertical->Height.AsFloat;
-    }
-#else
-      if (hasTransformVertical) {
-        height = tVertical->Height.AsFloat;
-      }
-#endif
-
-      if (collider->Shape.Type == Shape2DType.Compound) {
-        DrawCompoundShape2D(frame, &collider->Shape, t, tVertical, color, height, style);
-      } else {
-        var pos = t->Position.ToUnityVector3();
-        var rot = t->Rotation.ToUnityQuaternion();
-
-#if QUANTUM_XY
-      if (hasTransformVertical) {
-        pos.z = -tVertical->Position.AsFloat;
-      }
-#else
-        if (hasTransformVertical) {
-          pos.y = tVertical->Position.AsFloat;
-        }
-#endif
-
-        DrawShape2DGizmo(collider->Shape, pos, rot, color, height, frame, style);
-      }
-    }
-
-    public static unsafe void DrawShape3DGizmo(Shape3D s, Vector3 position, Quaternion rotation, Color color, QuantumGizmoStyle style = default) {
-      var localOffset   = s.LocalTransform.Position.ToUnityVector3();
-      var localRotation = s.LocalTransform.Rotation.ToUnityQuaternion();
-
-      position += rotation * localOffset;
-      rotation *= localRotation;
-
-      switch (s.Type) {
-        case Shape3DType.Sphere:
-          GizmoUtils.DrawGizmosSphere(position, s.Sphere.Radius.AsFloat, color, style: style);
-          break;
-        case Shape3DType.Box:
-          GizmoUtils.DrawGizmosBox(position, s.Box.Extents.ToUnityVector3() * 2, color, style: style, rotation: rotation);
-          break;
-        case Shape3DType.Capsule:
-          GizmoUtils.DrawGizmosCapsule(position, s.Capsule.Radius.AsFloat, s.Capsule.Extent.AsFloat, color, style: style, rotation: rotation);
-          break;
-      }
-    }
-
-    public static unsafe void DrawShape2DGizmo(Shape2D s, Vector3 pos, Quaternion rot, Color color, float height, Frame currentFrame, QuantumGizmoStyle style = default) {
-      var localOffset   = s.LocalTransform.Position.ToUnityVector3();
-      var localRotation = s.LocalTransform.Rotation.ToUnityQuaternion();
-
-      pos += rot * localOffset;
-      rot =  rot * localRotation;
-
-      switch (s.Type) {
-        case Shape2DType.Circle:
-          GizmoUtils.DrawGizmosCircle(pos, s.Circle.Radius.AsFloat, color, height: height, style: style);
-          break;
-
-        case Shape2DType.Box:
-          var size = s.Box.Extents.ToUnityVector3() * 2.0f;
-#if QUANTUM_XY
-        size.z = height;
-        pos.z += height * 0.5f;
-#else
-          size.y =  height;
-          pos.y  += height * 0.5f;
-#endif
-          GizmoUtils.DrawGizmosBox(pos, size, color, rotation: rot, style: style);
-
-          break;
-
-        //TODO: check for the height
-        case Shape2DType.Capsule:
-          GizmoUtils.DrawGizmosCapsule2D(pos, s.Capsule.Radius.AsFloat, s.Capsule.Extent.AsFloat, color, rotation: rot, style: style);
-          break;
-
-        case Shape2DType.Polygon:
-          PolygonCollider p;
-          if (currentFrame != null) {
-            p = currentFrame.FindAsset(s.Polygon.AssetRef);
-          } else {
-            QuantumUnityDB.TryGetGlobalAsset(s.Polygon.AssetRef, out p);
-          }
-
-          if (p != null) {
-            GizmoUtils.DrawGizmoPolygon2D(pos, rot, p.Vertices, height, color, style: style);
-          }
-
-          break;
-
-
-        case Shape2DType.Edge:
-          var extent = rot * Vector3.right * s.Edge.Extent.AsFloat;
-          GizmoUtils.DrawGizmosEdge(pos - extent, pos + extent, height, color);
-          break;
-      }
-    }
-
-    private static unsafe void DrawCompoundShape2D(Frame f, Shape2D* compoundShape, Transform2D* transform, Transform2DVertical* transformVertical, Color color, float height, QuantumGizmoStyle style = default) {
-      Debug.Assert(compoundShape->Type == Shape2DType.Compound);
-
-      if (compoundShape->Compound.GetShapes(f, out var shapesBuffer, out var count)) {
-        for (var i = 0; i < count; i++) {
-          var shape = shapesBuffer + i;
-
-          if (shape->Type == Shape2DType.Compound) {
-            DrawCompoundShape2D(f, shape, transform, transformVertical, color, height, style);
-          } else {
-            var pos = transform->Position.ToUnityVector3();
-            var rot = transform->Rotation.ToUnityQuaternion();
-
-#if QUANTUM_XY
-          if (transformVertical != null) {
-            pos.z = -transformVertical->Position.AsFloat;
-          }
-#else
-            if (transformVertical != null) {
-              pos.y = transformVertical->Position.AsFloat;
-            }
-#endif
-
-            DrawShape2DGizmo(*shape, pos, rot, color, height, f, style);
-          }
-        }
-      }
-    }
-
-    private static unsafe void DrawCompoundShape3D(Frame f, Shape3D* compoundShape, Transform3D* transform, Color color, QuantumGizmoStyle style = default) {
-      Debug.Assert(compoundShape->Type == Shape3DType.Compound);
-
-      if (compoundShape->Compound.GetShapes(f, out var shapesBuffer, out var count)) {
-        for (var i = 0; i < count; i++) {
-          var shape = shapesBuffer + i;
-
-          if (shape->Type == Shape3DType.Compound) {
-            DrawCompoundShape3D(f, shape, transform, color, style);
-          } else {
-            DrawShape3DGizmo(*shape, transform->Position.ToUnityVector3(), transform->Rotation.ToUnityQuaternion(), color, style);
-          }
-        }
-      }
-    }
-    
-    private static unsafe void DrawGizmosJoint2D(Joint* joint, Transform2D* jointTransform, Transform2D* connectedTransform, bool selected, QuantumGameGizmosSettings gizmosSettings, QuantumGizmoStyle style = default) {
-      if (joint->Type == JointType.None) {
-        return;
-      }
-
-      var param = default(QuantumGizmosJointInfo);
-      param.Selected  = selected;
-      param.JointRot  = jointTransform->Rotation.ToUnityQuaternion();
-      param.AnchorPos = jointTransform->TransformPoint(joint->Anchor).ToUnityVector3();
-
-      switch (joint->Type) {
-        case JointType.DistanceJoint:
-          param.Type        = QuantumGizmosJointInfo.GizmosJointType.DistanceJoint2D;
-          param.MinDistance = joint->DistanceJoint.MinDistance.AsFloat;
-          param.MaxDistance = joint->DistanceJoint.MaxDistance.AsFloat;
-          break;
-
-        case JointType.SpringJoint:
-          param.Type        = QuantumGizmosJointInfo.GizmosJointType.SpringJoint2D;
-          param.MinDistance = joint->SpringJoint.Distance.AsFloat;
-          break;
-
-        case JointType.HingeJoint:
-          param.Type           = QuantumGizmosJointInfo.GizmosJointType.HingeJoint2D;
-          param.RelRotRef      = Quaternion.Inverse(param.JointRot);
-          param.UseAngleLimits = joint->HingeJoint.UseAngleLimits;
-          param.LowerAngle     = (joint->HingeJoint.LowerLimitRad * FP.Rad2Deg).AsFloat;
-          param.UpperAngle     = (joint->HingeJoint.UpperLimitRad * FP.Rad2Deg).AsFloat;
-          break;
-      }
-
-      if (connectedTransform == null) {
-        param.ConnectedRot = Quaternion.identity;
-        param.ConnectedPos = joint->ConnectedAnchor.ToUnityVector3();
-      } else {
-        param.ConnectedRot = connectedTransform->Rotation.ToUnityQuaternion();
-        param.ConnectedPos = connectedTransform->TransformPoint(joint->ConnectedAnchor).ToUnityVector3();
-        param.RelRotRef    = (param.ConnectedRot * param.RelRotRef).normalized;
-      }
-
-#if QUANTUM_XY
-      param.Axis = Vector3.back;
-#else
-      param.Axis = Vector3.up;
-#endif
-
-      DrawGizmosJointInternal(ref param, gizmosSettings, style);
-    }
-    
-    private static unsafe void DrawGizmosJoint3D(Joint3D* joint, Transform3D* jointTransform, Transform3D* connectedTransform, bool selected, QuantumGameGizmosSettings gizmosSettings, QuantumGizmoStyle style = default) {
-      if (joint->Type == JointType3D.None) {
-        return;
-      }
-
-      var param = default(QuantumGizmosJointInfo);
-      param.Selected  = selected;
-      param.JointRot  = jointTransform->Rotation.ToUnityQuaternion();
-      param.AnchorPos = jointTransform->TransformPoint(joint->Anchor).ToUnityVector3();
-
-      switch (joint->Type) {
-        case JointType3D.DistanceJoint:
-          param.Type        = QuantumGizmosJointInfo.GizmosJointType.DistanceJoint3D;
-          param.MinDistance = joint->DistanceJoint.MinDistance.AsFloat;
-          param.MaxDistance = joint->DistanceJoint.MaxDistance.AsFloat;
-          break;
-
-        case JointType3D.SpringJoint:
-          param.Type        = QuantumGizmosJointInfo.GizmosJointType.SpringJoint3D;
-          param.MinDistance = joint->SpringJoint.Distance.AsFloat;
-          break;
-
-        case JointType3D.HingeJoint:
-          param.Type           = QuantumGizmosJointInfo.GizmosJointType.HingeJoint3D;
-          param.RelRotRef      = joint->HingeJoint.RelativeRotationReference.ToUnityQuaternion();
-          param.Axis           = joint->HingeJoint.Axis.ToUnityVector3();
-          param.UseAngleLimits = joint->HingeJoint.UseAngleLimits;
-          param.LowerAngle     = (joint->HingeJoint.LowerLimitRad * FP.Rad2Deg).AsFloat;
-          param.UpperAngle     = (joint->HingeJoint.UpperLimitRad * FP.Rad2Deg).AsFloat;
-          break;
-      }
-
-      if (connectedTransform == null) {
-        param.ConnectedRot = Quaternion.identity;
-        param.ConnectedPos = joint->ConnectedAnchor.ToUnityVector3();
-      } else {
-        param.ConnectedRot = connectedTransform->Rotation.ToUnityQuaternion();
-        param.ConnectedPos = connectedTransform->TransformPoint(joint->ConnectedAnchor).ToUnityVector3();
-      }
-
-      DrawGizmosJointInternal(ref param, gizmosSettings, style);
-    }
-    
-    public static void DrawGizmosJointInternal(ref QuantumGizmosJointInfo p, QuantumGameGizmosSettings gizmosSettings, QuantumGizmoStyle style = default) {
-      const float anchorRadiusFactor           = 0.1f;
-      const float barHalfLengthFactor          = 0.1f;
-      const float hingeRefAngleBarLengthFactor = 0.5f;
-
-      // how much weaker the alpha of the color of hinge disc is relative to the its rim's alpha
-      const float solidDiscAlphaRatio = 0.25f;
-
-      if (p.Type == QuantumGizmosJointInfo.GizmosJointType.None) {
-        return;
-      }
-
-      var gizmosScale = gizmosSettings.GizmoIconScale.AsFloat;
-
-      var primColor    = gizmosSettings.JointGizmosPrimaryColor;
-      var secColor     = gizmosSettings.JointGizmosSecondaryColor;
-      var warningColor = gizmosSettings.JointGizmosWarningColor;
-
-      if (p.Selected) {
-        primColor    = primColor.Brightness(gizmosSettings.GizmoSelectedBrightness);
-        secColor     = secColor.Brightness(gizmosSettings.GizmoSelectedBrightness);
-        warningColor = warningColor.Brightness(gizmosSettings.GizmoSelectedBrightness);
-      }
-
-      GizmoUtils.DrawGizmosSphere(p.AnchorPos, gizmosScale * anchorRadiusFactor, secColor, style: style);
-      GizmoUtils.DrawGizmosSphere(p.ConnectedPos, gizmosScale * anchorRadiusFactor, secColor, style: style);
-
-      Gizmos.color = secColor;
-      Gizmos.DrawLine(p.AnchorPos, p.ConnectedPos);
-
-      switch (p.Type) {
-        case QuantumGizmosJointInfo.GizmosJointType.DistanceJoint2D:
-        case QuantumGizmosJointInfo.GizmosJointType.DistanceJoint3D: {
-          var connectedToAnchorDir = Vector3.Normalize(p.AnchorPos - p.ConnectedPos);
-          var minDistanceMark      = p.ConnectedPos + connectedToAnchorDir * p.MinDistance;
-          var maxDistanceMark      = p.ConnectedPos + connectedToAnchorDir * p.MaxDistance;
-
-          Gizmos.color = Handles.color = primColor;
-
-          Gizmos.DrawLine(minDistanceMark, maxDistanceMark);
-          GizmoUtils.DrawGizmoDisc(minDistanceMark, connectedToAnchorDir, barHalfLengthFactor, primColor, style: style);
-          GizmoUtils.DrawGizmoDisc(maxDistanceMark, connectedToAnchorDir, barHalfLengthFactor, primColor, style: style);
-
-          Gizmos.color = Handles.color = Color.white;
-
-          break;
-        }
-
-        case QuantumGizmosJointInfo.GizmosJointType.SpringJoint2D:
-        case QuantumGizmosJointInfo.GizmosJointType.SpringJoint3D: {
-          var connectedToAnchorDir = Vector3.Normalize(p.AnchorPos - p.ConnectedPos);
-          var distanceMark         = p.ConnectedPos + connectedToAnchorDir * p.MinDistance;
-
-          Gizmos.color = Handles.color = primColor;
-
-          Gizmos.DrawLine(p.ConnectedPos, distanceMark);
-          GizmoUtils.DrawGizmoDisc(distanceMark, connectedToAnchorDir, barHalfLengthFactor, primColor, style: style);
-
-          Gizmos.color = Handles.color = Color.white;
-
-          break;
-        }
-
-        case QuantumGizmosJointInfo.GizmosJointType.HingeJoint2D: {
-          var hingeRefAngleBarLength = hingeRefAngleBarLengthFactor * gizmosScale;
-          var connectedAnchorRight   = p.ConnectedRot * Vector3.right;
-          var anchorRight            = p.JointRot * Vector3.right;
-
-          Gizmos.color = secColor;
-          Gizmos.DrawRay(p.AnchorPos, anchorRight * hingeRefAngleBarLength);
-
-          Gizmos.color = primColor;
-          Gizmos.DrawRay(p.ConnectedPos, connectedAnchorRight * hingeRefAngleBarLength);
-
-#if QUANTUM_XY
-          var planeNormal = -Vector3.forward;
-#else
-          var planeNormal = Vector3.up;
-#endif
-
-          if (p.UseAngleLimits) {
-            var fromDir    = Quaternion.AngleAxis(p.LowerAngle, planeNormal) * connectedAnchorRight;
-            var angleRange = p.UpperAngle - p.LowerAngle;
-            var arcColor   = angleRange < 0.0f ? warningColor : primColor;
-            GizmoUtils.DrawGizmoArc(p.ConnectedPos, planeNormal, fromDir, angleRange, hingeRefAngleBarLength, arcColor, solidDiscAlphaRatio, style: style);
-          } else {
-            // Draw full disc
-            GizmoUtils.DrawGizmoDisc(p.ConnectedPos, planeNormal, hingeRefAngleBarLength, primColor, solidDiscAlphaRatio, style: style);
-          }
-
-          Gizmos.color = Handles.color = Color.white;
-
-          break;
-        }
-
-        case QuantumGizmosJointInfo.GizmosJointType.HingeJoint3D: {
-          var hingeRefAngleBarLength = hingeRefAngleBarLengthFactor * gizmosScale;
-
-          var hingeAxisLocal = p.Axis.sqrMagnitude > float.Epsilon ? p.Axis.normalized : Vector3.right;
-          var hingeAxisWorld = p.JointRot * hingeAxisLocal;
-          var hingeOrtho     = Vector3.Cross(hingeAxisWorld, p.JointRot * Vector3.up);
-
-          hingeOrtho = hingeOrtho.sqrMagnitude > float.Epsilon ? hingeOrtho.normalized : Vector3.Cross(hingeAxisWorld, p.JointRot * Vector3.forward).normalized;
-
-          Gizmos.color = Handles.color = primColor;
-
-          Gizmos.DrawRay(p.AnchorPos, hingeOrtho * hingeRefAngleBarLength);
-          Handles.ArrowHandleCap(0, p.ConnectedPos, Quaternion.FromToRotation(Vector3.forward, hingeAxisWorld), hingeRefAngleBarLengthFactor * 1.5f, EventType.Repaint);
-
-          if (p.UseAngleLimits) {
-            var refAngle   = ComputeRelativeAngleHingeJoint(hingeAxisWorld, p.JointRot, p.ConnectedRot, p.RelRotRef);
-            var refOrtho   = Quaternion.AngleAxis(refAngle, hingeAxisWorld) * hingeOrtho;
-            var fromDir    = Quaternion.AngleAxis(-p.LowerAngle, hingeAxisWorld) * refOrtho;
-            var angleRange = p.UpperAngle - p.LowerAngle;
-            var arcColor   = angleRange < 0.0f ? warningColor : primColor;
-            GizmoUtils.DrawGizmoArc(p.ConnectedPos, hingeAxisWorld, fromDir, -angleRange, hingeRefAngleBarLength, arcColor, solidDiscAlphaRatio, style: style);
-          } else {
-            // Draw full disc
-            GizmoUtils.DrawGizmoDisc(p.ConnectedPos, hingeAxisWorld, hingeRefAngleBarLength, primColor, solidDiscAlphaRatio, style: style);
-          }
-
-          Gizmos.color = Handles.color = Color.white;
-
-          break;
-        }
-      }
-    }
-    
-    private static float ComputeRelativeAngleHingeJoint(Vector3 hingeAxis, Quaternion rotJoint, Quaternion rotConnectedAnchor, Quaternion relRotRef) {
-      var rotDiff = rotConnectedAnchor * Quaternion.Inverse(rotJoint);
-      var relRot  = rotDiff * Quaternion.Inverse(relRotRef);
-
-      var rotVector     = new Vector3(relRot.x, relRot.y, relRot.z);
-      var sinHalfRadAbs = rotVector.magnitude;
-      var cosHalfRad    = relRot.w;
-
-      var hingeAngleRad = 2 * Mathf.Atan2(sinHalfRadAbs, Mathf.Sign(Vector3.Dot(rotVector, hingeAxis)) * cosHalfRad);
-
-      // clamp to range [-Pi, Pi]
-      if (hingeAngleRad < -Mathf.PI) {
-        hingeAngleRad += 2 * Mathf.PI;
-      }
-
-      if (hingeAngleRad > Mathf.PI) {
-        hingeAngleRad -= 2 * Mathf.PI;
-      }
-
-      return hingeAngleRad * Mathf.Rad2Deg;
-    }
-  }
-  
-  public struct QuantumGizmosJointInfo {
-    public enum GizmosJointType {
-      None = 0,
-
-      DistanceJoint2D = 1,
-      DistanceJoint3D = 2,
-
-      SpringJoint2D = 3,
-      SpringJoint3D = 4,
-
-      HingeJoint2D = 5,
-      HingeJoint3D = 6,
-    }
-
-    public GizmosJointType Type;
-    public bool            Selected;
-
-    public Vector3 AnchorPos;
-    public Vector3 ConnectedPos;
-
-    public Quaternion JointRot;
-    public Quaternion ConnectedRot;
-    public Quaternion RelRotRef;
-
-    public float MinDistance;
-    public float MaxDistance;
-
-    public Vector3 Axis;
-
-    public bool  UseAngleLimits;
-    public float LowerAngle;
-    public float UpperAngle;
-  }
-#endif
-}
-
-#endregion
-
-
-#region Assets/Photon/Quantum/Runtime/QuantumGameGizmosSettings.cs
-
-namespace Quantum {
-  using System;
-  using Photon.Deterministic;
-  using UnityEngine;
-  
-  [Serializable]
-  public class QuantumGameGizmosSettings  {
-    [Header("Map")]
-    public Color PhysicsGridColor = new Color(0.0f, 0.7f, 1f, 0.5f);
-
-    public Color NavMeshGridColor = new Color(0.4f, 1.0f, 0.7f, 0.5f);
-
-    [Header("Gizmos")]
-    public FP GizmoIconScale = FP._1;
-
-    public float GizmoSelectedBrightness = 1.1f;
-
-    [Header("Collider Gizmos")]
-    public QuantumGameGizmosMode DrawColliderGizmos = QuantumGameGizmosMode.OnDraw | QuantumGameGizmosMode.OnSelected | QuantumGameGizmosMode.OnApplicationPlaying;
-
-    public QuantumGizmoStyle ColliderGizmosStyle = default;
-    public QuantumGizmoStyle StaticColliderGizmoStyle = default;
-
-    public Boolean DrawStaticMeshTriangles = true;
-    public Boolean DrawStaticMeshNormals = false;
-    public Boolean DrawSceneMeshCells = false;
-    public Boolean DrawSceneMeshTriangles = false;
-
-    public Color StaticColliderColor = new Color(0.4705882f, 0.7371198f, 1.0f, 0.5f);
-    public Color DynamicColliderColor = new Color(0.4925605f, 0.9176471f, 0.5050631f, 0.5f);
-    public Color KinematicColliderColor = ColorRGBA.White.AsColor.Alpha(0.5f);
-    public Color CharacterControllerColor = ColorRGBA.Yellow.AsColor.Alpha(0.5f);
-    public Color AsleepColliderColor = new Color(0.5192922f, 0.4622621f, 0.6985294f, 0.5f);
-    public Color DisabledColliderColor = new Color(0.625f, 0.625f, 0.625f, 0.5f);
-
-    [Header("Joint Gizmos")]
-    public QuantumGameGizmosMode DrawJointGizmos = QuantumGameGizmosMode.OnSelected | QuantumGameGizmosMode.OnApplicationPlaying;
-
-    public QuantumGizmoStyle JointGizmosStyle = default;
-    public Color JointGizmosPrimaryColor = new Color(0, 1, 0, 0.5f);
-    public Color JointGizmosSecondaryColor = new Color(0, 1, 1, 0.5f);
-    public Color JointGizmosWarningColor = new Color(1, 0, 0, 0.5f);
-
-    [Header("Prediction Culling Gizmos")]
-    public Boolean DrawPredictionArea = true;
-
-    public Color PredictionAreaColor = new Color(1, 0, 0, 0.25f);
-
-    [Header("Pathfinder Gizmos")]
-    public Boolean DrawPathfinderRawPath = false;
-
-    public Boolean DrawPathfinderRawTrianglePath = false;
-    public Boolean DrawPathfinderFunnel = false;
-
-    [Header("NavMesh Component Gizmos")]
-    public Boolean DrawNavMeshPathfinder = false;
-
-    public Boolean DrawNavMeshSteeringAgent = false;
-    public Boolean DrawNavMeshAvoidanceAgent = false;
-    public Boolean DrawNavMeshAvoidanceObstacle = false;
-    public QuantumGizmoStyle NavMeshComponentGizmoStyle = QuantumGizmoStyle.FillDisabled;
-
-    [Range(0.01f, 10.0f)]
-    public float NavMeshComponentGizmoSize = 0.5f;
-
-    public Boolean NavMeshComponentScaleWithAgentRadius = true;
-    public Color NavMeshPathfinderColor = Color.yellow;
-    public Color NavMeshSteeringAgentColor = new Color(0, 1, 0, 0.5f);
-    public Color NavMeshAvoidanceAgentColor = new Color(0, 0, 1, 0.5f);
-
-    [Header("NavMesh Gizmos")]
-    public Boolean DrawNavMesh = false;
-
-    public Boolean DrawNavMeshBorders = false;
-    public Boolean DrawNavMeshTriangleIds = false;
-    public Boolean DrawNavMeshRegionIds = false;
-    public Boolean DrawNavMeshVertexNormals = false;
-    public Boolean DrawNavMeshLinks = false;
-    public Color NavMeshDefaultColor = new Color(0.0f, 0.75f, 1.0f, 0.5f);
-    public Color NavMeshRegionColor = new Color(1.0f, 0.0f, 0.5f, 0.5f);
-
-    public Color GetNavMeshColor(NavMeshRegionMask regionMask) {
-      if (regionMask.IsMainArea) {
-        return NavMeshDefaultColor;
-      }
-
-      return NavMeshRegionColor;
-    }
-
-    public float? GetSelectedBrightness(bool selected) {
-      return selected ? GizmoSelectedBrightness : (float?)null;
-    }
-
-    public Color GetSelectedColor(Color color, bool selected) {
-      return selected ? color.Brightness(GizmoSelectedBrightness) : color;
-    }
-  }
-  
-  [Flags, Serializable]
-  public enum QuantumGameGizmosMode {
-    None                 = 0,
-    OnDraw               = 1 << 0,
-    OnSelected           = 1 << 1,
-    OnApplicationPlaying = 1 << 2,
-  }
-  
-  [Flags, Serializable]
-  public enum QuantumMeshGizmos {
-    DrawTriangles = 1 << 0,
-    DrawNormals = 1 << 1,
-    
-    Default = DrawTriangles | DrawNormals,
-  }
-}
-
-#endregion
-
-
 #region Assets/Photon/Quantum/Runtime/QuantumInstantReplay.cs
 
 namespace Quantum {
@@ -6322,7 +7943,7 @@ namespace Quantum {
     static IEnumerable<Quantum.NavMesh> BakeNavMeshesLoop(QuantumMapData data) {
 
 #if UNITY_EDITOR
-      QuantumNavMesh.InvalidateGizmos();
+      QuantumGameGizmos.InvalidateNavMeshGizmos();
 #endif
       
       var scene = data.gameObject.scene;
@@ -6572,7 +8193,7 @@ namespace Quantum {
 #if UNITY_EDITOR
     // TODO: this should be moved somewhere or renamed; the whole idea is that this stuff
     // is only used by behaviours, whereas for simulation gizmos runner can provide its own
-    protected QuantumGameGizmosSettings GlobalGizmosSettings => QuantumGameGizmosSettingsScriptableObject.Global.Settings;
+    //  protected QuantumGameGizmosSettings GlobalGizmosSettings => QuantumGameGizmosSettingsScriptableObject.Global.Settings;
 #endif
   }
 }
@@ -7587,82 +9208,7 @@ namespace Quantum {
 
 #if UNITY_EDITOR
     
-    private struct GizmoNavmeshData {
-      public Mesh              GizmoMesh;
-      public NavMeshRegionMask CurrentRegionMask;
-    }
-
-    [StaticField]
-    private static Dictionary<string, GizmoNavmeshData> _navmeshGizmoMap;
-
-    [StaticFieldResetMethod]
-    public static void InvalidateGizmos() {
-      if (_navmeshGizmoMap != null) {
-        _navmeshGizmoMap.Clear();
-      }
-    }
-
-    /// <summary>
-    ///   Creates a Unity mesh from the navmesh data and renders it as a gizmo. Uses submeshes to draw main mesh, regions and
-    ///   deactivated regions in different colors.
-    ///   The meshes are cached in a static dictionary by their NavMesh.Name. Call InvalidateGizmos() to reset the cache
-    ///   manually.
-    ///   New meshes are created when the region mask changed.
-    /// </summary>
-    public static void CreateAndDrawGizmoMesh(NavMesh navmesh, NavMeshRegionMask regionMask, QuantumGameGizmosSettings gizmosSettings) {
-      var mesh = CreateGizmoMesh(navmesh, regionMask);
-      DrawGizmoMesh(mesh, gizmosSettings.NavMeshDefaultColor, gizmosSettings.NavMeshRegionColor);
-    }
-
-    public static Mesh CreateGizmoMesh(NavMesh navmesh, NavMeshRegionMask regionMask) {
-      if (_navmeshGizmoMap == null) {
-        _navmeshGizmoMap = new Dictionary<string, GizmoNavmeshData>();
-      }
-
-      if (!_navmeshGizmoMap.TryGetValue(navmesh.Name, out GizmoNavmeshData gizmoNavmeshData) ||
-          gizmoNavmeshData.CurrentRegionMask.Equals(regionMask) == false ||
-          gizmoNavmeshData.GizmoMesh == null) {
-        var mesh = new Mesh();
-        mesh.subMeshCount = 3;
-
-#if QUANTUM_XY
-      mesh.vertices = navmesh.Vertices.Select(x => new Vector3(x.Point.X.AsFloat, x.Point.Z.AsFloat, x.Point.Y.AsFloat)).ToArray();
-#else
-        mesh.vertices = navmesh.Vertices.Select(x => x.Point.ToUnityVector3()).ToArray();
-#endif
-
-        mesh.SetTriangles(navmesh.Triangles.SelectMany(x => x.Regions.IsMainArea && x.Regions.IsSubset(regionMask) ? new int[] { x.Vertex0, x.Vertex1, x.Vertex2 } : new int[0]).ToArray(), 0);
-        mesh.SetTriangles(navmesh.Triangles.SelectMany(x => x.Regions.HasValidNoneMainRegion && x.Regions.IsSubset(regionMask) ? new int[] { x.Vertex0, x.Vertex1, x.Vertex2 } : new int[0]).ToArray(), 1);
-        mesh.SetTriangles(navmesh.Triangles.SelectMany(x => !x.Regions.IsSubset(regionMask) ? new int[] { x.Vertex0, x.Vertex1, x.Vertex2 } : new int[0]).ToArray(), 2);
-        mesh.RecalculateNormals();
-
-        gizmoNavmeshData = new GizmoNavmeshData() {
-          GizmoMesh         = mesh,
-          CurrentRegionMask = regionMask
-        };
-        _navmeshGizmoMap[navmesh.Name] = gizmoNavmeshData;
-      }
-
-      return gizmoNavmeshData.GizmoMesh;
-    }
-
-    internal static void DrawGizmoMesh(Mesh mesh, Color color, Color regionColor) {
-      var originalColor  = Gizmos.color;
-      Gizmos.color = color;
-      Gizmos.DrawMesh(mesh, 0);
-      Gizmos.color = Gizmos.color.Alpha(Gizmos.color.a * 0.75f);
-      Gizmos.DrawWireMesh(mesh, 0);
-      Gizmos.color = regionColor;
-      Gizmos.DrawMesh(mesh, 1);
-      Gizmos.color = Gizmos.color.Alpha(Gizmos.color.a * 0.75f);
-      Gizmos.DrawWireMesh(mesh, 1);
-      var greyValue = (Gizmos.color.r + Gizmos.color.g + Gizmos.color.b) / 3.0f;
-      Gizmos.color = new Color(greyValue, greyValue, greyValue, Gizmos.color.a);
-      Gizmos.DrawMesh(mesh, 2);
-      Gizmos.DrawWireMesh(mesh, 2);
-      Gizmos.color = originalColor;
-    }
-    
+  
 #endif
     
     #endregion
@@ -10642,13 +12188,13 @@ namespace Quantum {
       }
     }
 
-    public static void Capsule(Draw.DebugCapsule box) {
+    public static void Capsule(Draw.DebugCapsule capsule) {
       if (IsEnabled == false) {
         return;
       }
 
       lock (_capsules) {
-        _capsules.Enqueue(box);
+        _capsules.Enqueue(capsule);
       }
     }
 
@@ -10888,13 +12434,13 @@ namespace Quantum {
         GL.MultMatrix(m);
         GL.Begin(GL.LINE_STRIP);
 
-        var halfHeight = capsule.Height.AsFloat * 0.5f;
+        var extent = capsule.Extent.AsFloat;
 
         for (int i = 0; i < CircleResolution / 2; i++) {
 #if QUANTUM_XY
           GL.Vertex3(CirclePoints[i].x * capsule.Radius.AsFloat, CirclePoints[i].z * capsule.Radius.AsFloat + halfHeight, 0.0f);
 #else
-          GL.Vertex3(CirclePoints[i].x * capsule.Radius.AsFloat, 0.0f, CirclePoints[i].z * capsule.Radius.AsFloat + halfHeight);
+          GL.Vertex3(CirclePoints[i].x * capsule.Radius.AsFloat, 0.0f, CirclePoints[i].z * capsule.Radius.AsFloat + extent);
 #endif
         }
 
@@ -10902,15 +12448,15 @@ namespace Quantum {
         GL.Vertex3(-capsule.Radius.AsFloat, halfHeight, 0.0f);
         GL.Vertex3(-capsule.Radius.AsFloat, -halfHeight, 0.0f);
 #else
-        GL.Vertex3(-capsule.Radius.AsFloat, 0.0f, halfHeight);
-        GL.Vertex3(-capsule.Radius.AsFloat, 0.0f, -halfHeight);
+        GL.Vertex3(-capsule.Radius.AsFloat, 0.0f, extent);
+        GL.Vertex3(-capsule.Radius.AsFloat, 0.0f, -extent);
 #endif
 
         for (int i = CircleResolution / 2; i < CircleResolution; i++) {
 #if QUANTUM_XY
           GL.Vertex3(CirclePoints[i].x * capsule.Radius.AsFloat, CirclePoints[i].z * capsule.Radius.AsFloat - halfHeight, 0.0f);
 #else
-          GL.Vertex3(CirclePoints[i].x * capsule.Radius.AsFloat, 0.0f, CirclePoints[i].z * capsule.Radius.AsFloat - halfHeight);
+          GL.Vertex3(CirclePoints[i].x * capsule.Radius.AsFloat, 0.0f, CirclePoints[i].z * capsule.Radius.AsFloat - extent);
 #endif
         }
 
@@ -10918,8 +12464,8 @@ namespace Quantum {
         GL.Vertex3(capsule.Radius.AsFloat, -halfHeight, 0.0f);
         GL.Vertex3(capsule.Radius.AsFloat, halfHeight, 0.0f);
 #else
-        GL.Vertex3(capsule.Radius.AsFloat, 0.0f, -halfHeight);
-        GL.Vertex3(capsule.Radius.AsFloat, 0.0f, halfHeight);
+        GL.Vertex3(capsule.Radius.AsFloat, 0.0f, -extent);
+        GL.Vertex3(capsule.Radius.AsFloat, 0.0f, extent);
 #endif
 
         GL.End();
@@ -10961,8 +12507,8 @@ namespace Quantum {
 
           GL.PopMatrix();
         } else {
-          var height = (capsule.Height.AsFloat * 0.5f) + capsule.Radius.AsFloat;
-          var diameter = capsule.Radius.AsFloat * 2.0f;
+          var height = capsule.Height.AsFloat / 2.0f;
+          var diameter = capsule.Diameter.AsFloat;
           var m = Matrix4x4.TRS(capsule.Center.ToUnityVector3(true), capsule.Rotation.ToUnityQuaternion(true), (Vector3.up * height) + (Vector3.right + Vector3.forward) * diameter);
           Graphics.DrawMeshNow(DebugMesh.CapsuleMesh, m);
         }

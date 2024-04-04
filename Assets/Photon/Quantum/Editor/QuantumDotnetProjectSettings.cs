@@ -1,4 +1,4 @@
-﻿namespace Quantum.Editor {
+namespace Quantum.Editor {
   using System;
   using System.Collections.Generic;
   using System.IO;

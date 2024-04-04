@@ -52,7 +52,7 @@ namespace Quantum {
   public unsafe partial class Frame {
     public unsafe partial struct FrameEvents {
       static partial void GetEventTypeCountCodeGen(ref Int32 eventCount) {
-        eventCount = 3;
+        eventCount = 4;
       }
       static partial void GetParentEventIDCodeGen(Int32 eventID, ref Int32 parentEventID) {
         switch (eventID) {
@@ -61,11 +61,20 @@ namespace Quantum {
       }
       static partial void GetEventTypeCodeGen(Int32 eventID, ref System.Type result) {
         switch (eventID) {
+          case EventPlayerHealthUpdated.ID: result = typeof(EventPlayerHealthUpdated); return;
           case EventOnPlayerEnteredGrass.ID: result = typeof(EventOnPlayerEnteredGrass); return;
           case EventOnPlayerExitGrass.ID: result = typeof(EventOnPlayerExitGrass); return;
           case EventBulletHit.ID: result = typeof(EventBulletHit); return;
           default: break;
         }
+      }
+      public EventPlayerHealthUpdated PlayerHealthUpdated(EntityRef Entity, FP CurrentHealth, FP MaxHealth) {
+        var ev = _f.Context.AcquireEvent<EventPlayerHealthUpdated>(EventPlayerHealthUpdated.ID);
+        ev.Entity = Entity;
+        ev.CurrentHealth = CurrentHealth;
+        ev.MaxHealth = MaxHealth;
+        _f.AddEvent(ev);
+        return ev;
       }
       public EventOnPlayerEnteredGrass OnPlayerEnteredGrass(EntityRef player) {
         var ev = _f.Context.AcquireEvent<EventOnPlayerEnteredGrass>(EventOnPlayerEnteredGrass.ID);
@@ -87,13 +96,15 @@ namespace Quantum {
       }
     }
   }
-  public unsafe partial class EventOnPlayerEnteredGrass : EventBase {
+  public unsafe partial class EventPlayerHealthUpdated : EventBase {
     public new const Int32 ID = 0;
-    public EntityRef player;
-    protected EventOnPlayerEnteredGrass(Int32 id, EventFlags flags) : 
+    public EntityRef Entity;
+    public FP CurrentHealth;
+    public FP MaxHealth;
+    protected EventPlayerHealthUpdated(Int32 id, EventFlags flags) : 
         base(id, flags) {
     }
-    public EventOnPlayerEnteredGrass() : 
+    public EventPlayerHealthUpdated() : 
         base(0, EventFlags.Server|EventFlags.Client) {
     }
     public new QuantumGame Game {
@@ -107,18 +118,20 @@ namespace Quantum {
     public override Int32 GetHashCode() {
       unchecked {
         var hash = 37;
-        hash = hash * 31 + player.GetHashCode();
+        hash = hash * 31 + Entity.GetHashCode();
+        hash = hash * 31 + CurrentHealth.GetHashCode();
+        hash = hash * 31 + MaxHealth.GetHashCode();
         return hash;
       }
     }
   }
-  public unsafe partial class EventOnPlayerExitGrass : EventBase {
+  public unsafe partial class EventOnPlayerEnteredGrass : EventBase {
     public new const Int32 ID = 1;
     public EntityRef player;
-    protected EventOnPlayerExitGrass(Int32 id, EventFlags flags) : 
+    protected EventOnPlayerEnteredGrass(Int32 id, EventFlags flags) : 
         base(id, flags) {
     }
-    public EventOnPlayerExitGrass() : 
+    public EventOnPlayerEnteredGrass() : 
         base(1, EventFlags.Server|EventFlags.Client) {
     }
     public new QuantumGame Game {
@@ -137,13 +150,13 @@ namespace Quantum {
       }
     }
   }
-  public unsafe partial class EventBulletHit : EventBase {
+  public unsafe partial class EventOnPlayerExitGrass : EventBase {
     public new const Int32 ID = 2;
-    public EntityRef Bullet;
-    protected EventBulletHit(Int32 id, EventFlags flags) : 
+    public EntityRef player;
+    protected EventOnPlayerExitGrass(Int32 id, EventFlags flags) : 
         base(id, flags) {
     }
-    public EventBulletHit() : 
+    public EventOnPlayerExitGrass() : 
         base(2, EventFlags.Server|EventFlags.Client) {
     }
     public new QuantumGame Game {
@@ -157,6 +170,31 @@ namespace Quantum {
     public override Int32 GetHashCode() {
       unchecked {
         var hash = 43;
+        hash = hash * 31 + player.GetHashCode();
+        return hash;
+      }
+    }
+  }
+  public unsafe partial class EventBulletHit : EventBase {
+    public new const Int32 ID = 3;
+    public EntityRef Bullet;
+    protected EventBulletHit(Int32 id, EventFlags flags) : 
+        base(id, flags) {
+    }
+    public EventBulletHit() : 
+        base(3, EventFlags.Server|EventFlags.Client) {
+    }
+    public new QuantumGame Game {
+      get {
+        return (QuantumGame)base.Game;
+      }
+      set {
+        base.Game = value;
+      }
+    }
+    public override Int32 GetHashCode() {
+      unchecked {
+        var hash = 47;
         hash = hash * 31 + Bullet.GetHashCode();
         return hash;
       }

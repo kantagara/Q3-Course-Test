@@ -89,6 +89,43 @@
 
 ## Preview
 
+### Build 1417 (Apr 03, 2024)
+
+**Changes**
+
+- `FrameBase.FindAsset<T>(AssetRef, out T)` marked obsolete. Use `TryFindAsset` instead
+
+### Build 1416 (Apr 02, 2024)
+
+**Bug Fixes**
+
+- Fixed: Incorrect normal between box collisions when a shape is totally inside the other
+- Fixed: 3D Physics scene mesh always updating to the `Frame.Map`, even when a specific map is provided when forcing `Init` on the physics engine
+- Fixed: Not being able to reinitialized the 3D Scene Mesh from outside the Frame simulation loop, even if in a Verified frame
+- Fixed: 3D Scene Mesh structure not resetting the current tracked Map when calling `ResetMap` in the engine API
+
+### Build 1412 (Mar 27, 2024)
+
+**Breaking Changes**
+
+- The draw capsule API was changed to receive the extent instead of the height. Also, an override was added to use a capsule shape as an argument
+
+**Bug Fixes**
+
+- Fixed: 3D Physics issue when disabling `UseAngularVelocity`, which could cause some collision constraints to be ignored on every solver iteration
+- Fixed: Serialization of `PhysicsQueryRef`, which is now ensured to have a deterministic Version value
+
+### Build 1402 (Mar 25, 2024)
+
+**What's New**
+
+- Quantum gizmo selection screen overlay GUI to toggle Quantum gizmos more conveniently, open the overlay on the GizmoSettings inspector
+
+**Bug Fixes**
+
+- Fixed: CodeGen: `AssetRef<T>` incorrectly appearing as `AssetRef` when used in collections
+- Fixed: An issue on the plugin that caused large snapshot downloading to fail and cause disconnects or exceptions during late-joining
+
 ### Build 1393 (Mar 21, 2024)
 
 **Changes**
@@ -97,6 +134,7 @@
 
 **Bug Fixes**
 
+- Fixed: DllNotFoundException when starting a game on platforms other than Windows
 - Fixed: Desync caused by serialization of the PhysicsQueryRef
 
 ### Build 1390 (Mar 19, 2024)

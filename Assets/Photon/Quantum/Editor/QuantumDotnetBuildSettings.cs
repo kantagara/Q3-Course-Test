@@ -1,4 +1,4 @@
-﻿namespace Quantum.Editor {
+namespace Quantum.Editor {
   using System;
   using System.IO;
   using System.IO.Compression;

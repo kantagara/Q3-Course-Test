@@ -1,4 +1,4 @@
-﻿Shader "Quantum/Marker Series Graph"
+Shader "Quantum/Marker Series Graph"
 {
 	Properties
 	{

@@ -46,56 +46,6 @@ namespace Quantum {
     public virtual void BeforeBake() {
       UpdateFromSourceCollider(UpdateVerticesFromSourceOnBake);
     }
-
-#if UNITY_EDITOR
-    void OnDrawGizmos() {
-      if (Application.isPlaying == false) {
-        UpdateFromSourceCollider(updateVertices: false);
-      }
-
-      DrawGizmos(false);
-    }
-
-
-    void OnDrawGizmosSelected() {
-      if (Application.isPlaying == false) {
-        UpdateFromSourceCollider(updateVertices: false);
-      }
-
-      DrawGizmos(true);
-    }
-
-    void DrawGizmos(bool selected) {
-      
-      if (!QuantumGameGizmos.ShouldDraw(GlobalGizmosSettings.DrawColliderGizmos, selected, false)) {
-        return;
-      }
-
-      if (BakeAsStaticEdges2D) {
-        for (var i = 0; i < Vertices.Length; i++) {
-          QuantumStaticEdgeCollider2D.GetEdgeGizmosSettings(transform, PositionOffset, RotationOffset, Vertices[i], Vertices[(i + 1) % Vertices.Length], Height, out var start, out var end, out var edgeHeight);
-          GizmoUtils.DrawGizmosEdge(start, end, edgeHeight, GlobalGizmosSettings.GetSelectedColor(GlobalGizmosSettings.StaticColliderColor, selected), style: GlobalGizmosSettings.StaticColliderGizmoStyle);
-        }
-
-        return;
-      }
-
-      
-#if QUANTUM_XY
-      var verticalScale = -transform.lossyScale.z;
-#else
-      var verticalScale = transform.lossyScale.y;
-#endif
-
-      var heightScaled = Height.AsFloat * verticalScale;
-      var t = transform;
-      var matrix = Matrix4x4.TRS(
-        t.TransformPoint(PositionOffset.ToUnityVector3()),
-        t.rotation * RotationOffset.FlipRotation().ToUnityQuaternionDegrees(),
-        t.lossyScale);
-      GizmoUtils.DrawGizmoPolygon2D(matrix, Vertices, heightScaled, selected, GlobalGizmosSettings.GetSelectedColor(GlobalGizmosSettings.StaticColliderColor, selected), GlobalGizmosSettings.StaticColliderGizmoStyle);
-    }
-#endif
 #endif
   }
 }

@@ -46,26 +46,5 @@ namespace Quantum {
 
       DebugDraw.OnPostRender(camera);
     }
-
-#if UNITY_EDITOR
-    void OnDrawGizmos() {
-      if (Runner == null) {
-        return;
-      }
-
-      if (Runner.Session == null) {
-        return;
-      }
-
-      if (Runner.HideGizmos) {
-        return;
-      }
-
-      var game = Runner.Session.Game as QuantumGame;
-      if (game != null) {
-        QuantumGameGizmos.OnDrawGizmos(game, Runner.GizmoSettings ?? QuantumGameGizmosSettingsScriptableObject.Global.Settings);
-      }
-    }
-#endif
   }
 }

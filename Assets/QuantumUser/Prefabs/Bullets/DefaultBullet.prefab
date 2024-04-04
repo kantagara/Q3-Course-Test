@@ -209,7 +209,7 @@ GameObject:
   - component: {fileID: 2103904383105780411}
   - component: {fileID: -1168874114741265928}
   - component: {fileID: 777513739540710045}
-  - component: {fileID: -6921655212322538917}
+  - component: {fileID: 12973455418694190}
   m_Layer: 0
   m_Name: DefaultBullet
   m_TagString: Untagged
@@ -491,7 +491,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   trailRenderer: {fileID: 3068956773510629825}
---- !u!114 &-6921655212322538917
+--- !u!114 &12973455418694190
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -500,7 +500,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 3055301441527152227}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b2ae9642bcf53f141a669a68e96ee00a, type: 3}
+  m_Script: {fileID: 11500000, guid: e1c1aa8b2abbf224f8fb2d305b035251, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Prototype:

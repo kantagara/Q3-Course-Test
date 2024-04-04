@@ -5598,6 +5598,34 @@ namespace Quantum.Editor {
 #endregion
 
 
+#region Assets/Photon/Quantum/Editor/PropertyDrawers/GizmoOptionalBoolPropertyDrawer.cs
+
+namespace Quantum.Editor {
+  using UnityEditor;
+  using UnityEngine;
+
+  [CustomPropertyDrawer(typeof(OptionalGizmoBool))]
+  public class GizmoOptionalBoolPropertyDrawer : PropertyDrawer {
+    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
+      EditorGUI.BeginProperty(position, label, property);
+      EditorGUI.BeginChangeCheck();
+      var rect = new Rect(position.x, position.y, position.width, position.height);
+      var valueProperty = property.FindPropertyRelative("_value");
+      EditorGUI.PropertyField(rect, valueProperty,
+        new GUIContent { text = QuantumGizmoEditorUtil.AddSpacesToString(property.name) }, true);
+
+      if (EditorGUI.EndChangeCheck()) {
+        valueProperty.serializedObject.ApplyModifiedProperties();
+      }
+
+      EditorGUI.EndProperty();
+    }
+  }
+}
+
+#endregion
+
+
 #region Assets/Photon/Quantum/Editor/PropertyDrawers/LayerMaskDrawer.cs
 
 namespace Quantum.Editor {
@@ -6357,7 +6385,7 @@ namespace Quantum.Editor {
 
 #region Assets/Photon/Quantum/Editor/PropertyDrawers/UnionPrototypeDrawer.cs
 
-﻿namespace Quantum.Editor {
+namespace Quantum.Editor {
   using System;
   using System.Collections.Generic;
   using System.Linq;
@@ -15757,6 +15785,648 @@ namespace Quantum {
 #endregion
 
 
+#region Assets/Photon/Quantum/Editor/QuantumEditorGizmoOverlay.cs
+
+namespace Quantum.Editor {
+  using System;
+  using System.Collections.Generic;
+  using System.Linq;
+  using System.Reflection;
+  using UnityEditor;
+  using UnityEditor.Overlays;
+  using UnityEditor.UIElements;
+  using UnityEngine;
+  using UnityEngine.UIElements;
+  using PopupWindow = UnityEditor.PopupWindow;
+  using RangeAttribute = UnityEngine.RangeAttribute;
+
+  [Icon("Assets/Photon/Quantum/Editor/EditorResources/QuantumEditorTextureQtnIcon.png")]
+  [Overlay(typeof(SceneView), QuantumGameGizmosSettings.ID, DISPLAY_NAME, true)]
+  internal class QuantumEditorGizmoOverlay : Overlay {
+    const string DISPLAY_NAME = "Quantum Gizmos";
+    SerializedObject _serializedObject;
+    SerializedProperty _settingsProperty;
+
+    const string VisibilityOnIcon = "animationvisibilitytoggleon";
+    const string VisibilityOffIcon = "animationvisibilitytoggleoff";
+
+    const string ApplicationPlayingIcon = "d_PlayButton";
+    const string SelectedIcon = "Grid.BoxTool";
+    const string SettingsIcon = "TerrainInspector.TerrainToolSettings On";
+
+    readonly Texture2D _onPlayIcon = GetUnityIcon(ApplicationPlayingIcon);
+    readonly Texture2D _onSelectedIcon = GetUnityIcon(SelectedIcon);
+
+    readonly Texture2D _settingsIcon = GetUnityIcon(SettingsIcon);
+
+    readonly Dictionary<GizmoHeaderInfo, GizmoHeader> _headers =
+      new Dictionary<GizmoHeaderInfo, GizmoHeader>();
+
+    readonly Dictionary<QuantumGizmoEntry, ToolbarToggle> _gizmoEntryToToggle =
+      new Dictionary<QuantumGizmoEntry, ToolbarToggle>();
+
+    public override void OnCreated() {
+    }
+
+    private VisualElement FindParentWithClass(VisualElement element, string className) {
+      var parent = element;
+
+      while (parent != null) {
+        if (parent.ClassListContains(className)) {
+          return parent;
+        }
+
+        parent = parent.parent;
+      }
+
+      return null;
+    }
+
+    public override VisualElement CreatePanelContent() {
+      // hot reload re-uses the same class instance, so we need to clear the state
+      _gizmoEntryToToggle.Clear();
+      _headers.Clear();
+
+      _serializedObject = new SerializedObject(QuantumGameGizmosSettingsScriptableObject.Global);
+      _settingsProperty =
+        _serializedObject.FindProperty(nameof(QuantumGameGizmosSettingsScriptableObject.Global.Settings));
+
+      var root = new VisualElement();
+
+      root.name = id.ToLower() + "-content-root";
+
+      root.style.maxWidth = Length.Percent(100);
+      // leave room for toolbar
+      root.style.maxHeight = containerWindow.position.height * .925f;
+
+      SetGlobalSettingsUI(root);
+      var sv = CreateScrollView(root);
+      CreateScrollViewContent(sv);
+      BindSearchBar(root);
+
+      ForceBackgroundColor(root);
+
+      return root;
+    }
+
+    private void ForceBackgroundColor(VisualElement root) {
+      Color unityDark = new Color32(56, 56, 56, 255);
+
+      const string bgClassName = "overlay-box-background";
+      ToggleElement(root, false);
+      
+      // set background color!!
+      EditorApplication.delayCall += () => {
+        var contentRoot = typeof(Overlay)
+          .GetProperty("contentRoot",
+            BindingFlags.NonPublic | BindingFlags.Instance)?
+          .GetValue(this) as VisualElement;
+        
+        if (contentRoot == null) {
+          return;
+        }
+
+        // not in toolbar and not floating
+        if (isInToolbar == false && floating == false) {
+          var bg = FindParentWithClass(contentRoot, bgClassName);
+          bg.style.backgroundColor = unityDark;
+        }
+
+        // floating and expanded
+        if (floating && collapsed == false) {
+          var tree = contentRoot.panel.visualTree;
+          var overlay = tree.Q<VisualElement>(DISPLAY_NAME);
+  
+          var overlayBox = overlay.Q<VisualElement>(className: bgClassName);
+
+          overlayBox.style.backgroundColor = unityDark;
+        }
+
+        // access the modal popup and set the background color
+        if (collapsed) {
+            var modalPopup = typeof(Overlay)
+              .GetField("m_ModalPopup",
+                BindingFlags.NonPublic | BindingFlags.Instance)?
+              .GetValue(this) as VisualElement;
+
+            var bg = modalPopup.Q(className: bgClassName);
+            bg.style.backgroundColor = unityDark;
+        }
+        
+        ToggleElement(root, true);
+      };
+    }
+    
+    private VisualElement CreateScrollView(VisualElement root) {
+      var scrollView = QuantumGizmoEditorUtil.CreateScrollView();
+      root.Add(scrollView);
+
+      return scrollView;
+    }
+
+    private void BindSearchBar(VisualElement container) {
+      var scrollView = container.Q<ScrollView>();
+      var searchBar = QuantumGizmoEditorUtil.CreateSearchField();
+
+      searchBar.RegisterValueChangedCallback(evt => {
+        var text = evt.newValue;
+
+        if (string.IsNullOrEmpty(text)) {
+          foreach (var child in scrollView.Children()) {
+            ToggleElement(child, true);
+          }
+
+          return;
+        }
+
+        foreach (var child in scrollView.Children()) {
+          var nameElement = child.Q<Label>();
+
+          if (nameElement == null)
+            continue;
+
+          ToggleElement(child, nameElement.text.Contains(text, StringComparison.OrdinalIgnoreCase));
+        }
+      });
+
+      // set the search bar to the top of the scroll view
+      scrollView.Insert(0, searchBar);
+    }
+
+    private void SetGlobalSettingsUI(VisualElement container) {
+      var label = QuantumGizmoEditorUtil.CreateLabel("Global Gizmo Settings".ToUpper(), 15);
+
+      label.style.unityFontStyleAndWeight = QuantumEditorSkin.ScriptHeaderLabelStyle.fontStyle;
+      label.style.unityFontDefinition = new StyleFontDefinition(QuantumEditorSkin.ScriptHeaderLabelStyle.font);
+
+      container.Add(label);
+
+      var img = new Image();
+      img.image = AssetDatabase.LoadAssetAtPath("Assets/Photon/Quantum/Editor/EditorResources/Quantum-logo-2x.png",
+        typeof(Texture2D)) as Texture2D;
+
+      img.style.alignSelf = Align.FlexEnd;
+      img.style.opacity = 0.25f;
+      img.style.width = 80;
+      img.style.height = 80;
+      img.style.top = -18;
+      img.style.position = Position.Absolute;
+
+      container.Add(img);
+
+      var brightnessText = nameof(QuantumGameGizmosSettings.SelectedBrightness);
+      var scaleText = nameof(QuantumGameGizmosSettings.IconScale);
+
+      BindSlider(container, brightnessText);
+      BindSlider(container, scaleText);
+    }
+
+    private void UpdateEnabledIcon(ToolbarToggle toggle) {
+      var img = toggle.Q<Image>();
+
+      img.image = GetUnityIcon(toggle.value ? VisibilityOnIcon : VisibilityOffIcon);
+    }
+
+    private static Texture2D GetUnityIcon(string name) {
+      return (Texture2D)EditorGUIUtility.IconContent(name).image;
+    }
+
+    private void SetupToolBarToggles(
+      ToolbarToggle selected,
+      QuantumGizmoEntry entry) {
+      selected.tooltip = "Only Draw On Select";
+
+      SetFlagOnToolbarToggle(
+        selected,
+        newVal => entry.OnlyDrawSelected = newVal,
+        entry.OnlyDrawSelected,
+        _onSelectedIcon,
+        _onSelectedIcon
+      );
+    }
+
+    private void SetFlagOnToolbarToggle(
+      ToolbarToggle toggle,
+      Action<bool> setter,
+      OptionalGizmoBool currentVal,
+      Texture2D on,
+      Texture2D off) {
+      var img = new Image();
+      toggle.Add(img);
+
+      if (currentVal.HasValue == false) {
+        toggle.style.display = DisplayStyle.None;
+        return;
+      }
+
+      void Evaluate(bool newValue) {
+        toggle.value = newValue;
+        img.image = newValue ? on : off;
+
+        setter(newValue);
+
+        _serializedObject.Update();
+        _serializedObject.ApplyModifiedProperties();
+        EditorUtility.SetDirty(QuantumGameGizmosSettingsScriptableObject.Global);
+      }
+
+      toggle.RegisterCallback<ChangeEvent<bool>>(evt => Evaluate(evt.newValue));
+
+      Evaluate(currentVal);
+    }
+
+    private void CreateScrollViewContent(VisualElement scrollView) {
+      var so = QuantumGameGizmosSettingsScriptableObject.Global;
+      var gs = so.Settings;
+
+      // get all gizmo configs from the settings
+      var entries = GetEntries(gs);
+
+      foreach (var entry in entries) {
+        var headerInfo = entry.Header;
+
+        if (_headers.TryGetValue(headerInfo, out var header) == false) {
+          header = InsertHeader(headerInfo);
+          scrollView.Add(header.Element);
+        }
+
+        header.Entries.Add(entry.Entry);
+        header.Update();
+
+        var gizmoName = QuantumGizmoEditorUtil.AddSpacesToString(entry.Name);
+
+        // hack to fix navmesh being separated
+        gizmoName = gizmoName.Replace("Nav Mesh", "NavMesh");
+
+        var gizmoEntry = entry.Entry;
+
+        var clone = QuantumGizmoEditorUtil.CreateGizmoToolbar(
+          gizmoName,
+          out var enabledField,
+          out var styleButton,
+          out var selectedToggle,
+          out var togglesParent
+        );
+
+        var help = QuantumCodeDoc.FindEntry(entry.Field, false);
+
+        if (help != null) {
+          clone.tooltip = help.text;
+        }
+
+        enabledField.tooltip = "Enable/Disable Gizmo";
+        styleButton.tooltip = "Edit Gizmo Style";
+
+        var img = new Image();
+        enabledField.Add(img);
+
+        var styleImg = new Image();
+        styleButton.Add(styleImg);
+
+        styleImg.image = _settingsIcon;
+
+        SetupToolBarToggles(
+          selectedToggle,
+          gizmoEntry
+        );
+
+        styleButton.clicked += () => {
+          var clonedPopup = QuantumGizmoEditorUtil.CreateStylePopup(
+            out var colorField,
+            out var sColorField,
+            out var wColorField,
+            out var fillStyle,
+            out var scaleStyle,
+            out var scaleLabel
+          );
+
+          colorField.value = gizmoEntry.Color;
+          ToggleElement(fillStyle, false);
+          ToggleElement(sColorField.parent, false);
+          ToggleElement(wColorField.parent, false);
+
+          if (gizmoEntry is JointGizmoEntry joints) {
+            sColorField.value = joints.SecondaryColor;
+            wColorField.value = joints.WarningColor;
+
+            ToggleElement(sColorField.parent, true);
+            ToggleElement(wColorField.parent, true);
+
+            sColorField.RegisterCallback<ChangeEvent<Color>>(evt => {
+              _serializedObject.Update();
+              joints.SecondaryColor = evt.newValue;
+              _serializedObject.ApplyModifiedProperties();
+              EditorUtility.SetDirty(so);
+            });
+
+            wColorField.RegisterCallback<ChangeEvent<Color>>(evt => {
+              _serializedObject.Update();
+              joints.WarningColor = evt.newValue;
+              _serializedObject.ApplyModifiedProperties();
+              EditorUtility.SetDirty(so);
+            });
+          }
+
+          if (gizmoEntry is NavMeshGizmoEntry navMesh) {
+            sColorField.value = navMesh.RegionColor;
+            ToggleElement(sColorField.parent, true);
+            sColorField.parent.Q<Label>().text = "Region Color";
+
+            sColorField.RegisterCallback<ChangeEvent<Color>>(evt => {
+              _serializedObject.Update();
+              navMesh.RegionColor = evt.newValue;
+              _serializedObject.ApplyModifiedProperties();
+              EditorUtility.SetDirty(so);
+            });
+          }
+
+          if (gizmoEntry is NavMeshBorderGizmoEntry navMeshBorder) {
+            sColorField.value = navMeshBorder.BorderNormalColor;
+            ToggleElement(sColorField.parent, true);
+            sColorField.parent.Q<Label>().text = "Normal Color";
+            ToggleElement(fillStyle, true);
+            fillStyle.text = "Draw Normals";
+            fillStyle.value = navMeshBorder.DrawNormals;
+
+            fillStyle.RegisterCallback<ChangeEvent<bool>>(evt => {
+              _serializedObject.Update();
+              navMeshBorder.DrawNormals = evt.newValue;
+              _serializedObject.ApplyModifiedProperties();
+              EditorUtility.SetDirty(so);
+            });
+
+            sColorField.RegisterCallback<ChangeEvent<Color>>(evt => {
+              _serializedObject.Update();
+              navMeshBorder.BorderNormalColor = evt.newValue;
+              _serializedObject.ApplyModifiedProperties();
+              EditorUtility.SetDirty(so);
+            });
+          }
+
+          if (gizmoEntry.Scale > 0) {
+            scaleStyle.value = gizmoEntry.Scale;
+
+            // get min and max values from the attribute
+            var min = 0f;
+            var max = 1f;
+
+            var field = typeof(QuantumGizmoEntry).GetField(nameof(QuantumGizmoEntry.Scale));
+
+            if (field.GetCustomAttributes(typeof(RangeAttribute), true).FirstOrDefault() is RangeAttribute range) {
+              min = range.min;
+              max = range.max;
+            }
+
+            scaleStyle.lowValue = min;
+            scaleStyle.highValue = max;
+          } else {
+            ToggleElement(scaleStyle, false);
+            ToggleElement(scaleLabel, false);
+          }
+
+          if (gizmoEntry.DisableFill.HasValue) {
+            var value = gizmoEntry.DisableFill;
+            fillStyle.value = value;
+            ToggleElement(fillStyle, true);
+          }
+
+          scaleStyle.RegisterCallback<ChangeEvent<float>>(evt => {
+            _serializedObject.Update();
+            gizmoEntry.Scale = evt.newValue;
+            _serializedObject.ApplyModifiedProperties();
+            EditorUtility.SetDirty(so);
+          });
+
+          fillStyle.RegisterCallback<ChangeEvent<bool>>(evt => {
+            _serializedObject.Update();
+            gizmoEntry.DisableFill = evt.newValue;
+            _serializedObject.ApplyModifiedProperties();
+            EditorUtility.SetDirty(so);
+          });
+
+          colorField.RegisterCallback<ChangeEvent<Color>>(evt => {
+            _serializedObject.Update();
+            gizmoEntry.Color = evt.newValue;
+            _serializedObject.ApplyModifiedProperties();
+            EditorUtility.SetDirty(so);
+          });
+
+          var window = new QuantumEditorMapGizmoStylePopup { PopUpContent = clonedPopup };
+
+          PopupWindow.Show(styleButton.worldBound, window);
+        };
+
+        enabledField.value = gizmoEntry.Enabled;
+
+        UpdateEnabledIcon(enabledField);
+
+        _gizmoEntryToToggle[gizmoEntry] = enabledField;
+
+        enabledField.RegisterCallback<ChangeEvent<bool>>(evt => {
+          gizmoEntry.Enabled = evt.newValue;
+          _serializedObject.ApplyModifiedProperties();
+          EditorUtility.SetDirty(so);
+
+          UpdateEnabledIcon(enabledField);
+
+          UpdateToggleStates(gizmoEntry);
+        });
+
+        scrollView.Add(clone);
+      }
+    }
+
+    private void UpdateToggleStates(QuantumGizmoEntry entry) {
+      foreach (var kvp in _headers) {
+        if (kvp.Value.Entries.Contains(entry)) {
+          kvp.Value.Update();
+        }
+      }
+    }
+
+    private GizmoHeader InsertHeader(GizmoHeaderInfo info) {
+      var header = new GizmoHeader();
+
+      var element = QuantumGizmoEditorUtil.CreateHeader(info.Name, out var toggle, out var bg);
+
+      bg.style.backgroundColor = QuantumEditorSkin.GetScriptHeaderColor(info.BackColor);
+      toggle.style.backgroundColor = QuantumEditorSkin.GetScriptHeaderColor(info.BackColor).Darken();
+      header.Element = element;
+      header.Entries = new List<QuantumGizmoEntry>();
+
+      _headers.Add(info, header);
+
+      header.Update = () => {
+        UpdateHeaderToggleValue(toggle, info);
+        UpdateHeaderToggleImage(toggle, info);
+      };
+
+      toggle.RegisterValueChangedCallback(evt => {
+        foreach (var entry in header.Entries) {
+          entry.Enabled = evt.newValue;
+
+          var gToggle = _gizmoEntryToToggle[entry];
+          gToggle.SetValueWithoutNotify(evt.newValue);
+
+          UpdateEnabledIcon(gToggle);
+        }
+
+        UpdateHeaderToggleImage(toggle, info);
+
+        _serializedObject.Update();
+        _serializedObject.ApplyModifiedProperties();
+        EditorUtility.SetDirty(QuantumGameGizmosSettingsScriptableObject.Global);
+      });
+
+      return header;
+    }
+
+    private bool SomeButNotAllGizmosEnabled(IEnumerable<QuantumGizmoEntry> entries) {
+      bool foundEnabled = false;
+      bool foundDisabled = false;
+
+      foreach (var entry in entries) {
+        if (entry.Enabled) {
+          foundEnabled = true;
+        } else {
+          foundDisabled = true;
+        }
+      }
+
+      return foundEnabled && foundDisabled;
+    }
+
+    private bool AllGizmosEnabled(IEnumerable<QuantumGizmoEntry> entries) {
+      foreach (var entry in entries) {
+        if (!entry.Enabled) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    private void UpdateHeaderToggleValue(ToolbarToggle toggle, GizmoHeaderInfo header) {
+      var h = _headers[header];
+      var someButNotAllEnabled = SomeButNotAllGizmosEnabled(h.Entries);
+      var allEnabled = AllGizmosEnabled(h.Entries);
+
+      toggle.SetValueWithoutNotify(allEnabled || someButNotAllEnabled);
+    }
+
+    private void UpdateHeaderToggleImage(ToolbarToggle toggle, GizmoHeaderInfo header) {
+      var h = _headers[header];
+      var image = toggle.Q<Image>();
+
+      var someButNotAllEnabled = SomeButNotAllGizmosEnabled(h.Entries);
+      var allEnabled = AllGizmosEnabled(h.Entries);
+
+      if (allEnabled) {
+        image.image = GetUnityIcon(VisibilityOnIcon);
+      } else {
+        image.image = GetUnityIcon(someButNotAllEnabled ? VisibilityOnIcon : VisibilityOffIcon);
+      }
+    }
+
+    private static void ToggleElement(VisualElement e, bool visible) {
+      e.style.visibility = visible ? Visibility.Visible : Visibility.Hidden;
+      e.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+    }
+
+    private GizmoEntryInfo[] GetEntries(QuantumGameGizmosSettings settings) {
+      // find all fields of type GizmoEntry or inherited from it
+      var fields = settings.GetType().GetFields()
+        .Where(f => f.FieldType == typeof(QuantumGizmoEntry) || f.FieldType.IsSubclassOf(typeof(QuantumGizmoEntry)))
+        .ToArray();
+
+      var entries = new List<GizmoEntryInfo>();
+
+      GizmoHeaderInfo currentHeader = null;
+
+      for (var i = 0; i < fields.Length; i++) {
+        var field = fields[i];
+        var entry = (QuantumGizmoEntry)field.GetValue(settings);
+
+        var attr = field
+          .GetCustomAttributes(typeof(HeaderAttribute), false)
+          .FirstOrDefault();
+
+        if (attr is HeaderAttribute header) {
+          currentHeader = new GizmoHeaderInfo { Name = header.header };
+
+          var colorAttr = field
+            .GetCustomAttributes(typeof(GizmoIconColorAttribute), false)
+            .FirstOrDefault();
+
+          if (colorAttr is GizmoIconColorAttribute color) {
+            currentHeader.BackColor = color.Color;
+          }
+        }
+
+        entries.Add(new GizmoEntryInfo { Name = field.Name, Field = field, Entry = entry, Header = currentHeader });
+      }
+
+      return entries.ToArray();
+    }
+
+    private void BindSlider(VisualElement parent, string name) {
+      var min = 0f;
+      var max = 1f;
+
+      var field = typeof(QuantumGameGizmosSettings).GetField(name);
+      var value = (float)field.GetValue(QuantumGameGizmosSettingsScriptableObject.Global.Settings);
+
+      if (field.GetCustomAttributes(typeof(RangeAttribute), true).FirstOrDefault() is RangeAttribute range) {
+        min = range.min;
+        max = range.max;
+      }
+
+      var property = _settingsProperty.FindPropertyRelative(name);
+
+      EventCallback<ChangeEvent<float>> callback = evt => {
+        _serializedObject.Update();
+        property.floatValue = evt.newValue;
+        _serializedObject.ApplyModifiedProperties();
+        EditorUtility.SetDirty(QuantumGameGizmosSettingsScriptableObject.Global);
+      };
+
+      // add spaces between capital letters
+      var spaced = QuantumGizmoEditorUtil.AddSpacesToString(name);
+      var newSlider = QuantumGizmoEditorUtil.CreateSliderWithTitle(
+        spaced,
+        value,
+        min,
+        max,
+        callback
+      );
+
+      parent.Add(newSlider);
+    }
+  }
+
+  class GizmoHeaderInfo {
+    public string Name;
+    public ScriptHeaderBackColor BackColor;
+  }
+
+  class GizmoHeader {
+    public VisualElement Element;
+    public List<QuantumGizmoEntry> Entries;
+
+    public Action Update;
+  }
+
+  class GizmoEntryInfo {
+    public string Name;
+    public QuantumGizmoEntry Entry;
+    public FieldInfo Field;
+    public GizmoHeaderInfo Header;
+  }
+}
+
+#endregion
+
+
 #region Assets/Photon/Quantum/Editor/QuantumEditorLog.cs
 
 namespace Quantum.Editor {
@@ -15768,6 +16438,32 @@ namespace Quantum.Editor {
   //     InitColor(EditorGUIUtility.isProSkin ? new Color32(32, 203, 145, 255) : new Color32(18, 75, 60, 255));
   //   }
   // }
+}
+
+#endregion
+
+
+#region Assets/Photon/Quantum/Editor/QuantumEditorMapGizmoStylePopup.cs
+
+namespace Quantum.Editor {
+  using UnityEditor;
+  using UnityEngine;
+  using UnityEngine.UIElements;
+
+  public class QuantumEditorMapGizmoStylePopup : PopupWindowContent {
+    public VisualElement PopUpContent;
+
+    public override Vector2 GetWindowSize() {
+      return new Vector2(110, 120);
+    }
+
+    public override void OnOpen() {
+      editorWindow.rootVisualElement.Add(PopUpContent);
+    }
+
+    public override void OnGUI(Rect rect) {
+    }
+  }
 }
 
 #endregion
@@ -16881,6 +17577,235 @@ namespace Quantum.Editor {
     }
 
     #endregion
+  }
+}
+
+#endregion
+
+
+#region Assets/Photon/Quantum/Editor/QuantumGizmoEditorUtil.cs
+
+namespace Quantum {
+  using System.Linq;
+  using Editor;
+  using UnityEditor.UIElements;
+  using UnityEngine;
+  using UnityEngine.UIElements;
+
+  public class QuantumGizmoEditorUtil {
+    public static VisualElement CreateScrollView() {
+      var scrollView = new ScrollView();
+
+      scrollView.horizontalScroller.SetEnabled(false);
+      scrollView.verticalScroller.SetEnabled(true);
+
+      return scrollView;
+    }
+
+    public static VisualElement CreateGizmoToolbar(
+      string gizmoName,
+      out ToolbarToggle visToggle,
+      out ToolbarButton styleButton,
+      out ToolbarToggle selectedToggle,
+      out VisualElement optionsParent) {
+      var toolbar = new Toolbar();
+
+      toolbar.style.paddingLeft = 5;
+      toolbar.style.paddingRight = 5;
+
+      var left = new VisualElement();
+      left.style.justifyContent = Justify.FlexStart;
+      left.style.flexDirection = FlexDirection.Row;
+
+      var label = new Label(gizmoName);
+
+      label.style.paddingLeft = 5;
+      label.style.alignSelf = Align.Center;
+      label.style.unityFontStyleAndWeight = FontStyle.Bold;
+      label.style.fontSize = 10;
+
+      visToggle = new ToolbarToggle();
+
+      left.Add(visToggle);
+      left.Add(label);
+
+      toolbar.Add(left);
+
+      var spacer = new ToolbarSpacer();
+      spacer.style.flexGrow = 1;
+
+      toolbar.Add(spacer);
+
+      var right = new VisualElement();
+
+      right.style.justifyContent = Justify.FlexEnd;
+      right.style.flexDirection = FlexDirection.Row;
+      right.style.paddingLeft = 5;
+      right.style.paddingRight = 5;
+
+      selectedToggle = new ToolbarToggle();
+
+      right.Add(selectedToggle);
+
+      toolbar.Add(right);
+
+      styleButton = new ToolbarButton();
+
+      toolbar.Add(styleButton);
+
+      optionsParent = right;
+
+      return toolbar;
+    }
+
+    public static VisualElement CreateStylePopup(
+      out ColorField mainColorField,
+      out ColorField secondaryColorField,
+      out ColorField warningColorField,
+      out Toggle disabledFillToggle,
+      out Slider scaleSlider,
+      out Label scaleLabel) {
+      var root = new VisualElement();
+
+      root.style.height = Length.Percent(100);
+      root.style.width = Length.Percent(100);
+      root.style.paddingLeft = 2;
+      root.style.paddingRight = 2;
+      root.style.paddingTop = 2;
+      root.style.paddingBottom = 2;
+
+      var colorFieldContainer = CreateColorField("Main Color", out mainColorField);
+
+      root.Add(colorFieldContainer);
+
+      var sColorFieldContainer = CreateColorField("Secondary Color", out secondaryColorField);
+
+      root.Add(sColorFieldContainer);
+
+      var warningColorFieldContainer = CreateColorField("Warning Color", out warningColorField);
+
+      root.Add(warningColorFieldContainer);
+
+      disabledFillToggle = new Toggle();
+      disabledFillToggle.text = "Disable Fill";
+
+      root.Add(disabledFillToggle);
+
+      scaleLabel = new Label("Scale");
+
+      root.Add(scaleLabel);
+
+      scaleSlider = new Slider(1, 5);
+
+      root.Add(scaleSlider);
+
+      return root;
+    }
+
+    private static VisualElement CreateColorField(string label, out ColorField colorField) {
+      var container = new VisualElement();
+      var colorLabel = new Label(label);
+      colorField = new ColorField();
+
+      container.Add(colorLabel);
+      container.Add(colorField);
+
+      return container;
+    }
+
+    public static ToolbarSearchField CreateSearchField() {
+      var searchField = new ToolbarSearchField();
+      searchField.style.flexGrow = 1;
+      return searchField;
+    }
+
+    public static VisualElement CreateHeader(string text, out ToolbarToggle toggle, out VisualElement bg) {
+      var visualElement = new VisualElement();
+
+      // darkened unity default color
+      Color dark = new Color32(45, 45, 45, 255);
+
+      visualElement.style.flexDirection = FlexDirection.Row;
+      visualElement.style.paddingLeft = 5;
+      visualElement.style.paddingRight = 5;
+      visualElement.style.marginTop = 1;
+      visualElement.style.backgroundColor = dark;
+
+      bg = visualElement;
+
+      toggle = new ToolbarToggle();
+      var toggleImg = new Image();
+
+      toggle.Add(toggleImg);
+
+      var header = new Label(text.ToUpper());
+      header.style.paddingLeft = 5;
+      header.style.unityFontStyleAndWeight = QuantumEditorSkin.ScriptHeaderLabelStyle.fontStyle;
+      header.style.unityFontDefinition = new StyleFontDefinition(QuantumEditorSkin.ScriptHeaderLabelStyle.font);
+      header.style.alignSelf = Align.Center;
+      header.style.fontSize = 15;
+
+      visualElement.Add(toggle);
+      visualElement.Add(header);
+
+      var spacer = new VisualElement();
+      spacer.style.flexGrow = 1;
+      visualElement.Add(spacer);
+
+      var img = new Image();
+      img.image = QuantumEditorSkin.ScriptHeaderIconStyle.normal.background;
+      img.style.justifyContent = Justify.FlexEnd;
+      visualElement.Add(img);
+
+      return visualElement;
+    }
+
+    public static VisualElement CreateLabel(string text, int fontSize = 10) {
+      var label = new Label(text);
+      label.style.paddingLeft = 5;
+      label.style.paddingRight = 5;
+      label.style.unityFontStyleAndWeight = FontStyle.Bold;
+      label.style.fontSize = fontSize;
+      return label;
+    }
+
+    public static VisualElement CreateSliderWithTitle(
+      string title,
+      float value,
+      float min,
+      float max,
+      EventCallback<ChangeEvent<float>> callback) {
+      var parent = new VisualElement();
+      var label = new Label(title);
+      var slider = new Slider(min, max) { value = value };
+      var spacer = new VisualElement();
+
+      parent.Add(label);
+      parent.Add(spacer);
+      parent.Add(slider);
+
+      spacer.style.flexGrow = 1;
+
+      parent.style.flexDirection = FlexDirection.Row;
+      parent.style.paddingLeft = 5;
+      parent.style.paddingRight = 5;
+
+      label.style.alignSelf = Align.Center;
+      label.style.unityFontStyleAndWeight = FontStyle.Bold;
+      label.style.fontSize = 10;
+
+      slider.style.width = Length.Percent(50);
+      slider.style.height = 20;
+
+      slider.RegisterCallback(callback);
+
+      return parent;
+    }
+
+    public static string AddSpacesToString(string name) {
+      var spaced = string.Concat(name.Select(x => char.IsUpper(x) ? " " + x : x.ToString())).TrimStart(' ');
+      return spaced;
+    }
   }
 }
 
@@ -19495,7 +20420,8 @@ namespace Quantum.Editor {
       QuantumMapLoader.ResetStatics();
       DebugDraw.Clear();
 
-      QuantumNavMesh.InvalidateGizmos();
+      QuantumGameGizmos.InvalidateNavMeshGizmos();
+      QuantumGameGizmos.InvalidatePhysicsGizmos();
 
       QuantumUnityNativeUtility.ResetStatics();
     }

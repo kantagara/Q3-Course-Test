@@ -22,10 +22,16 @@ namespace Quantum.Systems
             }
 
             var nextPosition = filter.Transform->Position + filter.Transform->Up * filter.Bullet->Speed * f.DeltaTime;
-            
-            if (CheckCollision(f, filter, nextPosition))
+            if (CheckCollision(f, filter, nextPosition, out var entityHit))
             {
                 f.Events.BulletHit(filter.EntityRef);
+
+                if (entityHit != EntityRef.None && f.Unsafe.TryGetPointer(entityHit, out Damageable* damageable))
+                {
+                    var damageableAsset = f.FindAsset(damageable->DamageableBase);
+                    damageableAsset.TakeDamage(f, entityHit, filter.Bullet->Owner, damageable, filter.Bullet->Damage);
+                }
+                
                 f.Destroy(filter.EntityRef);
                 return;
             }
@@ -34,8 +40,10 @@ namespace Quantum.Systems
         }
         
 
-        private bool CheckCollision(Frame f, Filter filter, FPVector2 futurePosition)
+        private bool CheckCollision(Frame f, Filter filter, FPVector2 futurePosition, out EntityRef entityHit)
         {
+            entityHit = EntityRef.None;
+            
             var bullet = f.Get<Bullet>(filter.EntityRef);
             var bulletTransform = f.Unsafe.GetPointer<Transform2D>(filter.EntityRef);
             var playerThatShotBullet = bullet.Owner;
@@ -46,6 +54,7 @@ namespace Quantum.Systems
                 var collision = collisions[i];
                 if(collision.Entity == filter.EntityRef || collision.Entity == playerThatShotBullet)
                     continue;
+                entityHit = collision.Entity;
                 
                 return true;
             }

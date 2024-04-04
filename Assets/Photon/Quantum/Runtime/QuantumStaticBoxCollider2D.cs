@@ -54,51 +54,6 @@ namespace Quantum {
     public virtual void BeforeBake() {
       UpdateFromSourceCollider();
     }
-
-#if UNITY_EDITOR
-    void OnDrawGizmos() {
-      if (Application.isPlaying == false) {
-        UpdateFromSourceCollider();
-      }
-
-      DrawGizmos(false);
-    }
-
-    void OnDrawGizmosSelected() {
-      if (Application.isPlaying == false) {
-        UpdateFromSourceCollider();
-      }
-
-      DrawGizmos(true);
-    }
-
-    void DrawGizmos(bool selected) {
-      
-      if (!QuantumGameGizmos.ShouldDraw(GlobalGizmosSettings.DrawColliderGizmos, selected, false)) {
-        return;
-      }
-
-      var size   = Size.ToUnityVector3();
-      var offset = Vector3.zero;
-
-#if QUANTUM_XY
-    size.z = -Height.AsFloat;
-    offset.z = size.z / 2.0f;
-#else
-      size.y   = Height.AsFloat;
-      offset.y = size.y / 2.0f;
-#endif
-
-      var t = transform;
-      var tLossyScale = t.lossyScale;
-
-      var matrix = Matrix4x4.TRS(
-        t.TransformPoint(PositionOffset.ToUnityVector3()),
-        t.rotation * RotationOffset.FlipRotation().ToUnityQuaternionDegrees(),
-        tLossyScale) * Matrix4x4.Translate(offset);
-      GizmoUtils.DrawGizmosBox(matrix, size, GlobalGizmosSettings.GetSelectedColor(GlobalGizmosSettings.StaticColliderColor, selected), style: GlobalGizmosSettings.StaticColliderGizmoStyle);
-    }
-#endif
     
 #endif
   }

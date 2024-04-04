@@ -1497,7 +1497,7 @@ namespace Quantum {
   using Photon.Deterministic;
   using Quantum.Core;
   public unsafe interface ISignalOnComponentAdded<T> : ISignal where T : unmanaged, IComponent {
-    void OnAdded(Frame f, EntityRef entity, T* kcc);
+    void OnAdded(Frame f, EntityRef entity, T* component);
   }
 
   public unsafe interface ISignalOnComponentRemoved<T> : ISignal where T : unmanaged, IComponent {
@@ -1762,7 +1762,7 @@ namespace Quantum {
 
 #region Assets/Photon/Quantum/Simulation/Core/FrameThreadSafeExtensions.cs
 
-﻿namespace Quantum {
+namespace Quantum {
   using System.Runtime.CompilerServices;
   
   public static unsafe class FrameThreadSafeExtensions {
@@ -1784,7 +1784,7 @@ namespace Quantum {
 
 #region Assets/Photon/Quantum/Simulation/Core/IAssetSerializerExtensions.cs
 
-﻿namespace Quantum {
+namespace Quantum {
   using System;
   using System.Collections.Generic;
   using System.Linq;
@@ -6267,7 +6267,7 @@ namespace Quantum {
 
 #region Assets/Photon/Quantum/Simulation/Runner/DotNetSessionRunner.cs
 
-﻿namespace Quantum {
+namespace Quantum {
   using Photon.Deterministic;
   using System;
   using System.IO;

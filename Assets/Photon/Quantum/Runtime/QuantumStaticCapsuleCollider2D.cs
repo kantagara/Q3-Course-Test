@@ -53,43 +53,6 @@ namespace Quantum {
       UpdateFromSourceCollider();
     }
 
-#if UNITY_EDITOR
-    void OnDrawGizmos() {
-      if (Application.isPlaying == false) {
-        UpdateFromSourceCollider();
-      }
-
-      DrawGizmos(false);
-    }
-
-    void OnDrawGizmosSelected() {
-      if (Application.isPlaying == false) {
-        UpdateFromSourceCollider();
-      }
-
-      DrawGizmos(true);
-    }
-
-    void DrawGizmos(bool selected) {
-      
-      if (!QuantumGameGizmos.ShouldDraw(GlobalGizmosSettings.DrawColliderGizmos, selected, false)) {
-        return;
-      }
-
-      var scale = transform.lossyScale;
-#if QUANTUM_XY
-      var radius = (FPMath.Clamp(Size.X,0,Size.X) / FP._2).AsFloat * scale.x;
-      var height = (FPMath.Clamp(Size.Y - (Size.X / FP._2 * FP._2),FP._0, Size.Y) / FP._2).AsFloat * scale.y;
-#else
-      var radius = (FPMath.Clamp(Size.X,0,Size.X) / FP._2).AsFloat * scale.x;
-      var height = (FPMath.Clamp(Size.Y - (Size.X / FP._2 * FP._2),FP._0, Size.Y) / FP._2).AsFloat * scale.z;
-#endif
-      
-
-      GizmoUtils.DrawGizmosCapsule2D(transform.TransformPoint(PositionOffset.ToUnityVector2()), radius, height, GlobalGizmosSettings.GetSelectedColor(GlobalGizmosSettings.StaticColliderColor, selected), style: GlobalGizmosSettings.StaticColliderGizmoStyle);
-    }
-#endif
-
 #endif
     }
 }

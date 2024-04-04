@@ -97,7 +97,7 @@ namespace Quantum {
         }
       }
 #endif
-      RuntimeConfig.Seed = (int)DateTime.Now.Ticks;
+
       StartWithFrame(0, null);
     }
 

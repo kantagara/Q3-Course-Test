@@ -62,6 +62,15 @@
             Returns the log level defined by QUANTUM_LOGLEVEL_(..) defines.
             </summary>
         </member>
+        <member name="M:Quantum.QuantumGameGizmos.CreateAndDrawNavMeshGizmo(Quantum.NavMesh,Quantum.NavMeshRegionMask)">
+            <summary>
+              Creates a Unity mesh from the navmesh data and renders it as a gizmo. Uses submeshes to draw main mesh, regions and
+              deactivated regions in different colors.
+              The meshes are cached in a static dictionary by their NavMesh.Name. Call InvalidateGizmos() to reset the cache
+              manually.
+              New meshes are created when the region mask changed.
+            </summary>
+        </member>
         <member name="P:Quantum.DebugMesh.DebugMaterial">
             <summary>
             The material used to draw transparent simulation debug shapes. 
@@ -650,7 +659,7 @@
             <summary>
             Is called when the entity view is enabled for the first time.
             The <see cref="P:Quantum.QuantumViewComponent`1.ViewContext"/> is already set if available.
-            Access to <see cref="P:Quantum.QuantumViewComponent`1.Game"/>, <see cref="P:Quantum.QuantumViewComponent`1.VerifiedFrame"/>, <see cref="P:Quantum.QuantumViewComponent`1.PredictedFrame"/> and <see cref="P:Quantum.QuantumViewComponent`1.PredictedPreviousFrame"/> is not avalable yet.
+            Access to <see cref="P:Quantum.QuantumViewComponent`1.Game"/>, <see cref="P:Quantum.QuantumViewComponent`1.VerifiedFrame"/>, <see cref="P:Quantum.QuantumViewComponent`1.PredictedFrame"/> and <see cref="P:Quantum.QuantumViewComponent`1.PredictedPreviousFrame"/> is not available yet.
             </summary>
         </member>
         <member name="M:Quantum.QuantumViewComponent`1.OnActivate(Quantum.Frame)">
@@ -953,6 +962,187 @@
             </summary>
             <param name="prefab">Prefab to created pooled instances</param>
             <param name="desiredCount">The number of instances to create and add to the pool</param>
+        </member>
+        <member name="F:Quantum.QuantumGameGizmosSettings.IconScale">
+            <summary>
+            Global scale for all gizmos.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameGizmosSettings.SelectedBrightness">
+            <summary>
+            How bright the gizmos are when selected.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameGizmosSettings.PredictionArea">
+            <summary>
+            Draw the prediction area. Only available at runtime.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameGizmosSettings.CharacterController">
+            <summary>
+            Draw the CharacterController3D and CharacterController2D components.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameGizmosSettings.StaticColliders">
+            <summary>
+            Draw the colliders that are currently static.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameGizmosSettings.DynamicColliders">
+            <summary>
+            Draw the colliders that are currently dynamic.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameGizmosSettings.KinematicColliders">
+            <summary>
+            Draw the colliders that are currently kinematic.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameGizmosSettings.AsleepColliders">
+            <summary>
+            Draw the colliders that are asleep.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameGizmosSettings.DisabledColliders">
+            <summary>
+            Draw the colliders that are disabled.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameGizmosSettings.PhysicsArea">
+            <summary>
+            Draw the map's physics area.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameGizmosSettings.PhysicsBuckets">
+            <summary>
+            Draw the map's physics buckets.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameGizmosSettings.StaticMeshNormals">
+            <summary>
+            Draw the baked static mesh vertices.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameGizmosSettings.StaticMeshTriangles">
+            <summary>
+            Draw the baked static mesh vertices.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameGizmosSettings.SceneMeshCells">
+            <summary>
+            Draw the cells of the scene mesh.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameGizmosSettings.SceneMeshTriangles">
+            <summary>
+            Draw the triangles of the scene mesh.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameGizmosSettings.PhysicsJoints">
+            <summary>
+            Draw the entity's physics joints.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameGizmosSettings.ScaleComponentsWithAgentRadius">
+            <summary>
+            Should NavMesh components be scaled with the agent radius?
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameGizmosSettings.NavMesh">
+            <summary>
+            Draw the NavMesh. The QuantumMap game object will trigger DrawOnlySelected.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameGizmosSettings.NavMeshBorders">
+            <summary>
+            Draw the border of the NavMesh.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameGizmosSettings.NavMeshArea">
+            <summary>
+            Draw the NavMesh area. The QuantumMap game object will trigger DrawOnlySelected.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameGizmosSettings.NavMeshGrid">
+            <summary>
+            Draw the NavMesh grid. The QuantumMap game object will trigger DrawOnlySelected.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameGizmosSettings.NavMeshLinks">
+            <summary>
+            Draw the NavMesh links.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameGizmosSettings.NavMeshVertexNormals">
+            <summary>
+            Draw the vertex normals of the NavMesh.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameGizmosSettings.NavMeshTriangleIds">
+            <summary>
+            Draw the triangle ids of the NavMesh.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameGizmosSettings.NavMeshRegionIds">
+            <summary>
+            Draw the region ids of the NavMesh.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameGizmosSettings.NavMeshVertexIds">
+            <summary>
+            Draw the numerical vertex ids of the NavMesh.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameGizmosSettings.NavMeshPathfinder">
+            <summary>
+            Draw the NavMesh pathfinder component. Only available at runtime.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameGizmosSettings.NavMeshSteeringAgent">
+            <summary>
+            Draw the NavMesh steering agent component. Only available at runtime.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameGizmosSettings.NavMeshAvoidanceAgent">
+            <summary>
+            Draw the NavMesh avoidance agent component. Only available at runtime.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameGizmosSettings.NavMeshAvoidanceObstacles">
+            <summary>
+            Draw the NavMesh avoidance obstacles component. Only available at runtime.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameGizmosSettings.PathfinderRawPath">
+            <summary>
+            Draw the pathfinder path. Only available at runtime.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameGizmosSettings.PathfinderRawTrianglePath">
+            <summary>
+            Draw the raw pathfinder triangle path. Only available at runtime.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameGizmosSettings.PathfinderFunnel">
+            <summary>
+            Draw the pathfinder funnel. Only available at runtime.
+            </summary>
+        </member>
+        <member name="M:Quantum.QuantumGameGizmosSettings.GetEntryForPhysicsEntity3D(Quantum.Frame,Quantum.EntityRef)">
+            <summary>
+            Get the gizmo entry for a specific physics3d entity.
+            </summary>
+            <param name="frame"></param>
+            <param name="handle"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Quantum.QuantumGameGizmosSettings.GetEntryForPhysicsEntity2D(Quantum.Frame,Quantum.EntityRef)">
+            <summary>
+            Get the gizmo entry for a specific physics2d entity.
+            </summary>
+            <param name="frame"></param>
+            <param name="handle"></param>
+            <returns></returns>
         </member>
         <member name="T:Quantum.IQuantumViewContext">
             <summary>
@@ -1322,6 +1512,52 @@
             </summary>
             <param name="viewComponent">View component instance to remove</param>
         </member>
+        <member name="T:Quantum.QuantumGizmoEntry">
+            <summary>
+            Individual entry for a specific section of Quantum.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGizmoEntry.Enabled">
+            <summary>
+            Is this gizmo enabled.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGizmoEntry.Color">
+            <summary>
+            The main color of the gizmo.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGizmoEntry.Scale">
+            <summary>
+            The scale of the gizmo. Only available for gizmos that support scaling.
+            0 means disabled.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGizmoEntry.OnlyDrawSelected">
+            <summary>
+            Only draw the gizmo when the object is selected.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGizmoEntry.DisableFill">
+            <summary>
+            Draw the gizmo without fill. Only available for gizmos that support fill.
+            </summary>
+        </member>
+        <member name="F:Quantum.NavMeshComponentGizmoEntry.DefaultComponentGizmoSize">
+            <summary>
+            Default size for NavMesh component gizmos.
+            </summary>
+        </member>
+        <member name="M:Quantum.QuantumGameGizmosSettingsScriptableObject.OpenOverlay">
+            <summary>
+            Open the overlay for the Quantum gizmos.
+            </summary>
+        </member>
+        <member name="F:Quantum.QuantumGameGizmosSettingsScriptableObject.Settings">
+            <summary>
+            The global and default settings for Quantum gizmos.
+            </summary>
+        </member>
         <member name="T:Quantum.QuantumRunnerLocalReplay">
             <summary>
             An example of how to start a Quantum replay simulation from a replay file.
@@ -1367,15 +1603,6 @@
             <summary>
             Force Unity json deserialization of the deplay file even when Newtonsoft is available.
             Newtonsoft is very low when compiled with IL2CPP. But Unity Json deserialization expects the byte arrays to be int array instead on base64 strings.
-            </summary>
-        </member>
-        <member name="M:Quantum.QuantumNavMesh.CreateAndDrawGizmoMesh(Quantum.NavMesh,Quantum.NavMeshRegionMask,Quantum.QuantumGameGizmosSettings)">
-            <summary>
-              Creates a Unity mesh from the navmesh data and renders it as a gizmo. Uses submeshes to draw main mesh, regions and
-              deactivated regions in different colors.
-              The meshes are cached in a static dictionary by their NavMesh.Name. Call InvalidateGizmos() to reset the cache
-              manually.
-              New meshes are created when the region mask changed.
             </summary>
         </member>
         <member name="F:QuantumSDKAttributesTest.LayerMask">
