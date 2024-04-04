@@ -248,6 +248,9 @@ MonoBehaviour:
   - Components:
     - rid: 3513391852818530304
     - rid: 3513391852818530305
+  - Components:
+    - rid: 2069275615697043456
+    - rid: 2069275615697043457
   SerializedTriangleDataUncompressedSize: 8
   references:
     version: 2
@@ -306,6 +309,20 @@ MonoBehaviour:
           Value: 0
     - rid: 2069089796084465667
       type: {class: GrassPrototype, ns: Quantum.Prototypes, asm: Quantum.Simulation}
+      data:
+        _empty_prototype_dummy_field_: 0
+    - rid: 2069275615697043456
+      type: {class: Transform2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
+      data:
+        Position:
+          X:
+            RawValue: -3506176
+          Y:
+            RawValue: 2451046
+        Rotation:
+          RawValue: 0
+    - rid: 2069275615697043457
+      type: {class: SpawnPointPrototype, ns: Quantum.Prototypes, asm: Quantum.Simulation}
       data:
         _empty_prototype_dummy_field_: 0
     - rid: 2343711100207366144

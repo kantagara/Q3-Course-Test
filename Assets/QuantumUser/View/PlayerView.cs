@@ -1,27 +1,28 @@
-using System;
 using Quantum;
 using UnityEngine;
 using LayerMask = UnityEngine.LayerMask;
 
-public class PlayerView : QuantumEntityViewComponent
+public unsafe class PlayerView : QuantumEntityViewComponent
 {
-    [SerializeField] private Animator animator;
-    [SerializeField] private GameObject arrow;
-
-    private Renderer[] _renderers;
-    
     private static readonly int MoveZ = Animator.StringToHash("moveZ");
     private static readonly int MoveX = Animator.StringToHash("moveX");
+    [SerializeField] private Animator animator;
+    [SerializeField] private GameObject arrow;
     private bool _isLocalPlayer;
+    private PlayerLink* _playerLink;
+
+    private Renderer[] _renderers;
 
     private void Awake()
     {
-        _renderers = GetComponentsInChildren <Renderer> (true);
+        _renderers = GetComponentsInChildren<Renderer>(true);
     }
 
     public override void OnActivate(Frame frame)
     {
-        _isLocalPlayer = _game.PlayerIsLocal(PredictedFrame.Get<PlayerLink>(EntityRef).Player);
+        _playerLink = VerifiedFrame.Unsafe.GetPointer<PlayerLink>(EntityRef);
+        _isLocalPlayer = _game.PlayerIsLocal(_playerLink->Player);
+        
         arrow.SetActive(_isLocalPlayer);
         var layer = LayerMask.NameToLayer(_isLocalPlayer ? "Player_Local" : "Player_Remote");
 
@@ -31,29 +32,24 @@ public class PlayerView : QuantumEntityViewComponent
             renderer.gameObject.layer = layer;
             renderer.enabled = true;
         }
-        
+
         QuantumEvent.Subscribe<EventOnPlayerEnteredGrass>(this, OnPlayerEnterGrass);
         QuantumEvent.Subscribe<EventOnPlayerExitGrass>(this, OnPlayerExitGrass);
     }
+    
 
     private void OnPlayerExitGrass(EventOnPlayerExitGrass callback)
     {
         if (callback.player != EntityRef) return;
-        if(_isLocalPlayer) return;
-        foreach (var renderer in _renderers)
-        {
-            renderer.enabled = true;
-        }
+        if (_isLocalPlayer) return;
+        foreach (var renderer in _renderers) renderer.enabled = true;
     }
 
     private void OnPlayerEnterGrass(EventOnPlayerEnteredGrass callback)
     {
         if (callback.player != EntityRef) return;
-        if(_isLocalPlayer) return;
-        foreach (var renderer in _renderers)
-        {
-            renderer.enabled = false;
-        }
+        if (_isLocalPlayer) return;
+        foreach (var renderer in _renderers) renderer.enabled = false;
     }
 
     public override void OnDeactivate()
@@ -65,17 +61,13 @@ public class PlayerView : QuantumEntityViewComponent
     public override void OnUpdateView()
     {
         UpdateAnimator();
-        ChangeMaterialIfObstructed();
     }
-
-    private void ChangeMaterialIfObstructed()
+    
+    private void UpdateAnimator()
     {
-        
-    }
-
-    private unsafe void UpdateAnimator()
-    {
-        var input = PredictedFrame.GetPlayerInput(PredictedFrame.Get<PlayerLink>(EntityRef).Player);
+        if (!EntityRef.IsValid) return;
+        if(_playerLink == default) return;
+        var input = PredictedFrame.GetPlayerInput(_playerLink->Player);
         animator.SetFloat(MoveX, (float)input->Movement.X);
         animator.SetFloat(MoveZ, (float)input->Movement.Y);
     }

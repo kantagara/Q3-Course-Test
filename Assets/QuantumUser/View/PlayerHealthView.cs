@@ -1,3 +1,4 @@
+using System;
 using DG.Tweening;
 using Quantum;
 using UnityEngine;
@@ -10,6 +11,11 @@ public class PlayerHealthView : QuantumEntityViewComponent
     private void Start()
     {
         QuantumEvent.Subscribe<EventPlayerHealthUpdated>(this, PlayerHealthUpdated);
+    }
+
+    private void OnDestroy()
+    {
+        QuantumEvent.UnsubscribeListener(this);
     }
 
     private void PlayerHealthUpdated(EventPlayerHealthUpdated callback)

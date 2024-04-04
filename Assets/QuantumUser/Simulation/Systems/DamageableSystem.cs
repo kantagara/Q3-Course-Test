@@ -8,6 +8,7 @@ namespace QuantumUser.Simulation.Systems
         {
             var data = f.FindAsset(component->DamageableBase);
             component->CurrentHealth = data.MaxHealth;
+            component->MaxHealth = data.MaxHealth;
         }
     }
 }
