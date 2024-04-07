@@ -401,6 +401,28 @@ namespace Quantum {
     }
   }
   [StructLayout(LayoutKind.Explicit)]
+  public unsafe partial struct InitialState {
+    public const Int32 SIZE = 16;
+    public const Int32 ALIGNMENT = 8;
+    [FieldOffset(0)]
+    public FP InitialRadius;
+    [FieldOffset(8)]
+    public FP TimeToNextState;
+    public override Int32 GetHashCode() {
+      unchecked { 
+        var hash = 18713;
+        hash = hash * 31 + InitialRadius.GetHashCode();
+        hash = hash * 31 + TimeToNextState.GetHashCode();
+        return hash;
+      }
+    }
+    public static void Serialize(void* ptr, FrameSerializer serializer) {
+        var p = (InitialState*)ptr;
+        FP.Serialize(&p->InitialRadius, serializer);
+        FP.Serialize(&p->TimeToNextState, serializer);
+    }
+  }
+  [StructLayout(LayoutKind.Explicit)]
   public unsafe partial struct Input {
     public const Int32 SIZE = 48;
     public const Int32 ALIGNMENT = 8;
@@ -439,6 +461,46 @@ namespace Quantum {
         Button.Serialize(&p->Fire, serializer);
         FPVector2.Serialize(&p->MousePosition, serializer);
         FPVector2.Serialize(&p->Movement, serializer);
+    }
+  }
+  [StructLayout(LayoutKind.Explicit)]
+  public unsafe partial struct PreShrinkState {
+    public const Int32 SIZE = 16;
+    public const Int32 ALIGNMENT = 8;
+    [FieldOffset(0)]
+    public FP TargetRadius;
+    [FieldOffset(8)]
+    public FP TimeToNextState;
+    public override Int32 GetHashCode() {
+      unchecked { 
+        var hash = 8011;
+        hash = hash * 31 + TargetRadius.GetHashCode();
+        hash = hash * 31 + TimeToNextState.GetHashCode();
+        return hash;
+      }
+    }
+    public static void Serialize(void* ptr, FrameSerializer serializer) {
+        var p = (PreShrinkState*)ptr;
+        FP.Serialize(&p->TargetRadius, serializer);
+        FP.Serialize(&p->TimeToNextState, serializer);
+    }
+  }
+  [StructLayout(LayoutKind.Explicit)]
+  public unsafe partial struct ShrinkState {
+    public const Int32 SIZE = 8;
+    public const Int32 ALIGNMENT = 8;
+    [FieldOffset(0)]
+    public FP TimeToNextState;
+    public override Int32 GetHashCode() {
+      unchecked { 
+        var hash = 14083;
+        hash = hash * 31 + TimeToNextState.GetHashCode();
+        return hash;
+      }
+    }
+    public static void Serialize(void* ptr, FrameSerializer serializer) {
+        var p = (ShrinkState*)ptr;
+        FP.Serialize(&p->TimeToNextState, serializer);
     }
   }
   [StructLayout(LayoutKind.Explicit)]
@@ -503,6 +565,90 @@ namespace Quantum {
         PhysicsSceneSettings.Serialize(&p->PhysicsSettings, serializer);
         FixedArray.Serialize(p->input, serializer, Statics.SerializeInput);
         Quantum.BitSet6.Serialize(&p->PlayerLastConnectionState, serializer);
+    }
+  }
+  [StructLayout(LayoutKind.Explicit)]
+  [Union()]
+  public unsafe partial struct ShrinkingCircleState {
+    public const Int32 SIZE = 24;
+    public const Int32 ALIGNMENT = 8;
+    [FieldOffset(0)]
+    private Int32 _field_used_;
+    [FieldOffset(8)]
+    [FieldOverlap(8)]
+    [FramePrinter.PrintIf("_field_used_", Quantum.ShrinkingCircleState.INITIALSTATE)]
+    private InitialState _InitialState;
+    [FieldOffset(8)]
+    [FieldOverlap(8)]
+    [FramePrinter.PrintIf("_field_used_", Quantum.ShrinkingCircleState.PRESHRINKSTATE)]
+    private PreShrinkState _PreShrinkState;
+    [FieldOffset(8)]
+    [FieldOverlap(8)]
+    [FramePrinter.PrintIf("_field_used_", Quantum.ShrinkingCircleState.SHRINKSTATE)]
+    private ShrinkState _ShrinkState;
+    public const Int32 INITIALSTATE = 1;
+    public const Int32 PRESHRINKSTATE = 2;
+    public const Int32 SHRINKSTATE = 3;
+    public Int32 Field {
+      get {
+        return _field_used_;
+      }
+    }
+    public InitialState* InitialState {
+      get {
+        fixed (InitialState* p = &_InitialState) {
+          if (_field_used_ != INITIALSTATE) {
+            Native.Utils.Clear(p, 16);
+            _field_used_ = INITIALSTATE;
+          }
+          return p;
+        }
+      }
+    }
+    public PreShrinkState* PreShrinkState {
+      get {
+        fixed (PreShrinkState* p = &_PreShrinkState) {
+          if (_field_used_ != PRESHRINKSTATE) {
+            Native.Utils.Clear(p, 16);
+            _field_used_ = PRESHRINKSTATE;
+          }
+          return p;
+        }
+      }
+    }
+    public ShrinkState* ShrinkState {
+      get {
+        fixed (ShrinkState* p = &_ShrinkState) {
+          if (_field_used_ != SHRINKSTATE) {
+            Native.Utils.Clear(p, 8);
+            _field_used_ = SHRINKSTATE;
+          }
+          return p;
+        }
+      }
+    }
+    public override Int32 GetHashCode() {
+      unchecked { 
+        var hash = 19937;
+        hash = hash * 31 + _field_used_.GetHashCode();
+        hash = hash * 31 + _InitialState.GetHashCode();
+        hash = hash * 31 + _PreShrinkState.GetHashCode();
+        hash = hash * 31 + _ShrinkState.GetHashCode();
+        return hash;
+      }
+    }
+    public static void Serialize(void* ptr, FrameSerializer serializer) {
+        var p = (ShrinkingCircleState*)ptr;
+        serializer.Stream.Serialize(&p->_field_used_);
+        if (p->_field_used_ == INITIALSTATE) {
+          Quantum.InitialState.Serialize(&p->_InitialState, serializer);
+        }
+        if (p->_field_used_ == PRESHRINKSTATE) {
+          Quantum.PreShrinkState.Serialize(&p->_PreShrinkState, serializer);
+        }
+        if (p->_field_used_ == SHRINKSTATE) {
+          Quantum.ShrinkState.Serialize(&p->_ShrinkState, serializer);
+        }
     }
   }
   [StructLayout(LayoutKind.Explicit)]
@@ -634,6 +780,55 @@ namespace Quantum {
     }
   }
   [StructLayout(LayoutKind.Explicit)]
+  public unsafe partial struct ShrinkingCircle : Quantum.IComponentSingleton {
+    public const Int32 SIZE = 64;
+    public const Int32 ALIGNMENT = 8;
+    [FieldOffset(4)]
+    public QListPtr<ShrinkingCircleState> States;
+    [FieldOffset(40)]
+    public ShrinkingCircleState CurrentState;
+    [FieldOffset(16)]
+    public FP CurrentTime;
+    [FieldOffset(8)]
+    public FP CurrentRadius;
+    [FieldOffset(32)]
+    public FP TargetRadius;
+    [FieldOffset(24)]
+    public FP InitialRadius;
+    [FieldOffset(0)]
+    public Byte CurrentIndex;
+    public override Int32 GetHashCode() {
+      unchecked { 
+        var hash = 929;
+        hash = hash * 31 + States.GetHashCode();
+        hash = hash * 31 + CurrentState.GetHashCode();
+        hash = hash * 31 + CurrentTime.GetHashCode();
+        hash = hash * 31 + CurrentRadius.GetHashCode();
+        hash = hash * 31 + TargetRadius.GetHashCode();
+        hash = hash * 31 + InitialRadius.GetHashCode();
+        hash = hash * 31 + CurrentIndex.GetHashCode();
+        return hash;
+      }
+    }
+    public void ClearPointers(FrameBase f, EntityRef entity) {
+      States = default;
+    }
+    public static void OnRemoved(FrameBase frame, EntityRef entity, void* ptr) {
+      var p = (Quantum.ShrinkingCircle*)ptr;
+      p->ClearPointers((Frame)frame, entity);
+    }
+    public static void Serialize(void* ptr, FrameSerializer serializer) {
+        var p = (ShrinkingCircle*)ptr;
+        serializer.Stream.Serialize(&p->CurrentIndex);
+        QList.Serialize(&p->States, serializer, Statics.SerializeShrinkingCircleState);
+        FP.Serialize(&p->CurrentRadius, serializer);
+        FP.Serialize(&p->CurrentTime, serializer);
+        FP.Serialize(&p->InitialRadius, serializer);
+        FP.Serialize(&p->TargetRadius, serializer);
+        Quantum.ShrinkingCircleState.Serialize(&p->CurrentState, serializer);
+    }
+  }
+  [StructLayout(LayoutKind.Explicit)]
   public unsafe partial struct SpawnPoint : Quantum.IComponent {
     public const Int32 SIZE = 4;
     public const Int32 ALIGNMENT = 4;
@@ -762,6 +957,8 @@ namespace Quantum {
       BuildSignalsArrayOnComponentRemoved<PhysicsJoints3D>();
       BuildSignalsArrayOnComponentAdded<Quantum.PlayerLink>();
       BuildSignalsArrayOnComponentRemoved<Quantum.PlayerLink>();
+      BuildSignalsArrayOnComponentAdded<Quantum.ShrinkingCircle>();
+      BuildSignalsArrayOnComponentRemoved<Quantum.ShrinkingCircle>();
       BuildSignalsArrayOnComponentAdded<Quantum.SpawnPoint>();
       BuildSignalsArrayOnComponentRemoved<Quantum.SpawnPoint>();
       BuildSignalsArrayOnComponentAdded<Quantum.SpawnPointList>();
@@ -808,9 +1005,11 @@ namespace Quantum {
     }
   }
   public unsafe partial class Statics {
+    public static FrameSerializer.Delegate SerializeShrinkingCircleState;
     public static FrameSerializer.Delegate SerializeEntityRef;
     public static FrameSerializer.Delegate SerializeInput;
     static partial void InitStaticDelegatesGen() {
+      SerializeShrinkingCircleState = Quantum.ShrinkingCircleState.Serialize;
       SerializeEntityRef = EntityRef.Serialize;
       SerializeInput = Quantum.Input.Serialize;
     }
@@ -851,6 +1050,7 @@ namespace Quantum {
       typeRegistry.Register(typeof(HingeJoint3D), HingeJoint3D.SIZE);
       typeRegistry.Register(typeof(Hit), Hit.SIZE);
       typeRegistry.Register(typeof(Hit3D), Hit3D.SIZE);
+      typeRegistry.Register(typeof(Quantum.InitialState), Quantum.InitialState.SIZE);
       typeRegistry.Register(typeof(Quantum.Input), Quantum.Input.SIZE);
       typeRegistry.Register(typeof(Quantum.InputButtons), 4);
       typeRegistry.Register(typeof(Joint), Joint.SIZE);
@@ -881,12 +1081,16 @@ namespace Quantum {
       typeRegistry.Register(typeof(PhysicsSceneSettings), PhysicsSceneSettings.SIZE);
       typeRegistry.Register(typeof(Quantum.PlayerLink), Quantum.PlayerLink.SIZE);
       typeRegistry.Register(typeof(PlayerRef), PlayerRef.SIZE);
+      typeRegistry.Register(typeof(Quantum.PreShrinkState), Quantum.PreShrinkState.SIZE);
       typeRegistry.Register(typeof(Ptr), Ptr.SIZE);
       typeRegistry.Register(typeof(QBoolean), QBoolean.SIZE);
       typeRegistry.Register(typeof(Quantum.Ptr), Quantum.Ptr.SIZE);
       typeRegistry.Register(typeof(RNGSession), RNGSession.SIZE);
       typeRegistry.Register(typeof(Shape2D), Shape2D.SIZE);
       typeRegistry.Register(typeof(Shape3D), Shape3D.SIZE);
+      typeRegistry.Register(typeof(Quantum.ShrinkState), Quantum.ShrinkState.SIZE);
+      typeRegistry.Register(typeof(Quantum.ShrinkingCircle), Quantum.ShrinkingCircle.SIZE);
+      typeRegistry.Register(typeof(Quantum.ShrinkingCircleState), Quantum.ShrinkingCircleState.SIZE);
       typeRegistry.Register(typeof(Quantum.SpawnPoint), Quantum.SpawnPoint.SIZE);
       typeRegistry.Register(typeof(Quantum.SpawnPointList), Quantum.SpawnPointList.SIZE);
       typeRegistry.Register(typeof(SpringJoint), SpringJoint.SIZE);
@@ -899,13 +1103,14 @@ namespace Quantum {
       typeRegistry.Register(typeof(Quantum._globals_), Quantum._globals_.SIZE);
     }
     static partial void InitComponentTypeIdGen() {
-      ComponentTypeId.Reset(ComponentTypeId.BuiltInComponentCount + 8)
+      ComponentTypeId.Reset(ComponentTypeId.BuiltInComponentCount + 9)
         .AddBuiltInComponents()
         .Add<Quantum.Bullet>(Quantum.Bullet.Serialize, null, null, ComponentFlags.None)
         .Add<Quantum.Damageable>(Quantum.Damageable.Serialize, null, null, ComponentFlags.None)
         .Add<Quantum.Grass>(Quantum.Grass.Serialize, null, null, ComponentFlags.None)
         .Add<Quantum.KCC>(Quantum.KCC.Serialize, null, null, ComponentFlags.None)
         .Add<Quantum.PlayerLink>(Quantum.PlayerLink.Serialize, null, null, ComponentFlags.None)
+        .Add<Quantum.ShrinkingCircle>(Quantum.ShrinkingCircle.Serialize, null, Quantum.ShrinkingCircle.OnRemoved, ComponentFlags.Singleton)
         .Add<Quantum.SpawnPoint>(Quantum.SpawnPoint.Serialize, null, null, ComponentFlags.None)
         .Add<Quantum.SpawnPointList>(Quantum.SpawnPointList.Serialize, null, Quantum.SpawnPointList.OnRemoved, ComponentFlags.Singleton)
         .Add<Quantum.Weapon>(Quantum.Weapon.Serialize, null, null, ComponentFlags.None)

@@ -52,7 +52,7 @@ namespace Quantum {
   public unsafe partial class Frame {
     public unsafe partial struct FrameEvents {
       static partial void GetEventTypeCountCodeGen(ref Int32 eventCount) {
-        eventCount = 4;
+        eventCount = 5;
       }
       static partial void GetParentEventIDCodeGen(Int32 eventID, ref Int32 parentEventID) {
         switch (eventID) {
@@ -64,6 +64,7 @@ namespace Quantum {
           case EventPlayerHealthUpdated.ID: result = typeof(EventPlayerHealthUpdated); return;
           case EventOnPlayerEnteredGrass.ID: result = typeof(EventOnPlayerEnteredGrass); return;
           case EventOnPlayerExitGrass.ID: result = typeof(EventOnPlayerExitGrass); return;
+          case EventCircleChangedState.ID: result = typeof(EventCircleChangedState); return;
           case EventBulletHit.ID: result = typeof(EventBulletHit); return;
           default: break;
         }
@@ -85,6 +86,12 @@ namespace Quantum {
       public EventOnPlayerExitGrass OnPlayerExitGrass(EntityRef player) {
         var ev = _f.Context.AcquireEvent<EventOnPlayerExitGrass>(EventOnPlayerExitGrass.ID);
         ev.player = player;
+        _f.AddEvent(ev);
+        return ev;
+      }
+      public EventCircleChangedState CircleChangedState(ShrinkingCircle ShrinkingCircle) {
+        var ev = _f.Context.AcquireEvent<EventCircleChangedState>(EventCircleChangedState.ID);
+        ev.ShrinkingCircle = ShrinkingCircle;
         _f.AddEvent(ev);
         return ev;
       }
@@ -175,13 +182,13 @@ namespace Quantum {
       }
     }
   }
-  public unsafe partial class EventBulletHit : EventBase {
+  public unsafe partial class EventCircleChangedState : EventBase {
     public new const Int32 ID = 3;
-    public EntityRef Bullet;
-    protected EventBulletHit(Int32 id, EventFlags flags) : 
+    public ShrinkingCircle ShrinkingCircle;
+    protected EventCircleChangedState(Int32 id, EventFlags flags) : 
         base(id, flags) {
     }
-    public EventBulletHit() : 
+    public EventCircleChangedState() : 
         base(3, EventFlags.Server|EventFlags.Client) {
     }
     public new QuantumGame Game {
@@ -195,6 +202,31 @@ namespace Quantum {
     public override Int32 GetHashCode() {
       unchecked {
         var hash = 47;
+        hash = hash * 31 + ShrinkingCircle.GetHashCode();
+        return hash;
+      }
+    }
+  }
+  public unsafe partial class EventBulletHit : EventBase {
+    public new const Int32 ID = 4;
+    public EntityRef Bullet;
+    protected EventBulletHit(Int32 id, EventFlags flags) : 
+        base(id, flags) {
+    }
+    public EventBulletHit() : 
+        base(4, EventFlags.Server|EventFlags.Client) {
+    }
+    public new QuantumGame Game {
+      get {
+        return (QuantumGame)base.Game;
+      }
+      set {
+        base.Game = value;
+      }
+    }
+    public override Int32 GetHashCode() {
+      unchecked {
+        var hash = 53;
         hash = hash * 31 + Bullet.GetHashCode();
         return hash;
       }

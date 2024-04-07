@@ -122,6 +122,9 @@ MonoBehaviour:
   - Components:
     - rid: 2069275615697043456
     - rid: 2069275615697043457
+  - Components:
+    - rid: 3307304351847940096
+    - rid: 3307304351847940097
   SerializedTriangleDataUncompressedSize: 8
   references:
     version: 2
@@ -252,6 +255,164 @@ MonoBehaviour:
       type: {class: GrassPrototype, ns: Quantum.Prototypes, asm: Quantum.Simulation}
       data:
         _empty_prototype_dummy_field_: 0
+    - rid: 3307304351847940096
+      type: {class: Transform2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
+      data:
+        Position:
+          X:
+            RawValue: 0
+          Y:
+            RawValue: 0
+        Rotation:
+          RawValue: 0
+    - rid: 3307304351847940097
+      type: {class: ShrinkingCirclePrototype, ns: Quantum.Prototypes, asm: Quantum.Simulation}
+      data:
+        States:
+        - _field_used_: INITIALSTATE
+          InitialState:
+            InitialRadius:
+              RawValue: 13107200
+            TimeToNextState:
+              RawValue: 327680
+          CooldownState:
+            TimeToNextState:
+              RawValue: 0
+          PreShrinkState:
+            TimeToNextState:
+              RawValue: 0
+            TargetRadius:
+              RawValue: 0
+          ShrinkState:
+            TimeToShrink:
+              RawValue: 655360
+        - _field_used_: PRESHRINKSTATE
+          InitialState:
+            InitialRadius:
+              RawValue: 0
+            TimeToNextState:
+              RawValue: 0
+          CooldownState:
+            TimeToNextState:
+              RawValue: 0
+          PreShrinkState:
+            TimeToNextState:
+              RawValue: 327680
+            TargetRadius:
+              RawValue: 10485760
+          ShrinkState:
+            TimeToShrink:
+              RawValue: 0
+        - _field_used_: SHRINKSTATE
+          InitialState:
+            InitialRadius:
+              RawValue: 0
+            TimeToNextState:
+              RawValue: 0
+          CooldownState:
+            TimeToNextState:
+              RawValue: 0
+          PreShrinkState:
+            TimeToNextState:
+              RawValue: 0
+            TargetRadius:
+              RawValue: 0
+          ShrinkState:
+            TimeToShrink:
+              RawValue: 327680
+        - _field_used_: PRESHRINKSTATE
+          InitialState:
+            InitialRadius:
+              RawValue: 0
+            TimeToNextState:
+              RawValue: 0
+          CooldownState:
+            TimeToNextState:
+              RawValue: 0
+          PreShrinkState:
+            TimeToNextState:
+              RawValue: 327680
+            TargetRadius:
+              RawValue: 6553600
+          ShrinkState:
+            TimeToShrink:
+              RawValue: 655360
+        - _field_used_: SHRINKSTATE
+          InitialState:
+            InitialRadius:
+              RawValue: 0
+            TimeToNextState:
+              RawValue: 0
+          CooldownState:
+            TimeToNextState:
+              RawValue: 0
+          PreShrinkState:
+            TimeToNextState:
+              RawValue: 65536
+            TargetRadius:
+              RawValue: 0
+          ShrinkState:
+            TimeToShrink:
+              RawValue: 327680
+        - _field_used_: PRESHRINKSTATE
+          InitialState:
+            InitialRadius:
+              RawValue: 0
+            TimeToNextState:
+              RawValue: 0
+          CooldownState:
+            TimeToNextState:
+              RawValue: 0
+          PreShrinkState:
+            TimeToNextState:
+              RawValue: 327680
+            TargetRadius:
+              RawValue: 3932160
+          ShrinkState:
+            TimeToShrink:
+              RawValue: 655360
+        - _field_used_: SHRINKSTATE
+          InitialState:
+            InitialRadius:
+              RawValue: 0
+            TimeToNextState:
+              RawValue: 0
+          CooldownState:
+            TimeToNextState:
+              RawValue: 0
+          PreShrinkState:
+            TimeToNextState:
+              RawValue: 0
+            TargetRadius:
+              RawValue: 0
+          ShrinkState:
+            TimeToShrink:
+              RawValue: 327680
+        CurrentState:
+          _field_used_: 
+          InitialState:
+            InitialRadius:
+              RawValue: 0
+            TimeToNextState:
+              RawValue: 0
+          CooldownState:
+            TimeToNextState:
+              RawValue: 0
+          PreShrinkState:
+            TimeToNextState:
+              RawValue: 0
+            TargetRadius:
+              RawValue: 0
+          ShrinkState:
+            TimeToShrink:
+              RawValue: 0
+        CurrentTime:
+          RawValue: 0
+        CurrentRadius:
+          RawValue: 0
+        TargetRadius:
+          RawValue: 0
+        CurrentIndex: 0
     - rid: 3513391852818530304
       type: {class: Transform2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
       data:

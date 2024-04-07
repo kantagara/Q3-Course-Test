@@ -4,11 +4,11 @@ namespace QuantumUser.Simulation.Systems
 {
     public class DamageableSystem : SystemSignalsOnly, ISignalOnComponentAdded<Damageable>
     {
-        public unsafe void OnAdded(Frame f, EntityRef entity, Damageable* component)
+        public unsafe void OnAdded(Frame f, EntityRef entity, Damageable* damageable)
         {
-            var data = f.FindAsset(component->DamageableBase);
-            component->CurrentHealth = data.MaxHealth;
-            component->MaxHealth = data.MaxHealth;
+            var data = f.FindAsset(damageable->DamageableBase);
+            damageable->CurrentHealth = data.MaxHealth;
+            damageable->MaxHealth = data.MaxHealth;
         }
     }
 }

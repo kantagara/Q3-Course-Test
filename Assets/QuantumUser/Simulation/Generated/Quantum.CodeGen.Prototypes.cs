@@ -107,6 +107,18 @@ namespace Quantum.Prototypes {
     }
   }
   [System.SerializableAttribute()]
+  [Quantum.Prototypes.Prototype(typeof(Quantum.InitialState))]
+  public unsafe partial class InitialStatePrototype : StructPrototype {
+    public FP InitialRadius;
+    public FP TimeToNextState;
+    partial void MaterializeUser(Frame frame, ref Quantum.InitialState result, in PrototypeMaterializationContext context);
+    public void Materialize(Frame frame, ref Quantum.InitialState result, in PrototypeMaterializationContext context = default) {
+        result.InitialRadius = this.InitialRadius;
+        result.TimeToNextState = this.TimeToNextState;
+        MaterializeUser(frame, ref result, in context);
+    }
+  }
+  [System.SerializableAttribute()]
   [Quantum.Prototypes.Prototype(typeof(Quantum.Input))]
   public unsafe partial class InputPrototype : StructPrototype {
     public FPVector2 Movement;
@@ -153,6 +165,84 @@ namespace Quantum.Prototypes {
     }
     public void Materialize(Frame frame, ref Quantum.PlayerLink result, in PrototypeMaterializationContext context = default) {
         result.Player = this.Player;
+        MaterializeUser(frame, ref result, in context);
+    }
+  }
+  [System.SerializableAttribute()]
+  [Quantum.Prototypes.Prototype(typeof(Quantum.PreShrinkState))]
+  public unsafe partial class PreShrinkStatePrototype : StructPrototype {
+    public FP TargetRadius;
+    public FP TimeToNextState;
+    partial void MaterializeUser(Frame frame, ref Quantum.PreShrinkState result, in PrototypeMaterializationContext context);
+    public void Materialize(Frame frame, ref Quantum.PreShrinkState result, in PrototypeMaterializationContext context = default) {
+        result.TargetRadius = this.TargetRadius;
+        result.TimeToNextState = this.TimeToNextState;
+        MaterializeUser(frame, ref result, in context);
+    }
+  }
+  [System.SerializableAttribute()]
+  [Quantum.Prototypes.Prototype(typeof(Quantum.ShrinkState))]
+  public unsafe partial class ShrinkStatePrototype : StructPrototype {
+    public FP TimeToNextState;
+    partial void MaterializeUser(Frame frame, ref Quantum.ShrinkState result, in PrototypeMaterializationContext context);
+    public void Materialize(Frame frame, ref Quantum.ShrinkState result, in PrototypeMaterializationContext context = default) {
+        result.TimeToNextState = this.TimeToNextState;
+        MaterializeUser(frame, ref result, in context);
+    }
+  }
+  [System.SerializableAttribute()]
+  [Quantum.Prototypes.Prototype(typeof(Quantum.ShrinkingCircle))]
+  public unsafe partial class ShrinkingCirclePrototype : ComponentPrototype<Quantum.ShrinkingCircle> {
+    [DynamicCollectionAttribute()]
+    public Quantum.Prototypes.ShrinkingCircleStatePrototype[] States = {};
+    public Quantum.Prototypes.ShrinkingCircleStatePrototype CurrentState;
+    public FP CurrentTime;
+    public FP CurrentRadius;
+    public FP TargetRadius;
+    public FP InitialRadius;
+    public Byte CurrentIndex;
+    partial void MaterializeUser(Frame frame, ref Quantum.ShrinkingCircle result, in PrototypeMaterializationContext context);
+    public override Boolean AddToEntity(FrameBase f, EntityRef entity, in PrototypeMaterializationContext context) {
+        Quantum.ShrinkingCircle component = default;
+        Materialize((Frame)f, ref component, in context);
+        return f.Set(entity, component) == SetResult.ComponentAdded;
+    }
+    public void Materialize(Frame frame, ref Quantum.ShrinkingCircle result, in PrototypeMaterializationContext context = default) {
+        if (this.States.Length == 0) {
+          result.States = default;
+        } else {
+          var list = frame.AllocateList(out result.States, this.States.Length);
+          for (int i = 0; i < this.States.Length; ++i) {
+            Quantum.ShrinkingCircleState tmp = default;
+            this.States[i].Materialize(frame, ref tmp, in context);
+            list.Add(tmp);
+          }
+        }
+        this.CurrentState.Materialize(frame, ref result.CurrentState, in context);
+        result.CurrentTime = this.CurrentTime;
+        result.CurrentRadius = this.CurrentRadius;
+        result.TargetRadius = this.TargetRadius;
+        result.InitialRadius = this.InitialRadius;
+        result.CurrentIndex = this.CurrentIndex;
+        MaterializeUser(frame, ref result, in context);
+    }
+  }
+  [System.SerializableAttribute()]
+  [Quantum.Prototypes.Prototype(typeof(Quantum.ShrinkingCircleState))]
+  public unsafe partial class ShrinkingCircleStatePrototype : UnionPrototype {
+    public string _field_used_;
+    public Quantum.Prototypes.InitialStatePrototype InitialState;
+    public Quantum.Prototypes.PreShrinkStatePrototype PreShrinkState;
+    public Quantum.Prototypes.ShrinkStatePrototype ShrinkState;
+    partial void MaterializeUser(Frame frame, ref Quantum.ShrinkingCircleState result, in PrototypeMaterializationContext context);
+    public void Materialize(Frame frame, ref Quantum.ShrinkingCircleState result, in PrototypeMaterializationContext context = default) {
+        switch (_field_used_) {
+          case "INITIALSTATE": this.InitialState.Materialize(frame, ref *result.InitialState, in context); break;
+          case "PRESHRINKSTATE": this.PreShrinkState.Materialize(frame, ref *result.PreShrinkState, in context); break;
+          case "SHRINKSTATE": this.ShrinkState.Materialize(frame, ref *result.ShrinkState, in context); break;
+          case "": case null: break;
+          default: PrototypeValidator.UnknownUnionField(_field_used_, in context); break;
+        }
         MaterializeUser(frame, ref result, in context);
     }
   }

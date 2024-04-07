@@ -259,6 +259,12 @@ MonoBehaviour:
     SystemName: 
     StartDisabled: 0
     Children: []
+  - SystemType:
+      AssemblyQualifiedName: QuantumUser.Simulation.Systems.ShrinkingCircleSystem,
+        Quantum.Simulation, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    SystemName: 
+    StartDisabled: 0
+    Children: []
 --- !u!114 &-5051629531297053773
 MonoBehaviour:
   m_ObjectHideFlags: 0
