@@ -18,7 +18,7 @@ MonoBehaviour:
       Value: 341755006242495730
   Offset:
     X:
-      RawValue: 13107
+      RawValue: 0
     Y:
       RawValue: 78643
     Z:
@@ -26,3 +26,5 @@ MonoBehaviour:
   Cooldown:
     RawValue: 19661
   BulletData: {fileID: 11400000, guid: 0ab806a574bd49649893f5611430f120, type: 2}
+  Damage:
+    RawValue: 1966080
