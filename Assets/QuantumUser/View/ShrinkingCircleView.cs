@@ -18,11 +18,10 @@ public unsafe class ShrinkingCircleView : QuantumEntityViewComponent
     public override void OnActivate(Frame frame)
     {
         _shrinkingCircle = frame.Unsafe.GetPointerSingleton<ShrinkingCircle>();
-        targetCircleSprite.localScale = dangerCircleSprite.localScale = new Vector3(_shrinkingCircle->CurrentRadius.AsFloat / ppu, _shrinkingCircle->CurrentRadius.AsFloat / ppu);
+        targetCircleSprite.localScale = dangerCircleSprite.localScale = new Vector3(_shrinkingCircle->CurrentRadius.AsFloat , _shrinkingCircle->CurrentRadius.AsFloat );
         dangerCircleSprite.gameObject.SetActive(false);        
     }
 
-    private float ppu = 1024;
 
     private void OnDestroy()
     {
@@ -32,7 +31,7 @@ public unsafe class ShrinkingCircleView : QuantumEntityViewComponent
     public override void OnLateUpdateView()
     {
         base.OnLateUpdateView();
-        dangerCircleSprite.localScale = new Vector3(_shrinkingCircle->CurrentRadius.AsFloat / ppu, _shrinkingCircle->CurrentRadius.AsFloat / ppu);
+        dangerCircleSprite.localScale = new Vector3(_shrinkingCircle->CurrentRadius.AsFloat , _shrinkingCircle->CurrentRadius.AsFloat );
     }
 
     private void CircleChangedState(EventCircleChangedState callback)
@@ -40,6 +39,6 @@ public unsafe class ShrinkingCircleView : QuantumEntityViewComponent
         var currentState = _shrinkingCircle->CurrentState;
         dangerCircleSprite.gameObject.SetActive(currentState.Field is ShrinkingCircleState.SHRINKSTATE or ShrinkingCircleState.PRESHRINKSTATE);
         if(currentState.Field == ShrinkingCircleState.PRESHRINKSTATE)
-            targetCircleSprite.DOScale(new Vector3(_shrinkingCircle->TargetRadius.AsFloat / ppu, _shrinkingCircle->TargetRadius.AsFloat / ppu), 1f);
+            targetCircleSprite.DOScale(new Vector3(_shrinkingCircle->TargetRadius.AsFloat , _shrinkingCircle->TargetRadius.AsFloat ), 1f);
     }
 }
