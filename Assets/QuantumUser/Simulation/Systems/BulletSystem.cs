@@ -77,9 +77,10 @@ namespace Quantum.Systems
         }
 
 
-        public void CreateBullet(Frame f, EntityRef owner, Weapon weapon)
+        public void CreateBullet(Frame f, EntityRef owner, AssetRef<FiringWeaponData> weapon)
         {
-            var weaponData = f.FindAsset(weapon.WeaponData);
+            Log.Info("Creating the bullet");
+            var weaponData = f.FindAsset(weapon);
             var bulletData = weaponData.BulletData;
             
             var bulletEntity = f.Create(bulletData.Entity);

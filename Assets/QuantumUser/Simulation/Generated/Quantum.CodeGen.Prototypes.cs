@@ -306,6 +306,7 @@ namespace Quantum.Prototypes {
   [Quantum.Prototypes.Prototype(typeof(Quantum.Weapon))]
   public unsafe partial class WeaponPrototype : ComponentPrototype<Quantum.Weapon> {
     public FP CooldownTime;
+    public Byte Ammo;
     public AssetRef<WeaponData> WeaponData;
     partial void MaterializeUser(Frame frame, ref Quantum.Weapon result, in PrototypeMaterializationContext context);
     public override Boolean AddToEntity(FrameBase f, EntityRef entity, in PrototypeMaterializationContext context) {
@@ -315,6 +316,7 @@ namespace Quantum.Prototypes {
     }
     public void Materialize(Frame frame, ref Quantum.Weapon result, in PrototypeMaterializationContext context = default) {
         result.CooldownTime = this.CooldownTime;
+        result.Ammo = this.Ammo;
         result.WeaponData = this.WeaponData;
         MaterializeUser(frame, ref result, in context);
     }

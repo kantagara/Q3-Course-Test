@@ -1175,9 +1175,10 @@ MonoBehaviour:
   Prototype:
     CooldownTime:
       RawValue: 0
+    Ammo: 0
     WeaponData:
       Id:
-        Value: 341755006242495730
+        Value: 476535399849913692
 --- !u!1 &1411613008270497269
 GameObject:
   m_ObjectHideFlags: 0

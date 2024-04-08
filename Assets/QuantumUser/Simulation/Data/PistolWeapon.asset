@@ -9,22 +9,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9ca2a6a626534b679f9964ceb9f41250, type: 3}
-  m_Name: PistolWeaponData
+  m_Script: {fileID: 11500000, guid: d0e172ec2f254e7682cd9124babafa70, type: 3}
+  m_Name: PistolWeapon
   m_EditorClassIdentifier: 
   Identifier:
-    Path: QuantumUser/Simulation/Data/PistolWeaponData
+    Path: QuantumUser/Simulation/Data/PistolWeapon
     Guid:
-      Value: 341755006242495730
+      Value: 476535399849913692
   Offset:
     X:
-      RawValue: 0
+      RawValue: 19661
     Y:
-      RawValue: 78643
+      RawValue: 58262
     Z:
-      RawValue: 65536
+      RawValue: 78643
   Cooldown:
-    RawValue: 19661
-  BulletData: {fileID: 11400000, guid: 0ab806a574bd49649893f5611430f120, type: 2}
+    RawValue: 32768
   Damage:
     RawValue: 1966080
+  Ammo: 20
+  BulletData: {fileID: 11400000, guid: 0ab806a574bd49649893f5611430f120, type: 2}

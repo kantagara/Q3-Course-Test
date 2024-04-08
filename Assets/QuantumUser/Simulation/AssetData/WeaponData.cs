@@ -4,11 +4,35 @@ using Photon.Deterministic;
 namespace Quantum
 {
     [Serializable]
-    public class WeaponData : AssetObject
+    public abstract unsafe class WeaponData : AssetObject
     {
         public FPVector3 Offset;
         public FP Cooldown;
-        public BulletData BulletData;
         public FP Damage = 30;
+
+        public virtual void OnInit(Frame f, EntityRef entity, Weapon* weapon)
+        {
+            
+        }
+
+        public virtual void OnFirePressed(Frame f, WeaponSystem.Filter filter)
+        {
+            
+        }
+        
+        public virtual void OnUpdate(Frame frame, WeaponSystem.Filter filter)
+        {
+            
+        }
+
+        public virtual void OnFireHeld(Frame f, WeaponSystem.Filter filter)
+        {
+            
+        }
+
+        public virtual void OnFireReleased(Frame f, WeaponSystem.Filter filter)
+        {
+            
+        }
     }
 }

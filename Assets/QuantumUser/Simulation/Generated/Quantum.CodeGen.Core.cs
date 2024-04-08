@@ -915,28 +915,32 @@ namespace Quantum {
   }
   [StructLayout(LayoutKind.Explicit)]
   public unsafe partial struct Weapon : Quantum.IComponent {
-    public const Int32 SIZE = 16;
+    public const Int32 SIZE = 24;
     public const Int32 ALIGNMENT = 8;
-    [FieldOffset(8)]
+    [FieldOffset(16)]
     public FP CooldownTime;
     [FieldOffset(0)]
+    public Byte Ammo;
+    [FieldOffset(8)]
     public AssetRef<WeaponData> WeaponData;
     public override Int32 GetHashCode() {
       unchecked { 
         var hash = 8713;
         hash = hash * 31 + CooldownTime.GetHashCode();
+        hash = hash * 31 + Ammo.GetHashCode();
         hash = hash * 31 + WeaponData.GetHashCode();
         return hash;
       }
     }
     public static void Serialize(void* ptr, FrameSerializer serializer) {
         var p = (Weapon*)ptr;
+        serializer.Stream.Serialize(&p->Ammo);
         AssetRef.Serialize(&p->WeaponData, serializer);
         FP.Serialize(&p->CooldownTime, serializer);
     }
   }
   public unsafe partial interface ISignalCreateBullet : ISignal {
-    void CreateBullet(Frame f, EntityRef Owner, Weapon Weapon);
+    void CreateBullet(Frame f, EntityRef Owner, AssetRef<FiringWeaponData> Weapon);
   }
   public static unsafe partial class Constants {
   }
@@ -1032,7 +1036,7 @@ namespace Quantum {
       Physics3D.Init(_globals->PhysicsState3D.MapStaticCollidersState.TrackedMap);
     }
     public unsafe partial struct FrameSignals {
-      public void CreateBullet(EntityRef Owner, Weapon Weapon) {
+      public void CreateBullet(EntityRef Owner, AssetRef<FiringWeaponData> Weapon) {
         var array = _f._ISignalCreateBulletSystems;
         for (Int32 i = 0; i < array.Length; ++i) {
           var s = array[i];

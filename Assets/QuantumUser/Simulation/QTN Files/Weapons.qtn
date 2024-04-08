@@ -1,6 +1,7 @@
 component Weapon 
 {
    FP CooldownTime;
+   byte Ammo;
    AssetRef<WeaponData> WeaponData;
 }
 
@@ -14,7 +15,7 @@ component Bullet
     FP HeightOffset;
 }
 
-signal CreateBullet(EntityRef Owner,Weapon Weapon);
+signal CreateBullet(EntityRef Owner,AssetRef<FiringWeaponData> Weapon);
 
 event BulletHit
 {
