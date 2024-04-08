@@ -1,19 +1,27 @@
-﻿singleton component ShrinkingCircle
+﻿
+singleton component ShrinkingCircle
 {
+    //All the possible states
     list<ShrinkingCircleState> States;
     ShrinkingCircleState CurrentState;
+    //CurrentTime to next state
     FP CurrentTime;
+    //Current radius that is shrinking
     FP CurrentRadius;
+    //Target radius we're shrinking towards
     FP TargetRadius;
+    //Initial radius - used to easily lerp towards the target radius once the shrinking state starts.
     FP InitialRadius;
     byte CurrentIndex;
-    
+    //Used for accurately lerping towards the target radius
+    FP ShrinkingCircleTime;
 }
 
 union ShrinkingCircleState
 {
     InitialState InitialState;
     PreShrinkState PreShrinkState;
+    CooldownState CooldownState;
     ShrinkState ShrinkState;
 }
 
@@ -28,7 +36,6 @@ struct PreShrinkState
 {
     FP TargetRadius;
     FP TimeToNextState;
-
 }
 
 struct ShrinkState
@@ -36,8 +43,13 @@ struct ShrinkState
     FP TimeToNextState;
 }
 
+struct CooldownState
+{
+    FP TimeToNextState;
+}
+
 
 event CircleChangedState
 {
-    ShrinkingCircle ShrinkingCircle;
+    
 }

@@ -36,7 +36,7 @@ namespace QuantumUser.Simulation.Systems
             shrinkingCircle->CurrentIndex++;
             shrinkingCircle->CurrentState = states[shrinkingCircle->CurrentIndex];
             shrinkingCircle->CurrentState.EnterState(shrinkingCircle);
-            f.Events.CircleChangedState(*shrinkingCircle);
+            f.Events.CircleChangedState();
         }
         
 

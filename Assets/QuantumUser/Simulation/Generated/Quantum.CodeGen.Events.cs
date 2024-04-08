@@ -89,9 +89,8 @@ namespace Quantum {
         _f.AddEvent(ev);
         return ev;
       }
-      public EventCircleChangedState CircleChangedState(ShrinkingCircle ShrinkingCircle) {
+      public EventCircleChangedState CircleChangedState() {
         var ev = _f.Context.AcquireEvent<EventCircleChangedState>(EventCircleChangedState.ID);
-        ev.ShrinkingCircle = ShrinkingCircle;
         _f.AddEvent(ev);
         return ev;
       }
@@ -184,7 +183,6 @@ namespace Quantum {
   }
   public unsafe partial class EventCircleChangedState : EventBase {
     public new const Int32 ID = 3;
-    public ShrinkingCircle ShrinkingCircle;
     protected EventCircleChangedState(Int32 id, EventFlags flags) : 
         base(id, flags) {
     }
@@ -202,7 +200,6 @@ namespace Quantum {
     public override Int32 GetHashCode() {
       unchecked {
         var hash = 47;
-        hash = hash * 31 + ShrinkingCircle.GetHashCode();
         return hash;
       }
     }

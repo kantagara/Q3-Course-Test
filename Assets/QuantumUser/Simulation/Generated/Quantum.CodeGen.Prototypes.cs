@@ -73,6 +73,16 @@ namespace Quantum.Prototypes {
     }
   }
   [System.SerializableAttribute()]
+  [Quantum.Prototypes.Prototype(typeof(Quantum.CooldownState))]
+  public unsafe partial class CooldownStatePrototype : StructPrototype {
+    public FP TimeToNextState;
+    partial void MaterializeUser(Frame frame, ref Quantum.CooldownState result, in PrototypeMaterializationContext context);
+    public void Materialize(Frame frame, ref Quantum.CooldownState result, in PrototypeMaterializationContext context = default) {
+        result.TimeToNextState = this.TimeToNextState;
+        MaterializeUser(frame, ref result, in context);
+    }
+  }
+  [System.SerializableAttribute()]
   [Quantum.Prototypes.Prototype(typeof(Quantum.Damageable))]
   public unsafe partial class DamageablePrototype : ComponentPrototype<Quantum.Damageable> {
     public FP CurrentHealth;
@@ -201,6 +211,7 @@ namespace Quantum.Prototypes {
     public FP TargetRadius;
     public FP InitialRadius;
     public Byte CurrentIndex;
+    public FP ShrinkingCircleTime;
     partial void MaterializeUser(Frame frame, ref Quantum.ShrinkingCircle result, in PrototypeMaterializationContext context);
     public override Boolean AddToEntity(FrameBase f, EntityRef entity, in PrototypeMaterializationContext context) {
         Quantum.ShrinkingCircle component = default;
@@ -224,6 +235,7 @@ namespace Quantum.Prototypes {
         result.TargetRadius = this.TargetRadius;
         result.InitialRadius = this.InitialRadius;
         result.CurrentIndex = this.CurrentIndex;
+        result.ShrinkingCircleTime = this.ShrinkingCircleTime;
         MaterializeUser(frame, ref result, in context);
     }
   }
@@ -233,12 +245,14 @@ namespace Quantum.Prototypes {
     public string _field_used_;
     public Quantum.Prototypes.InitialStatePrototype InitialState;
     public Quantum.Prototypes.PreShrinkStatePrototype PreShrinkState;
+    public Quantum.Prototypes.CooldownStatePrototype CooldownState;
     public Quantum.Prototypes.ShrinkStatePrototype ShrinkState;
     partial void MaterializeUser(Frame frame, ref Quantum.ShrinkingCircleState result, in PrototypeMaterializationContext context);
     public void Materialize(Frame frame, ref Quantum.ShrinkingCircleState result, in PrototypeMaterializationContext context = default) {
         switch (_field_used_) {
           case "INITIALSTATE": this.InitialState.Materialize(frame, ref *result.InitialState, in context); break;
           case "PRESHRINKSTATE": this.PreShrinkState.Materialize(frame, ref *result.PreShrinkState, in context); break;
+          case "COOLDOWNSTATE": this.CooldownState.Materialize(frame, ref *result.CooldownState, in context); break;
           case "SHRINKSTATE": this.ShrinkState.Materialize(frame, ref *result.ShrinkState, in context); break;
           case "": case null: break;
           default: PrototypeValidator.UnknownUnionField(_field_used_, in context); break;

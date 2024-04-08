@@ -14,12 +14,16 @@ namespace Quantum
                     circle->TargetRadius = PreShrinkState->TargetRadius;
                     return;
                 case SHRINKSTATE:
-                    circle->CurrentTime = PreShrinkState->TimeToNextState;
+                    circle->CurrentTime = ShrinkState->TimeToNextState;
                     circle->InitialRadius = circle->CurrentRadius;
+                    circle->ShrinkingCircleTime = FP._0;
                     return;
                 case INITIALSTATE:
-                    circle->CurrentTime = PreShrinkState->TimeToNextState;
+                    circle->CurrentTime = InitialState->TimeToNextState;
                     circle->CurrentRadius = InitialState->InitialRadius;
+                    return;
+                case COOLDOWNSTATE:
+                    circle->CurrentTime = CooldownState->TimeToNextState;
                     return;
             }
         }
@@ -30,7 +34,9 @@ namespace Quantum
             switch (Field)
             {
                 case SHRINKSTATE:
-                    circle->CurrentRadius -= FPMath.Lerp(circle->InitialRadius, circle->TargetRadius, f.DeltaTime/ ShrinkState->TimeToNextState);
+                    circle->ShrinkingCircleTime += f.DeltaTime / ShrinkState->TimeToNextState;
+                    circle->CurrentRadius = FPMath.Lerp(circle->InitialRadius, circle->TargetRadius, 
+                        circle->ShrinkingCircleTime);
                     return;
             }
         }
