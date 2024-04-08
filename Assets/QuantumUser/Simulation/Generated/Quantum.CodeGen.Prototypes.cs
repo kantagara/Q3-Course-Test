@@ -203,8 +203,7 @@ namespace Quantum.Prototypes {
   [System.SerializableAttribute()]
   [Quantum.Prototypes.Prototype(typeof(Quantum.ShrinkingCircle))]
   public unsafe partial class ShrinkingCirclePrototype : ComponentPrototype<Quantum.ShrinkingCircle> {
-    [DynamicCollectionAttribute()]
-    public Quantum.Prototypes.ShrinkingCircleStatePrototype[] States = {};
+    public AssetRef<ShrinkingCircleConfig> ShrinkingCircleConfig;
     public Quantum.Prototypes.ShrinkingCircleStatePrototype CurrentState;
     public FP CurrentTime;
     public FP CurrentRadius;
@@ -212,6 +211,7 @@ namespace Quantum.Prototypes {
     public FP InitialRadius;
     public Byte CurrentIndex;
     public FP ShrinkingCircleTime;
+    public FPVector2 Position;
     partial void MaterializeUser(Frame frame, ref Quantum.ShrinkingCircle result, in PrototypeMaterializationContext context);
     public override Boolean AddToEntity(FrameBase f, EntityRef entity, in PrototypeMaterializationContext context) {
         Quantum.ShrinkingCircle component = default;
@@ -219,16 +219,7 @@ namespace Quantum.Prototypes {
         return f.Set(entity, component) == SetResult.ComponentAdded;
     }
     public void Materialize(Frame frame, ref Quantum.ShrinkingCircle result, in PrototypeMaterializationContext context = default) {
-        if (this.States.Length == 0) {
-          result.States = default;
-        } else {
-          var list = frame.AllocateList(out result.States, this.States.Length);
-          for (int i = 0; i < this.States.Length; ++i) {
-            Quantum.ShrinkingCircleState tmp = default;
-            this.States[i].Materialize(frame, ref tmp, in context);
-            list.Add(tmp);
-          }
-        }
+        result.ShrinkingCircleConfig = this.ShrinkingCircleConfig;
         this.CurrentState.Materialize(frame, ref result.CurrentState, in context);
         result.CurrentTime = this.CurrentTime;
         result.CurrentRadius = this.CurrentRadius;
@@ -236,6 +227,7 @@ namespace Quantum.Prototypes {
         result.InitialRadius = this.InitialRadius;
         result.CurrentIndex = this.CurrentIndex;
         result.ShrinkingCircleTime = this.ShrinkingCircleTime;
+        result.Position = this.Position;
         MaterializeUser(frame, ref result, in context);
     }
   }

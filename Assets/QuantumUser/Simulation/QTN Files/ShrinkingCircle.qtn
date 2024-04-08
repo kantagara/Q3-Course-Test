@@ -2,7 +2,7 @@
 singleton component ShrinkingCircle
 {
     //All the possible states
-    list<ShrinkingCircleState> States;
+    AssetRef<ShrinkingCircleConfig> ShrinkingCircleConfig;
     ShrinkingCircleState CurrentState;
     //CurrentTime to next state
     FP CurrentTime;
@@ -15,6 +15,7 @@ singleton component ShrinkingCircle
     byte CurrentIndex;
     //Used for accurately lerping towards the target radius
     FP ShrinkingCircleTime;
+    FPVector2 Position;
 }
 
 union ShrinkingCircleState

@@ -1,0 +1,174 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dba0383ec42b4f7594a37ecc99f79565, type: 3}
+  m_Name: ShrinkCircleConfig
+  m_EditorClassIdentifier: 
+  Identifier:
+    Path: QuantumUser/Simulation/Data/ShrinkCircleConfig
+    Guid:
+      Value: 307926171305568066
+  DamageDealingPerSecond:
+    RawValue: 196608
+  States:
+  - _field_used_: INITIALSTATE
+    InitialState:
+      InitialRadius:
+        RawValue: 13107200
+      TimeToNextState:
+        RawValue: 327680
+    PreShrinkState:
+      TargetRadius:
+        RawValue: 0
+      TimeToNextState:
+        RawValue: 0
+    CooldownState:
+      TimeToNextState:
+        RawValue: 0
+    ShrinkState:
+      TimeToNextState:
+        RawValue: 0
+  - _field_used_: PRESHRINKSTATE
+    InitialState:
+      InitialRadius:
+        RawValue: 0
+      TimeToNextState:
+        RawValue: 0
+    PreShrinkState:
+      TargetRadius:
+        RawValue: 10485760
+      TimeToNextState:
+        RawValue: 327680
+    CooldownState:
+      TimeToNextState:
+        RawValue: 0
+    ShrinkState:
+      TimeToNextState:
+        RawValue: 0
+  - _field_used_: SHRINKSTATE
+    InitialState:
+      InitialRadius:
+        RawValue: 0
+      TimeToNextState:
+        RawValue: 0
+    PreShrinkState:
+      TargetRadius:
+        RawValue: 0
+      TimeToNextState:
+        RawValue: 0
+    CooldownState:
+      TimeToNextState:
+        RawValue: 0
+    ShrinkState:
+      TimeToNextState:
+        RawValue: 327680
+  - _field_used_: COOLDOWNSTATE
+    InitialState:
+      InitialRadius:
+        RawValue: 0
+      TimeToNextState:
+        RawValue: 0
+    PreShrinkState:
+      TargetRadius:
+        RawValue: 0
+      TimeToNextState:
+        RawValue: 0
+    CooldownState:
+      TimeToNextState:
+        RawValue: 327680
+    ShrinkState:
+      TimeToNextState:
+        RawValue: 0
+  - _field_used_: PRESHRINKSTATE
+    InitialState:
+      InitialRadius:
+        RawValue: 0
+      TimeToNextState:
+        RawValue: 0
+    PreShrinkState:
+      TargetRadius:
+        RawValue: 6553600
+      TimeToNextState:
+        RawValue: 327680
+    CooldownState:
+      TimeToNextState:
+        RawValue: 0
+    ShrinkState:
+      TimeToNextState:
+        RawValue: 0
+  - _field_used_: SHRINKSTATE
+    InitialState:
+      InitialRadius:
+        RawValue: 0
+      TimeToNextState:
+        RawValue: 0
+    PreShrinkState:
+      TargetRadius:
+        RawValue: 0
+      TimeToNextState:
+        RawValue: 0
+    CooldownState:
+      TimeToNextState:
+        RawValue: 0
+    ShrinkState:
+      TimeToNextState:
+        RawValue: 327680
+  - _field_used_: COOLDOWNSTATE
+    InitialState:
+      InitialRadius:
+        RawValue: 0
+      TimeToNextState:
+        RawValue: 0
+    PreShrinkState:
+      TargetRadius:
+        RawValue: 0
+      TimeToNextState:
+        RawValue: 0
+    CooldownState:
+      TimeToNextState:
+        RawValue: 327680
+    ShrinkState:
+      TimeToNextState:
+        RawValue: 0
+  - _field_used_: PRESHRINKSTATE
+    InitialState:
+      InitialRadius:
+        RawValue: 0
+      TimeToNextState:
+        RawValue: 0
+    PreShrinkState:
+      TargetRadius:
+        RawValue: 3932160
+      TimeToNextState:
+        RawValue: 327680
+    CooldownState:
+      TimeToNextState:
+        RawValue: 0
+    ShrinkState:
+      TimeToNextState:
+        RawValue: 0
+  - _field_used_: SHRINKSTATE
+    InitialState:
+      InitialRadius:
+        RawValue: 0
+      TimeToNextState:
+        RawValue: 0
+    PreShrinkState:
+      TargetRadius:
+        RawValue: 0
+      TimeToNextState:
+        RawValue: 0
+    CooldownState:
+      TimeToNextState:
+        RawValue: 0
+    ShrinkState:
+      TimeToNextState:
+        RawValue: 327680

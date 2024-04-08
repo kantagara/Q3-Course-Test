@@ -819,28 +819,30 @@ namespace Quantum {
   }
   [StructLayout(LayoutKind.Explicit)]
   public unsafe partial struct ShrinkingCircle : Quantum.IComponentSingleton {
-    public const Int32 SIZE = 72;
+    public const Int32 SIZE = 96;
     public const Int32 ALIGNMENT = 8;
-    [FieldOffset(4)]
-    public QListPtr<ShrinkingCircleState> States;
-    [FieldOffset(48)]
-    public ShrinkingCircleState CurrentState;
-    [FieldOffset(16)]
-    public FP CurrentTime;
     [FieldOffset(8)]
-    public FP CurrentRadius;
-    [FieldOffset(40)]
-    public FP TargetRadius;
+    public AssetRef<ShrinkingCircleConfig> ShrinkingCircleConfig;
+    [FieldOffset(72)]
+    public ShrinkingCircleState CurrentState;
     [FieldOffset(24)]
+    public FP CurrentTime;
+    [FieldOffset(16)]
+    public FP CurrentRadius;
+    [FieldOffset(48)]
+    public FP TargetRadius;
+    [FieldOffset(32)]
     public FP InitialRadius;
     [FieldOffset(0)]
     public Byte CurrentIndex;
-    [FieldOffset(32)]
+    [FieldOffset(40)]
     public FP ShrinkingCircleTime;
+    [FieldOffset(56)]
+    public FPVector2 Position;
     public override Int32 GetHashCode() {
       unchecked { 
         var hash = 929;
-        hash = hash * 31 + States.GetHashCode();
+        hash = hash * 31 + ShrinkingCircleConfig.GetHashCode();
         hash = hash * 31 + CurrentState.GetHashCode();
         hash = hash * 31 + CurrentTime.GetHashCode();
         hash = hash * 31 + CurrentRadius.GetHashCode();
@@ -848,25 +850,20 @@ namespace Quantum {
         hash = hash * 31 + InitialRadius.GetHashCode();
         hash = hash * 31 + CurrentIndex.GetHashCode();
         hash = hash * 31 + ShrinkingCircleTime.GetHashCode();
+        hash = hash * 31 + Position.GetHashCode();
         return hash;
       }
-    }
-    public void ClearPointers(FrameBase f, EntityRef entity) {
-      States = default;
-    }
-    public static void OnRemoved(FrameBase frame, EntityRef entity, void* ptr) {
-      var p = (Quantum.ShrinkingCircle*)ptr;
-      p->ClearPointers((Frame)frame, entity);
     }
     public static void Serialize(void* ptr, FrameSerializer serializer) {
         var p = (ShrinkingCircle*)ptr;
         serializer.Stream.Serialize(&p->CurrentIndex);
-        QList.Serialize(&p->States, serializer, Statics.SerializeShrinkingCircleState);
+        AssetRef.Serialize(&p->ShrinkingCircleConfig, serializer);
         FP.Serialize(&p->CurrentRadius, serializer);
         FP.Serialize(&p->CurrentTime, serializer);
         FP.Serialize(&p->InitialRadius, serializer);
         FP.Serialize(&p->ShrinkingCircleTime, serializer);
         FP.Serialize(&p->TargetRadius, serializer);
+        FPVector2.Serialize(&p->Position, serializer);
         Quantum.ShrinkingCircleState.Serialize(&p->CurrentState, serializer);
     }
   }
@@ -1047,11 +1044,9 @@ namespace Quantum {
     }
   }
   public unsafe partial class Statics {
-    public static FrameSerializer.Delegate SerializeShrinkingCircleState;
     public static FrameSerializer.Delegate SerializeEntityRef;
     public static FrameSerializer.Delegate SerializeInput;
     static partial void InitStaticDelegatesGen() {
-      SerializeShrinkingCircleState = Quantum.ShrinkingCircleState.Serialize;
       SerializeEntityRef = EntityRef.Serialize;
       SerializeInput = Quantum.Input.Serialize;
     }
@@ -1153,7 +1148,7 @@ namespace Quantum {
         .Add<Quantum.Grass>(Quantum.Grass.Serialize, null, null, ComponentFlags.None)
         .Add<Quantum.KCC>(Quantum.KCC.Serialize, null, null, ComponentFlags.None)
         .Add<Quantum.PlayerLink>(Quantum.PlayerLink.Serialize, null, null, ComponentFlags.None)
-        .Add<Quantum.ShrinkingCircle>(Quantum.ShrinkingCircle.Serialize, null, Quantum.ShrinkingCircle.OnRemoved, ComponentFlags.Singleton)
+        .Add<Quantum.ShrinkingCircle>(Quantum.ShrinkingCircle.Serialize, null, null, ComponentFlags.Singleton)
         .Add<Quantum.SpawnPoint>(Quantum.SpawnPoint.Serialize, null, null, ComponentFlags.None)
         .Add<Quantum.SpawnPointList>(Quantum.SpawnPointList.Serialize, null, Quantum.SpawnPointList.OnRemoved, ComponentFlags.Singleton)
         .Add<Quantum.Weapon>(Quantum.Weapon.Serialize, null, null, ComponentFlags.None)

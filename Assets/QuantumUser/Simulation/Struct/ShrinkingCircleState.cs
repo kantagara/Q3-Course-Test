@@ -3,6 +3,7 @@ using Photon.Deterministic;
 
 namespace Quantum
 {
+    [Serializable]
     public unsafe partial struct ShrinkingCircleState
     {
         public void EnterState(ShrinkingCircle* circle)
