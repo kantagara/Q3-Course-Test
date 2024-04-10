@@ -8,7 +8,6 @@ public unsafe class ShrinkingCircleView : QuantumEntityViewComponent
     [SerializeField] private Transform targetCircleSprite;
     [SerializeField] private Transform dangerCircleSprite;
 
-    private ShrinkingCircle* _shrinkingCircle;
 
     private void Awake()
     {
@@ -17,8 +16,8 @@ public unsafe class ShrinkingCircleView : QuantumEntityViewComponent
 
     public override void OnActivate(Frame frame)
     {
-        _shrinkingCircle = frame.Unsafe.GetPointerSingleton<ShrinkingCircle>();
-        targetCircleSprite.localScale = dangerCircleSprite.localScale = new Vector3(_shrinkingCircle->CurrentRadius.AsFloat , _shrinkingCircle->CurrentRadius.AsFloat );
+        var shrinkingCircle = frame.GetSingleton<ShrinkingCircle>();
+        targetCircleSprite.localScale = dangerCircleSprite.localScale = new Vector3(shrinkingCircle.CurrentRadius.AsFloat , shrinkingCircle.CurrentRadius.AsFloat );
         dangerCircleSprite.gameObject.SetActive(false);        
     }
 
@@ -30,15 +29,16 @@ public unsafe class ShrinkingCircleView : QuantumEntityViewComponent
 
     public override void OnLateUpdateView()
     {
-        base.OnLateUpdateView();
-        dangerCircleSprite.localScale = new Vector3(_shrinkingCircle->CurrentRadius.AsFloat , _shrinkingCircle->CurrentRadius.AsFloat );
+        var shrinkingCircle = PredictedFrame.Unsafe.GetPointerSingleton<ShrinkingCircle>();
+        dangerCircleSprite.localScale = new Vector3(shrinkingCircle->CurrentRadius.AsFloat , shrinkingCircle->CurrentRadius.AsFloat );
     }
 
     private void CircleChangedState(EventCircleChangedState callback)
     {
-        var currentState = _shrinkingCircle->CurrentState;
+        var shrinkingCircle = PredictedFrame.GetSingleton<ShrinkingCircle>();
+        var currentState = shrinkingCircle.CurrentState;
         dangerCircleSprite.gameObject.SetActive(currentState.Field is ShrinkingCircleState.SHRINKSTATE or ShrinkingCircleState.PRESHRINKSTATE);
         if(currentState.Field == ShrinkingCircleState.PRESHRINKSTATE)
-            targetCircleSprite.DOScale(new Vector3(_shrinkingCircle->TargetRadius.AsFloat , _shrinkingCircle->TargetRadius.AsFloat ), 1f);
+            targetCircleSprite.DOScale(new Vector3(shrinkingCircle.TargetRadius.AsFloat , shrinkingCircle.TargetRadius.AsFloat ), 1f);
     }
 }

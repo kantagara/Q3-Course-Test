@@ -21,7 +21,6 @@ namespace Quantum
             
             if (playerInput->Fire.WasPressed)
             {
-                Log.Info("Fire Pressed");
                 OnFirePressed(f,filter);
             }
             else if (playerInput->Fire.WasReleased)
