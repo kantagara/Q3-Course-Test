@@ -808,6 +808,28 @@ namespace Quantum {
     }
   }
   [StructLayout(LayoutKind.Explicit)]
+  public unsafe partial struct LootDrop : Quantum.IComponent {
+    public const Int32 SIZE = 16;
+    public const Int32 ALIGNMENT = 8;
+    [FieldOffset(0)]
+    public AssetRef<EntityPrototype> HealthLoot;
+    [FieldOffset(8)]
+    public AssetRef<EntityPrototype> WeaponLoot;
+    public override Int32 GetHashCode() {
+      unchecked { 
+        var hash = 14897;
+        hash = hash * 31 + HealthLoot.GetHashCode();
+        hash = hash * 31 + WeaponLoot.GetHashCode();
+        return hash;
+      }
+    }
+    public static void Serialize(void* ptr, FrameSerializer serializer) {
+        var p = (LootDrop*)ptr;
+        AssetRef.Serialize(&p->HealthLoot, serializer);
+        AssetRef.Serialize(&p->WeaponLoot, serializer);
+    }
+  }
+  [StructLayout(LayoutKind.Explicit)]
   public unsafe partial struct PickupItem : Quantum.IComponent {
     public const Int32 SIZE = 32;
     public const Int32 ALIGNMENT = 8;
@@ -1014,6 +1036,8 @@ namespace Quantum {
       BuildSignalsArrayOnComponentRemoved<Quantum.Grass>();
       BuildSignalsArrayOnComponentAdded<Quantum.KCC>();
       BuildSignalsArrayOnComponentRemoved<Quantum.KCC>();
+      BuildSignalsArrayOnComponentAdded<Quantum.LootDrop>();
+      BuildSignalsArrayOnComponentRemoved<Quantum.LootDrop>();
       BuildSignalsArrayOnComponentAdded<MapEntityLink>();
       BuildSignalsArrayOnComponentRemoved<MapEntityLink>();
       BuildSignalsArrayOnComponentAdded<NavMeshAvoidanceAgent>();
@@ -1143,6 +1167,7 @@ namespace Quantum {
       typeRegistry.Register(typeof(Joint3D), Joint3D.SIZE);
       typeRegistry.Register(typeof(Quantum.KCC), Quantum.KCC.SIZE);
       typeRegistry.Register(typeof(LayerMask), LayerMask.SIZE);
+      typeRegistry.Register(typeof(Quantum.LootDrop), Quantum.LootDrop.SIZE);
       typeRegistry.Register(typeof(MapEntityId), MapEntityId.SIZE);
       typeRegistry.Register(typeof(MapEntityLink), MapEntityLink.SIZE);
       typeRegistry.Register(typeof(NavMeshAvoidanceAgent), NavMeshAvoidanceAgent.SIZE);
@@ -1191,12 +1216,13 @@ namespace Quantum {
       typeRegistry.Register(typeof(Quantum._globals_), Quantum._globals_.SIZE);
     }
     static partial void InitComponentTypeIdGen() {
-      ComponentTypeId.Reset(ComponentTypeId.BuiltInComponentCount + 10)
+      ComponentTypeId.Reset(ComponentTypeId.BuiltInComponentCount + 11)
         .AddBuiltInComponents()
         .Add<Quantum.Bullet>(Quantum.Bullet.Serialize, null, null, ComponentFlags.None)
         .Add<Quantum.Damageable>(Quantum.Damageable.Serialize, null, null, ComponentFlags.None)
         .Add<Quantum.Grass>(Quantum.Grass.Serialize, null, null, ComponentFlags.None)
         .Add<Quantum.KCC>(Quantum.KCC.Serialize, null, null, ComponentFlags.None)
+        .Add<Quantum.LootDrop>(Quantum.LootDrop.Serialize, null, null, ComponentFlags.None)
         .Add<Quantum.PickupItem>(Quantum.PickupItem.Serialize, null, null, ComponentFlags.None)
         .Add<Quantum.PlayerLink>(Quantum.PlayerLink.Serialize, null, null, ComponentFlags.None)
         .Add<Quantum.ShrinkingCircle>(Quantum.ShrinkingCircle.Serialize, null, null, ComponentFlags.Singleton)

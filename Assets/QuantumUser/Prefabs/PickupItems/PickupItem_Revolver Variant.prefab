@@ -152,6 +152,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: PickupItem_Revolver Variant
       objectReference: {fileID: 0}
+    - target: {fileID: 8503168947627670198, guid: db6425a4b62ead449935b3a394a51c54,
+        type: 3}
+      propertyPath: TransformMode
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8740026645481667478, guid: db6425a4b62ead449935b3a394a51c54,
         type: 3}
       propertyPath: Prototype.PickupItemConfigBase.Id.Value

@@ -4,3 +4,10 @@ component PickupItem{
     FP PickupTime;
     AssetRef<PickupItemConfigBase> PickupItemConfigBase;
 }
+
+component LootDrop
+{
+    AssetRef<EntityPrototype> HealthLoot;
+    AssetRef<EntityPrototype> WeaponLoot;
+}
+

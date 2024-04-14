@@ -17,7 +17,7 @@ MonoBehaviour:
     Guid:
       Value: 307926171305568066
   DamageDealingPerSecond:
-    RawValue: 196608
+    RawValue: 983040
   States:
   - _field_used_: INITIALSTATE
     InitialState:

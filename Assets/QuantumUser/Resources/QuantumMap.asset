@@ -101,10 +101,12 @@ MonoBehaviour:
     - rid: 3307304351847940096
     - rid: 3307304351847940097
   - Components:
-    - rid: 7955660360814428160
-    - rid: 7955660360814428161
-    - rid: 7955660360814428162
-    - rid: 7955660360814428163
+    - rid: 8219593157784895488
+    - rid: 8219593157784895489
+    - rid: 8219593157784895490
+    - rid: 8219593157784895491
+  - Components:
+    - rid: 2504808556759351296
   SerializedTriangleDataUncompressedSize: 8
   references:
     version: 2
@@ -123,6 +125,16 @@ MonoBehaviour:
       type: {class: SpawnPointPrototype, ns: Quantum.Prototypes, asm: Quantum.Simulation}
       data:
         _empty_prototype_dummy_field_: 0
+    - rid: 2504808556759351296
+      type: {class: Transform2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
+      data:
+        Position:
+          X:
+            RawValue: 0
+          Y:
+            RawValue: 0
+        Rotation:
+          RawValue: 0
     - rid: 3307304351847940096
       type: {class: Transform2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
       data:
@@ -265,17 +277,17 @@ MonoBehaviour:
       type: {class: GrassPrototype, ns: Quantum.Prototypes, asm: Quantum.Simulation}
       data:
         _empty_prototype_dummy_field_: 0
-    - rid: 7955660360814428160
+    - rid: 8219593157784895488
       type: {class: Transform2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
       data:
         Position:
           X:
-            RawValue: -3223818
+            RawValue: -2837708
           Y:
-            RawValue: 957480
+            RawValue: 1179648
         Rotation:
           RawValue: 0
-    - rid: 7955660360814428161
+    - rid: 8219593157784895489
       type: {class: PhysicsCollider2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
       data:
         ShapeConfig:
@@ -312,12 +324,12 @@ MonoBehaviour:
         PhysicsMaterial:
           Id:
             Value: 0
-    - rid: 7955660360814428162
+    - rid: 8219593157784895490
       type: {class: PhysicsCallbacks2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
       data:
         CallbackFlags:
           Value: 384
-    - rid: 7955660360814428163
+    - rid: 8219593157784895491
       type: {class: PickupItemPrototype, ns: Quantum.Prototypes, asm: Quantum.Simulation}
       data:
         EntityPickingUp:
@@ -328,4 +340,4 @@ MonoBehaviour:
           RawValue: 0
         PickupItemConfigBase:
           Id:
-            Value: 400160843250485336
+            Value: 467710837992227161

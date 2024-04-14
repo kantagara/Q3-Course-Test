@@ -779,6 +779,7 @@ GameObject:
   - component: {fileID: 315876646699054720}
   - component: {fileID: 922460355526489083}
   - component: {fileID: 477268824446172245}
+  - component: {fileID: 5022768947933942807}
   m_Layer: 6
   m_Name: Character-Green
   m_TagString: Untagged
@@ -1208,6 +1209,25 @@ MonoBehaviour:
     WeaponData:
       Id:
         Value: 476535399849913692
+--- !u!114 &5022768947933942807
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1326267824891306075}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 319607146b7ae8d4a909caad39b022e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Prototype:
+    HealthLoot:
+      Id:
+        Value: 1426358946506850149
+    WeaponLoot:
+      Id:
+        Value: 1487228309458099876
 --- !u!1 &1411613008270497269
 GameObject:
   m_ObjectHideFlags: 0
