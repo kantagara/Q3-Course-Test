@@ -170,6 +170,25 @@ MonoBehaviour:
   HeapPageShift: 15
   HeapPageCount: 256
   HeapExtraCount: 0
+  weaponEntityRefs:
+  - Type: 0
+    EntityPrototype: {fileID: 3097001405596171208, guid: 4fc52994e2a583c45b2f00b143ccdd4c,
+      type: 3}
+  - Type: 1
+    EntityPrototype: {fileID: 3097001405596171208, guid: f5f36571daa7ca348a5e37cda21ae39e,
+      type: 3}
+  - Type: 2
+    EntityPrototype: {fileID: 3097001405596171208, guid: 90982921cd0de264380afdb81682d8a7,
+      type: 3}
+  - Type: 3
+    EntityPrototype: {fileID: 3097001405596171208, guid: dcd34c7761423ff4d9cd690ce973d451,
+      type: 3}
+  - Type: 4
+    EntityPrototype: {fileID: 3097001405596171208, guid: 2e4fd88ae77be704ab1599ac31e119a5,
+      type: 3}
+  - Type: 5
+    EntityPrototype: {fileID: 3097001405596171208, guid: 84e2fa5970d90194698270ed23fca240,
+      type: 3}
 --- !u!114 &-7671801800668575351
 MonoBehaviour:
   m_ObjectHideFlags: 0

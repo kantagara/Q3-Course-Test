@@ -11,6 +11,11 @@ namespace Quantum
             weapon->CooldownTime = 0;
             weapon->Type = WeaponData.WeaponType;
             WeaponData.OnInit(f, entityPickingUp, weapon);
+
+            var lootDrop = f.Unsafe.GetPointer<LootDrop>(entityPickingUp);
+            lootDrop->WeaponLoot = f.SimulationConfig.WeaponEntityRefByType(weapon->Type).EntityPrototype;
+            
+            
             f.Events.OnWeaponChanged(entityPickingUp, WeaponData.WeaponType);
             f.Destroy(entityBeingPickedUp);
         }

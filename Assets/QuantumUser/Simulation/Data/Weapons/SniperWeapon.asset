@@ -16,7 +16,7 @@ MonoBehaviour:
     Path: QuantumUser/Simulation/Data/Weapons/SniperWeapon
     Guid:
       Value: 315601981754454357
-  WeaponType: 6
+  WeaponType: 5
   Offset:
     X:
       RawValue: 19661

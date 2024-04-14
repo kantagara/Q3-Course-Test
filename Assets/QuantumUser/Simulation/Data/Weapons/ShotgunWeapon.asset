@@ -16,7 +16,7 @@ MonoBehaviour:
     Path: QuantumUser/Simulation/Data/Weapons/ShotgunWeapon
     Guid:
       Value: 275815061926608641
-  WeaponType: 4
+  WeaponType: 3
   Offset:
     X:
       RawValue: 19661

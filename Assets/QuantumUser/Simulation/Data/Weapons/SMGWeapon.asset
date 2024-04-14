@@ -16,7 +16,7 @@ MonoBehaviour:
     Path: QuantumUser/Simulation/Data/Weapons/SMGWeapon
     Guid:
       Value: 334843171124478472
-  WeaponType: 5
+  WeaponType: 4
   Offset:
     X:
       RawValue: 19661
