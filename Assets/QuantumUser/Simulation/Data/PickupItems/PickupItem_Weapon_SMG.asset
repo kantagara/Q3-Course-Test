@@ -9,12 +9,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 13e76d3a10934aa291c0fb61eb18630a, type: 3}
-  m_Name: PickupItemBase
+  m_Script: {fileID: 11500000, guid: 786831270ede472e944ddfbe7d034a93, type: 3}
+  m_Name: PickupItem_Weapon_SMG
   m_EditorClassIdentifier: 
   Identifier:
-    Path: QuantumUser/Simulation/Data/PickupItemBase
+    Path: QuantumUser/Simulation/Data/PickupItems/PickupItem_Weapon_SMG
     Guid:
-      Value: 528776509545100995
+      Value: 347347976633080716
   PickupTime:
     RawValue: 131072
+  WeaponData: {fileID: 11400000, guid: 71172e23daee1424ca1a70a42b4f67a7, type: 2}

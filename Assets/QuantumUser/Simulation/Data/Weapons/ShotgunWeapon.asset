@@ -10,22 +10,23 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d0e172ec2f254e7682cd9124babafa70, type: 3}
-  m_Name: PistolWeapon
+  m_Name: ShotgunWeapon
   m_EditorClassIdentifier: 
   Identifier:
-    Path: QuantumUser/Simulation/Data/PistolWeapon
+    Path: QuantumUser/Simulation/Data/Weapons/ShotgunWeapon
     Guid:
-      Value: 476535399849913692
+      Value: 275815061926608641
+  WeaponType: 4
   Offset:
     X:
       RawValue: 19661
     Y:
-      RawValue: 58262
+      RawValue: 59638
     Z:
-      RawValue: 78643
+      RawValue: 98304
   Cooldown:
-    RawValue: 32768
+    RawValue: 6554
   Damage:
-    RawValue: 1966080
-  Ammo: 20
+    RawValue: 3276800
+  Ammo: 40
   BulletData: {fileID: 11400000, guid: 0ab806a574bd49649893f5611430f120, type: 2}

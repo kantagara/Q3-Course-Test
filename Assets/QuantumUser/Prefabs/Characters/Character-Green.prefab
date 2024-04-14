@@ -285,6 +285,7 @@ GameObject:
   - component: {fileID: 3622610478827448158}
   - component: {fileID: 9006253173319040214}
   - component: {fileID: 8292444601935024333}
+  - component: {fileID: 3217126520189366897}
   m_Layer: 6
   m_Name: Revolver
   m_TagString: Untagged
@@ -360,6 +361,20 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &3217126520189366897
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 258774302587945715}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2fd9830024ff4fce8d53dd3b06faa337, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <WeaponType>k__BackingField: 2
+  <Rig>k__BackingField: {fileID: 8166893920779984157}
 --- !u!1 &274832211002739945
 GameObject:
   m_ObjectHideFlags: 0
@@ -763,6 +778,7 @@ GameObject:
   - component: {fileID: 6505326275260182152}
   - component: {fileID: 4000067740816974268}
   - component: {fileID: 315876646699054720}
+  - component: {fileID: 922460355526489083}
   - component: {fileID: 477268824446172245}
   m_Layer: 6
   m_Name: Character-Green
@@ -770,7 +786,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &3014794430628324286
 Transform:
   m_ObjectHideFlags: 0
@@ -1160,6 +1176,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   healthFill: {fileID: 1497564469917106863}
+--- !u!114 &922460355526489083
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1326267824891306075}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f3935cf8ff83046e6ac78dd90743770b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &477268824446172245
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1173,6 +1201,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Prototype:
+    Type:
+      Value: 0
     CooldownTime:
       RawValue: 0
     Ammo: 0
@@ -1252,6 +1282,7 @@ GameObject:
   - component: {fileID: 6222378943639169249}
   - component: {fileID: 6269260371734994184}
   - component: {fileID: 1245619357701757532}
+  - component: {fileID: 8152016984675035704}
   m_Layer: 6
   m_Name: Sniper
   m_TagString: Untagged
@@ -1326,6 +1357,20 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &8152016984675035704
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1610053015267691627}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2fd9830024ff4fce8d53dd3b06faa337, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <WeaponType>k__BackingField: 6
+  <Rig>k__BackingField: {fileID: 8166893920779984157}
 --- !u!1 &1739315570316238824
 GameObject:
   m_ObjectHideFlags: 0
@@ -1947,6 +1992,7 @@ GameObject:
   - component: {fileID: 3788128111790898220}
   - component: {fileID: 7121229409137720382}
   - component: {fileID: 892125654786722431}
+  - component: {fileID: 4080790351580170299}
   m_Layer: 6
   m_Name: SMG
   m_TagString: Untagged
@@ -2022,6 +2068,20 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &4080790351580170299
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3232284295629465362}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2fd9830024ff4fce8d53dd3b06faa337, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <WeaponType>k__BackingField: 5
+  <Rig>k__BackingField: {fileID: 8166893920779984157}
 --- !u!1 &3309766165110327227
 GameObject:
   m_ObjectHideFlags: 0
@@ -2319,6 +2379,7 @@ GameObject:
   - component: {fileID: 3375480325368497729}
   - component: {fileID: 6599658918037911176}
   - component: {fileID: 1590236366643478488}
+  - component: {fileID: 860954309083707587}
   m_Layer: 6
   m_Name: AK
   m_TagString: Untagged
@@ -2394,6 +2455,20 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &860954309083707587
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3709787643617739019}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2fd9830024ff4fce8d53dd3b06faa337, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <WeaponType>k__BackingField: 0
+  <Rig>k__BackingField: {fileID: 8166893920779984157}
 --- !u!1 &3741703011952470170
 GameObject:
   m_ObjectHideFlags: 0
@@ -2856,6 +2931,7 @@ GameObject:
   - component: {fileID: 9155335047809469070}
   - component: {fileID: 3189219873017381809}
   - component: {fileID: 1977883244740686981}
+  - component: {fileID: 2400311520502535038}
   m_Layer: 6
   m_Name: Shotgun
   m_TagString: Untagged
@@ -2931,6 +3007,20 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &2400311520502535038
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5739753129807677118}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2fd9830024ff4fce8d53dd3b06faa337, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <WeaponType>k__BackingField: 4
+  <Rig>k__BackingField: {fileID: 8166893920779984157}
 --- !u!1 &5757358001558819558
 GameObject:
   m_ObjectHideFlags: 0
@@ -3960,6 +4050,7 @@ GameObject:
   - component: {fileID: 5312101610763634958}
   - component: {fileID: 7714250185241736414}
   - component: {fileID: 3882918566325944568}
+  - component: {fileID: 8886231939774810390}
   m_Layer: 6
   m_Name: Pistol
   m_TagString: Untagged
@@ -4034,6 +4125,20 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &8886231939774810390
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8532628296579217617}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2fd9830024ff4fce8d53dd3b06faa337, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <WeaponType>k__BackingField: 1
+  <Rig>k__BackingField: {fileID: 8166893920779984157}
 --- !u!1 &8613635072338149215
 GameObject:
   m_ObjectHideFlags: 0
@@ -4229,6 +4334,7 @@ GameObject:
   - component: {fileID: 2157634399903057526}
   - component: {fileID: 8626369261147955229}
   - component: {fileID: 4277684740203928853}
+  - component: {fileID: 233702638004642951}
   m_Layer: 6
   m_Name: ShortCannon
   m_TagString: Untagged
@@ -4303,3 +4409,17 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &233702638004642951
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9147709545697137441}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2fd9830024ff4fce8d53dd3b06faa337, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <WeaponType>k__BackingField: 3
+  <Rig>k__BackingField: {fileID: 8166893920779984157}

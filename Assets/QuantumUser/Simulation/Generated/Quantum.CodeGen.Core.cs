@@ -49,6 +49,15 @@ namespace Quantum {
   using RuntimeInitializeOnLoadMethodAttribute = UnityEngine.RuntimeInitializeOnLoadMethodAttribute;
   #endif //;
   
+  public enum WeaponType : int {
+    AK,
+    Pistol,
+    Revolver,
+    ShortCannon,
+    Shotgun,
+    SMG,
+    Sniper,
+  }
   [System.FlagsAttribute()]
   public enum InputButtons : int {
     Fire = 1 << 0,
@@ -947,6 +956,8 @@ namespace Quantum {
   public unsafe partial struct Weapon : Quantum.IComponent {
     public const Int32 SIZE = 24;
     public const Int32 ALIGNMENT = 8;
+    [FieldOffset(4)]
+    public WeaponType Type;
     [FieldOffset(16)]
     public FP CooldownTime;
     [FieldOffset(0)]
@@ -956,6 +967,7 @@ namespace Quantum {
     public override Int32 GetHashCode() {
       unchecked { 
         var hash = 8713;
+        hash = hash * 31 + (Int32)Type;
         hash = hash * 31 + CooldownTime.GetHashCode();
         hash = hash * 31 + Ammo.GetHashCode();
         hash = hash * 31 + WeaponData.GetHashCode();
@@ -965,6 +977,7 @@ namespace Quantum {
     public static void Serialize(void* ptr, FrameSerializer serializer) {
         var p = (Weapon*)ptr;
         serializer.Stream.Serialize(&p->Ammo);
+        serializer.Stream.Serialize((Int32*)&p->Type);
         AssetRef.Serialize(&p->WeaponData, serializer);
         FP.Serialize(&p->CooldownTime, serializer);
     }
@@ -1175,6 +1188,7 @@ namespace Quantum {
       typeRegistry.Register(typeof(Transform3D), Transform3D.SIZE);
       typeRegistry.Register(typeof(View), View.SIZE);
       typeRegistry.Register(typeof(Quantum.Weapon), Quantum.Weapon.SIZE);
+      typeRegistry.Register(typeof(Quantum.WeaponType), 4);
       typeRegistry.Register(typeof(Quantum._globals_), Quantum._globals_.SIZE);
     }
     static partial void InitComponentTypeIdGen() {
@@ -1196,6 +1210,7 @@ namespace Quantum {
     public static void EnsureNotStrippedGen() {
       FramePrinter.EnsureNotStripped();
       FramePrinter.EnsurePrimitiveNotStripped<Quantum.InputButtons>();
+      FramePrinter.EnsurePrimitiveNotStripped<Quantum.WeaponType>();
     }
   }
 }

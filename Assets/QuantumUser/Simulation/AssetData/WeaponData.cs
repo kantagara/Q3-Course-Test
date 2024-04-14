@@ -6,6 +6,7 @@ namespace Quantum
     [Serializable]
     public abstract unsafe class WeaponData : AssetObject
     {
+        public WeaponType WeaponType;
         public FPVector3 Offset;
         public FP Cooldown;
         public FP Damage = 30;

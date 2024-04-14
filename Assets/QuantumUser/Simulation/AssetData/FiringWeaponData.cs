@@ -13,6 +13,11 @@ namespace Quantum
         public override void OnInit(Frame f, EntityRef entity, Weapon* weapon)
         {
             weapon->Ammo = Ammo;
+            
+            //If we still don't have playerLink, that's okay
+            if(!f.TryGet(entity, out PlayerLink playerLink)) return;
+            
+            f.Events.OnAmmoChanged(playerLink.Player, weapon->Ammo);
         }
 
         public override void OnUpdate(Frame f, WeaponSystem.Filter filter)

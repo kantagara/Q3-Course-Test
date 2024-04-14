@@ -101,14 +101,78 @@ MonoBehaviour:
     - rid: 3307304351847940096
     - rid: 3307304351847940097
   - Components:
-    - rid: 5368245669406441472
-    - rid: 5368245669406441473
-    - rid: 5368245669406441474
-    - rid: 5368245669406441475
+    - rid: 1678197278365450240
+    - rid: 1678197278365450241
+    - rid: 1678197278365450242
+    - rid: 1678197278365450243
   SerializedTriangleDataUncompressedSize: 8
   references:
     version: 2
     RefIds:
+    - rid: 1678197278365450240
+      type: {class: Transform2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
+      data:
+        Position:
+          X:
+            RawValue: -3630694
+          Y:
+            RawValue: 2162688
+        Rotation:
+          RawValue: 0
+    - rid: 1678197278365450241
+      type: {class: PhysicsCollider2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
+      data:
+        ShapeConfig:
+          ShapeType: 1
+          PolygonCollider:
+            Id:
+              Value: 0
+          CircleRadius:
+            RawValue: 98304
+          CapsuleSize:
+            X:
+              RawValue: 0
+            Y:
+              RawValue: 0
+          EdgeExtent:
+            RawValue: 0
+          BoxExtents:
+            X:
+              RawValue: 0
+            Y:
+              RawValue: 0
+          PositionOffset:
+            X:
+              RawValue: 0
+            Y:
+              RawValue: 0
+          RotationOffset:
+            RawValue: 0
+          UserTag: 0
+          IsPersistent: 1
+          CompoundShapes: []
+        Layer: 0
+        IsTrigger: 1
+        PhysicsMaterial:
+          Id:
+            Value: 0
+    - rid: 1678197278365450242
+      type: {class: PhysicsCallbacks2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
+      data:
+        CallbackFlags:
+          Value: 384
+    - rid: 1678197278365450243
+      type: {class: PickupItemPrototype, ns: Quantum.Prototypes, asm: Quantum.Simulation}
+      data:
+        EntityPickingUp:
+          SceneIndexPlusOne: 0
+        CurrentPickupTime:
+          RawValue: 0
+        PickupTime:
+          RawValue: 0
+        PickupItemConfigBase:
+          Id:
+            Value: 528384253604579326
     - rid: 2069275615697043456
       type: {class: Transform2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
       data:
@@ -209,70 +273,6 @@ MonoBehaviour:
       data:
         availableSpawnPoints: []
         usedSpawnPoints: []
-    - rid: 5368245669406441472
-      type: {class: Transform2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
-      data:
-        Position:
-          X:
-            RawValue: -3630694
-          Y:
-            RawValue: 2162688
-        Rotation:
-          RawValue: 0
-    - rid: 5368245669406441473
-      type: {class: PhysicsCollider2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
-      data:
-        ShapeConfig:
-          ShapeType: 1
-          PolygonCollider:
-            Id:
-              Value: 0
-          CircleRadius:
-            RawValue: 98304
-          CapsuleSize:
-            X:
-              RawValue: 0
-            Y:
-              RawValue: 0
-          EdgeExtent:
-            RawValue: 0
-          BoxExtents:
-            X:
-              RawValue: 0
-            Y:
-              RawValue: 0
-          PositionOffset:
-            X:
-              RawValue: 0
-            Y:
-              RawValue: 0
-          RotationOffset:
-            RawValue: 0
-          UserTag: 0
-          IsPersistent: 1
-          CompoundShapes: []
-        Layer: 0
-        IsTrigger: 1
-        PhysicsMaterial:
-          Id:
-            Value: 0
-    - rid: 5368245669406441474
-      type: {class: PhysicsCallbacks2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
-      data:
-        CallbackFlags:
-          Value: 384
-    - rid: 5368245669406441475
-      type: {class: PickupItemPrototype, ns: Quantum.Prototypes, asm: Quantum.Simulation}
-      data:
-        EntityPickingUp:
-          SceneIndexPlusOne: 0
-        CurrentPickupTime:
-          RawValue: 0
-        PickupTime:
-          RawValue: 0
-        PickupItemConfigBase:
-          Id:
-            Value: 528776509545100995
     - rid: 7606997411101147136
       type: {class: Transform2DPrototype, ns: Quantum.Prototypes, asm: Quantum.Engine}
       data:

@@ -11,9 +11,9 @@ namespace Quantum
             pickupItem->PickupTime = PickupTime;
         }
 
-        public virtual void PickupItem(Frame f, EntityRef entityRef)
+        public virtual void PickupItem(Frame f, EntityRef entityBeingPickedUp, EntityRef entityPickingUp)
         {
-            f.Destroy(entityRef);
+            f.Destroy(entityBeingPickedUp);
         }
     }
 }

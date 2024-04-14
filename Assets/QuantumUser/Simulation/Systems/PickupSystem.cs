@@ -20,7 +20,7 @@ namespace QuantumUser.Simulation.Systems
             if(filter.PickupItem->CurrentPickupTime >= filter.PickupItem->PickupTime)
             {
                 var asset = f.FindAsset(filter.PickupItem->PickupItemConfigBase);
-                asset.PickupItem(f, filter.EntityRef);
+                asset.PickupItem(f, filter.EntityRef, filter.PickupItem->EntityPickingUp);
             }
             
         }

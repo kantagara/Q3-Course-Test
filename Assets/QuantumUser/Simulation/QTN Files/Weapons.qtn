@@ -1,5 +1,6 @@
 component Weapon 
 {
+   WeaponType Type;
    FP CooldownTime;
    byte Ammo;
    AssetRef<WeaponData> WeaponData;
@@ -15,12 +16,29 @@ component Bullet
     FP HeightOffset;
 }
 
+enum WeaponType
+{
+    AK,
+    Pistol,
+    Revolver,
+    ShortCannon,
+    Shotgun,
+    SMG,
+    Sniper
+}
+
 signal CreateBullet(EntityRef Owner,AssetRef<FiringWeaponData> Weapon);
 
 event OnAmmoChanged
 {
     local PlayerRef Player;
     byte Value;
+}
+
+event OnWeaponChanged
+{
+    EntityRef Entity;
+    WeaponType Type;
 }
 
 event BulletHit
