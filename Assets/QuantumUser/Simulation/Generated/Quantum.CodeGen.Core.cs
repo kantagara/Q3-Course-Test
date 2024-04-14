@@ -53,7 +53,6 @@ namespace Quantum {
     AK,
     Pistol,
     Revolver,
-    ShortCannon,
     Shotgun,
     SMG,
     Sniper,

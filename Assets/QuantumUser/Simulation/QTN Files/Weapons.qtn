@@ -21,7 +21,6 @@ enum WeaponType
     AK,
     Pistol,
     Revolver,
-    ShortCannon,
     Shotgun,
     SMG,
     Sniper

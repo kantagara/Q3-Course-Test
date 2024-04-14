@@ -25,8 +25,8 @@ MonoBehaviour:
     Z:
       RawValue: 98304
   Cooldown:
-    RawValue: 6554
+    RawValue: 327680
   Damage:
-    RawValue: 3276800
-  Ammo: 40
+    RawValue: 6553600
+  Ammo: 10
   BulletData: {fileID: 11400000, guid: 0ab806a574bd49649893f5611430f120, type: 2}

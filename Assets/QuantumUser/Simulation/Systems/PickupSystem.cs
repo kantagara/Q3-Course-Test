@@ -28,6 +28,11 @@ namespace QuantumUser.Simulation.Systems
         public void OnAdded(Frame f, EntityRef entity, PickupItem* pickupItem)
         {
             var asset = f.FindAsset(pickupItem->PickupItemConfigBase);
+            if (asset == null)
+            {
+                Log.DebugWarn("PickupItemConfigBase not found");
+                return;
+            }
             asset.Init(pickupItem);
         }
 
