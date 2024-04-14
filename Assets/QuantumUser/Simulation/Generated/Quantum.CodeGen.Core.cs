@@ -1003,12 +1003,16 @@ namespace Quantum {
         FP.Serialize(&p->CooldownTime, serializer);
     }
   }
+  public unsafe partial interface ISignalPlayerKilled : ISignal {
+    void PlayerKilled(Frame f, EntityRef Player);
+  }
   public unsafe partial interface ISignalCreateBullet : ISignal {
     void CreateBullet(Frame f, EntityRef Owner, AssetRef<FiringWeaponData> Weapon);
   }
   public static unsafe partial class Constants {
   }
   public unsafe partial class Frame {
+    private ISignalPlayerKilled[] _ISignalPlayerKilledSystems;
     private ISignalCreateBullet[] _ISignalCreateBulletSystems;
     partial void AllocGen() {
       _globals = (_globals_*)Context.Allocator.AllocAndClear(sizeof(_globals_));
@@ -1021,6 +1025,7 @@ namespace Quantum {
     }
     partial void InitGen() {
       Initialize(this, this.SimulationConfig.Entities);
+      _ISignalPlayerKilledSystems = BuildSignalsArray<ISignalPlayerKilled>();
       _ISignalCreateBulletSystems = BuildSignalsArray<ISignalCreateBullet>();
       _ComponentSignalsOnAdded = new ComponentReactiveCallbackInvoker[ComponentTypeId.Type.Length];
       _ComponentSignalsOnRemoved = new ComponentReactiveCallbackInvoker[ComponentTypeId.Type.Length];
@@ -1104,6 +1109,15 @@ namespace Quantum {
       Physics3D.Init(_globals->PhysicsState3D.MapStaticCollidersState.TrackedMap);
     }
     public unsafe partial struct FrameSignals {
+      public void PlayerKilled(EntityRef Player) {
+        var array = _f._ISignalPlayerKilledSystems;
+        for (Int32 i = 0; i < array.Length; ++i) {
+          var s = array[i];
+          if (_f.SystemIsEnabledInHierarchy((SystemBase)s)) {
+            s.PlayerKilled(_f, Player);
+          }
+        }
+      }
       public void CreateBullet(EntityRef Owner, AssetRef<FiringWeaponData> Weapon) {
         var array = _f._ISignalCreateBulletSystems;
         for (Int32 i = 0; i < array.Length; ++i) {

@@ -4,7 +4,7 @@ using Quantum;
 namespace QuantumUser.Simulation.Systems
 {
     public unsafe class PickupSystem : SystemMainThreadFilter<PickupSystem.Filter>, ISignalOnComponentAdded<PickupItem>,
-        ISignalOnTriggerEnter2D, ISignalOnTriggerExit2D
+        ISignalOnTriggerEnter2D, ISignalOnTriggerExit2D, ISignalPlayerKilled
     {
         public struct Filter
         {
@@ -50,7 +50,19 @@ namespace QuantumUser.Simulation.Systems
             if(!f.Unsafe.TryGetPointer(info.Entity, out PickupItem* pickupItem)) return;
             if(pickupItem->EntityPickingUp != info.Other) return;
             pickupItem->EntityPickingUp = EntityRef.None;
-            pickupItem->CurrentPickupTime = FP._0;
+            pickupItem->CurrentPickupTime = FP._0; 
+        }
+
+        public void PlayerKilled(Frame f, EntityRef Player)
+        {
+            foreach (var entity in f.Unsafe.GetComponentBlockIterator<PickupItem>())
+            {
+                if(entity.Component->EntityPickingUp == Player)
+                {
+                    entity.Component->EntityPickingUp = EntityRef.None;
+                    entity.Component->CurrentPickupTime = FP._0; 
+                }
+            }
         }
     }
 }
