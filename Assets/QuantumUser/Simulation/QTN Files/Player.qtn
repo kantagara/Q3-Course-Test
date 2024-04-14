@@ -2,6 +2,12 @@ component PlayerLink{
     PlayerRef Player;
 }
 
+event OnPlayerSpawned
+{
+    EntityRef Entity;
+    PlayerRef Player;
+}
+
 input{
     FPVector2 Movement;
     FPVector2 MousePosition;

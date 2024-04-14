@@ -1,4 +1,5 @@
 using Photon.Deterministic;
+using Quantum.Collections;
 
 namespace Quantum
 {
@@ -8,6 +9,7 @@ namespace Quantum
         {
             if(!firstTime) return;
             var playerEntity = CreatePlayer(f, player);
+            f.Events.OnPlayerSpawned(playerEntity, player);
             SpawnPlayerOnRandomSpawnPoint(f, playerEntity);
         }
 
@@ -33,6 +35,11 @@ namespace Quantum
             
             availableSpawnPoints.RemoveAt(randomIndex);
             usedSpawnPoints.Add(spawnPoint);
+            if (availableSpawnPoints.Count == 0)
+            {
+                spawnPointList->availableSpawnPoints = usedSpawnPoints;
+                spawnPointList->usedSpawnPoints = new QListPtr<EntityRef>();
+            }
             return spawnPoint;
         }
 

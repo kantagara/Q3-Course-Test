@@ -17,6 +17,12 @@ component Bullet
 
 signal CreateBullet(EntityRef Owner,AssetRef<FiringWeaponData> Weapon);
 
+event OnAmmoChanged
+{
+    local PlayerRef Player;
+    byte Value;
+}
+
 event BulletHit
 {
     EntityRef Bullet;

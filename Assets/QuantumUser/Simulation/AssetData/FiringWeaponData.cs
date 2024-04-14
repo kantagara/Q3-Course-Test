@@ -44,6 +44,7 @@ namespace Quantum
                 var weaponData = f.FindAsset(filter.Weapon->WeaponData);
                 filter.Weapon->CooldownTime = weaponData.Cooldown;
                 filter.Weapon->Ammo--;
+                f.Events.OnAmmoChanged(filter.PlayerLink->Player, filter.Weapon->Ammo);
                 f.Signals.CreateBullet(filter.Entity, filter.Weapon->WeaponData.Id);
             }
 
