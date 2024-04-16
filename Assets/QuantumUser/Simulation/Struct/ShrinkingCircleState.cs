@@ -8,34 +8,32 @@ namespace Quantum
     {
         public void EnterState(ShrinkingCircle* circle)
         {
-            switch (Field)
+            circle->CurrentTime = TimeToNextState;
+            switch (CircleStateUnion.Field)
             {
-                case PRESHRINKSTATE:
-                    circle->CurrentTime = PreShrinkState->TimeToNextState;
-                    circle->TargetRadius = PreShrinkState->TargetRadius;
+                case CircleStateUnion.PRESHRINKSTATE:
+                    circle->TargetRadius = CircleStateUnion.PreShrinkState->TargetRadius;
                     return;
-                case SHRINKSTATE:
-                    circle->CurrentTime = ShrinkState->TimeToNextState;
+                case CircleStateUnion.SHRINKSTATE:
                     circle->InitialRadius = circle->CurrentRadius;
                     circle->ShrinkingCircleTime = FP._0;
                     return;
-                case INITIALSTATE:
-                    circle->CurrentTime = InitialState->TimeToNextState;
-                    circle->CurrentRadius = InitialState->InitialRadius;
-                    return;
-                case COOLDOWNSTATE:
-                    circle->CurrentTime = CooldownState->TimeToNextState;
+                case CircleStateUnion.INITIALSTATE:
+                    circle->CurrentRadius = CircleStateUnion.InitialState->InitialRadius;
                     return;
             }
         }
 
         public void UpdateState(Frame f, ShrinkingCircle* circle)
         {
+            if(circle->CurrentTime <= FP._0) return;
+            
             circle->CurrentTime -= f.DeltaTime;
-            switch (Field)
+            
+            switch (CircleStateUnion.Field)
             {
-                case SHRINKSTATE:
-                    circle->ShrinkingCircleTime += f.DeltaTime / ShrinkState->TimeToNextState;
+                case CircleStateUnion.SHRINKSTATE:
+                    circle->ShrinkingCircleTime += f.DeltaTime / TimeToNextState;
                     circle->CurrentRadius = FPMath.Lerp(circle->InitialRadius, circle->TargetRadius, 
                         circle->ShrinkingCircleTime);
                     return;

@@ -214,23 +214,20 @@ MonoBehaviour:
           Id:
             Value: 307926171305568066
         CurrentState:
-          _field_used_: 
-          InitialState:
-            InitialRadius:
-              RawValue: 0
-            TimeToNextState:
-              RawValue: 0
-          PreShrinkState:
-            TargetRadius:
-              RawValue: 0
-            TimeToNextState:
-              RawValue: 0
-          CooldownState:
-            TimeToNextState:
-              RawValue: 0
-          ShrinkState:
-            TimeToNextState:
-              RawValue: 0
+          TimeToNextState:
+            RawValue: 0
+          CircleStateUnion:
+            _field_used_: 
+            InitialState:
+              InitialRadius:
+                RawValue: 0
+            PreShrinkState:
+              TargetRadius:
+                RawValue: 0
+            CooldownState:
+              _empty_prototype_dummy_field_: 0
+            ShrinkState:
+              _empty_prototype_dummy_field_: 0
         CurrentTime:
           RawValue: 0
         CurrentRadius:

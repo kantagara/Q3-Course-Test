@@ -37,8 +37,8 @@ public unsafe class ShrinkingCircleView : QuantumEntityViewComponent
     {
         var shrinkingCircle = PredictedFrame.GetSingleton<ShrinkingCircle>();
         var currentState = shrinkingCircle.CurrentState;
-        dangerCircleSprite.gameObject.SetActive(currentState.Field is ShrinkingCircleState.SHRINKSTATE or ShrinkingCircleState.PRESHRINKSTATE);
-        if(currentState.Field == ShrinkingCircleState.PRESHRINKSTATE)
+        dangerCircleSprite.gameObject.SetActive(currentState.CircleStateUnion.Field is CircleStateUnion.SHRINKSTATE or CircleStateUnion.PRESHRINKSTATE);
+        if(currentState.CircleStateUnion.Field == CircleStateUnion.PRESHRINKSTATE)
             targetCircleSprite.DOScale(new Vector3(shrinkingCircle.TargetRadius.AsFloat , shrinkingCircle.TargetRadius.AsFloat ), 1f);
     }
 }

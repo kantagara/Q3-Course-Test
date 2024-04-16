@@ -18,7 +18,13 @@ singleton component ShrinkingCircle
     FPVector2 Position;
 }
 
-union ShrinkingCircleState
+component ShrinkingCircleState
+{
+    FP TimeToNextState;
+    CircleStateUnion CircleStateUnion;
+}
+
+union CircleStateUnion
 {
     InitialState InitialState;
     PreShrinkState PreShrinkState;
@@ -29,24 +35,20 @@ union ShrinkingCircleState
 struct InitialState
 {
     FP InitialRadius;
-    FP TimeToNextState;
 
 }
 
 struct PreShrinkState
 {
     FP TargetRadius;
-    FP TimeToNextState;
 }
 
 struct ShrinkState
 {
-    FP TimeToNextState;
 }
 
 struct CooldownState
 {
-    FP TimeToNextState;
 }
 
 
