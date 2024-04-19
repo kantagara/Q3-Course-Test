@@ -8,6 +8,7 @@ public unsafe class PlayerView : QuantumEntityViewComponent
     private static readonly int MoveX = Animator.StringToHash("moveX");
     [SerializeField] private Animator animator;
     [SerializeField] private GameObject arrow;
+    [SerializeField] private GameObject overHeadUi;
     private bool _isLocalPlayer;
     private PlayerLink* _playerLink;
 
@@ -32,8 +33,11 @@ public unsafe class PlayerView : QuantumEntityViewComponent
             renderer.gameObject.layer = layer;
             renderer.enabled = true;
         }
+        
+        overHeadUi.SetActive(true);
 
         QuantumEvent.Subscribe<EventOnPlayerEnteredGrass>(this, OnPlayerEnterGrass);
+        QuantumEvent.Subscribe<EventOnPlayerExitGrass>(this, OnPlayerExitGrass);
         QuantumEvent.Subscribe<EventOnPlayerExitGrass>(this, OnPlayerExitGrass);
     }
     
@@ -43,6 +47,7 @@ public unsafe class PlayerView : QuantumEntityViewComponent
         if (callback.player != EntityRef) return;
         if (_isLocalPlayer) return;
         foreach (var renderer in _renderers) renderer.enabled = true;
+        overHeadUi.SetActive(true);
     }
 
     private void OnPlayerEnterGrass(EventOnPlayerEnteredGrass callback)
@@ -50,6 +55,7 @@ public unsafe class PlayerView : QuantumEntityViewComponent
         if (callback.player != EntityRef) return;
         if (_isLocalPlayer) return;
         foreach (var renderer in _renderers) renderer.enabled = false;
+        overHeadUi.SetActive(false);
     }
 
     public override void OnDeactivate()

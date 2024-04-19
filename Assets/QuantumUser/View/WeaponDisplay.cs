@@ -13,6 +13,13 @@ public class WeaponDisplay : MonoBehaviour
     {
         QuantumEvent.Subscribe<EventOnAmmoChanged>(this, OnAmmoChanged);
         QuantumEvent.Subscribe<EventOnPlayerSpawned>(this, OnPlayerSpawned);
+        QuantumEvent.Subscribe<EventOnWeaponChanged>(this, WeaponChanged);
+    }
+
+    private void WeaponChanged(EventOnWeaponChanged callback)
+    {
+        var f = callback.Game.Frames.Verified;
+        weaponImage.sprite = f.FindAsset(f.Get<Weapon>(callback.Entity).WeaponData).WeaponSprite;
     }
 
     private void OnDestroy()
@@ -24,6 +31,7 @@ public class WeaponDisplay : MonoBehaviour
     {
         if(!callback.Game.PlayerIsLocal(callback.Player)) return;
         var f = callback.Game.Frames.Predicted;
+        weaponImage.sprite = f.FindAsset(f.Get<Weapon>(callback.Entity).WeaponData).WeaponSprite;
         ammoText.SetText(f.Get<Weapon>(callback.Entity).Ammo.ToString());
     }
 

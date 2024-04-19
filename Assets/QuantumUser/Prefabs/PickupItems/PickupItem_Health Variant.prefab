@@ -8,6 +8,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1724770601901394697, guid: 978a90e9afaf7c141a6733a3ddca3547,
+        type: 3}
+      propertyPath: Prototype.PickupItemConfigBase.Id.Value
+      value: 467710837992227161
+      objectReference: {fileID: 0}
     - target: {fileID: 1999724261054202018, guid: 978a90e9afaf7c141a6733a3ddca3547,
         type: 3}
       propertyPath: m_Name

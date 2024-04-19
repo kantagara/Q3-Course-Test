@@ -12,8 +12,13 @@ namespace QuantumUser.View
         public override void OnActivate(Frame frame)
         {
             base.OnActivate(frame);
-            _playerWeapons = GetComponentsInChildren<PlayerWeapon>(true).ToDictionary(x => x.WeaponType, x => x);
+            _playerWeapons = GetComponentsInChildren<PlayerWeapon>(true).ToDictionary(x => x.WeaponType, x =>
+            {
+                x.gameObject.SetActive(false);
+                return x;
+            });
             _currentWeapon = _playerWeapons[WeaponType.Pistol];
+            _currentWeapon.gameObject.SetActive(true);
             QuantumEvent.Subscribe<EventOnWeaponChanged>(this, OnWeaponChanged);
         }
 
@@ -25,6 +30,7 @@ namespace QuantumUser.View
         private void OnWeaponChanged(EventOnWeaponChanged callback)
         {
             if (callback.Type == _currentWeapon.WeaponType) return;
+            if(callback.Entity != EntityRef) return;
 
             _currentWeapon.Rig.weight = 0;
             _currentWeapon.gameObject.SetActive(false);

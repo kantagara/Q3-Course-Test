@@ -20,8 +20,8 @@ namespace Quantum {
         _mouseHitPosition = hit.point;
       
       Quantum.Input i = new Quantum.Input {
-        Movement = new FPVector2(UnityEngine.Input.GetAxis("Horizontal").ToFP(),
-          UnityEngine.Input.GetAxis("Vertical").ToFP()),
+        Movement = new FPVector2(UnityEngine.Input.GetAxis("Vertical").ToFP(),
+          -UnityEngine.Input.GetAxis("Horizontal").ToFP()),
         MousePosition = _mouseHitPosition.ToFPVector3().XZ,
         Fire = UnityEngine.Input.GetButton("Fire1"),
       };

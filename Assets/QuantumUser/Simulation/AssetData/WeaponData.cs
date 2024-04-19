@@ -1,11 +1,13 @@
 ﻿using System;
 using Photon.Deterministic;
+using UnityEngine;
 
 namespace Quantum
 {
     [Serializable]
     public abstract unsafe class WeaponData : AssetObject
     {
+        public Sprite WeaponSprite;
         public WeaponType WeaponType;
         public FPVector3 Offset;
         public FP Cooldown;

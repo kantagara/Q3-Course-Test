@@ -1,11 +1,9 @@
-using System;
 using Photon.Deterministic;
-using UnityEngine.Serialization;
+
 
 namespace Quantum
 {
-    [Serializable]
-    public unsafe class FiringWeaponData : WeaponData
+    public abstract unsafe class FiringWeaponData : WeaponData
     {
         public byte Ammo;
         public BulletData BulletData;
@@ -41,22 +39,9 @@ namespace Quantum
             
             filter.Weapon->CooldownTime -= f.DeltaTime;
         }
-
-        public override void OnFirePressed(Frame f, WeaponSystem.Filter filter)
-        {
-            if (filter.Weapon->CooldownTime <= FP._0 && NoObstacleInFront(f, filter) && filter.Weapon->Ammo > 0)
-            {
-                var weaponData = f.FindAsset(filter.Weapon->WeaponData);
-                filter.Weapon->CooldownTime = weaponData.Cooldown;
-                filter.Weapon->Ammo--;
-                f.Events.OnAmmoChanged(filter.PlayerLink->Player, filter.Weapon->Ammo);
-                f.Signals.CreateBullet(filter.Entity, filter.Weapon->WeaponData.Id);
-            }
-
-            
-        }
         
-        private static bool NoObstacleInFront(Frame f, WeaponSystem.Filter filter)
+        
+        protected static bool NoObstacleInFront(Frame f, WeaponSystem.Filter filter)
         {
             var initialLineCast = f.Physics2D.Linecast(filter.Transform->Position,
                 filter.Transform->Position + filter.Transform->Up);

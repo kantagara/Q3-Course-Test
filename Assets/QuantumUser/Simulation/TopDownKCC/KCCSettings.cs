@@ -19,7 +19,7 @@ namespace Quantum
 		public FP MaxPenetration;
 	}
 
-	unsafe partial class KCCSettings : AssetObject
+	unsafe partial class KCCSettings
 	{
 		// This is the KCC actual radius (non penetrable)
 		public FP Radius = FP._0_50;
@@ -32,6 +32,8 @@ namespace Quantum
 		public FP Brake = 1;
 		
 		public LayerMask LayerMask;
+		
+		public bool MoveAlongsideRotation = true;
 
 		public void Init(ref KCC kcc)
 		{
@@ -60,21 +62,12 @@ namespace Quantum
 				return;
 			}
 
-			if (movementData.Type != KCCMovementType.None) {
-				// Calculate the forward direction based on rotation if transform->Forward is not updated
-				// Assuming transform->Rotation is the angle in radians
-				FP cosRotation = FPMath.Cos(transform->Rotation);
-				FP sinRotation = FPMath.Sin(transform->Rotation);
+			if (movementData.Type != KCCMovementType.None)
+			{
 
-				// If there's additional directional input that needs to be considered (e.g., from a joystick),
-				// it should be rotated accordingly. Assuming movementData.Direction is such an input:
-				FPVector2 rotatedDirection = new FPVector2(
-					movementData.Direction.X * cosRotation - movementData.Direction.Y * sinRotation,
-					movementData.Direction.X * sinRotation + movementData.Direction.Y * cosRotation
-				);
-
+				var direction = GetMovementDirection(transform, movementData);
 				// Now apply this direction, scaled by acceleration and deltaTime
-				kcc->Velocity += kcc->Acceleration * f.DeltaTime * rotatedDirection;
+				kcc->Velocity += kcc->Acceleration * f.DeltaTime * direction;
 
 				// Clamp the velocity to the maximum speed
 				if (kcc->Velocity.SqrMagnitude > kcc->MaxSpeed * kcc->MaxSpeed) {
@@ -113,6 +106,28 @@ namespace Quantum
 #endif
 		}
 
+		private FPVector2 GetMovementDirection(Transform2D* transform, KCCMovementData movementData)
+		{
+			if (MoveAlongsideRotation)
+			{
+				// Calculate the forward direction based on rotation if transform->Forward is not updated
+				// Assuming transform->Rotation is the angle in radians
+				FP cosRotation = FPMath.Cos(transform->Rotation);
+				FP sinRotation = FPMath.Sin(transform->Rotation);
+
+				// If there's additional directional input that needs to be considered (e.g., from a joystick),
+				// it should be rotated accordingly. Assuming movementData.Direction is such an input:
+				FPVector2 rotatedDirection = new FPVector2(
+					movementData.Direction.X * cosRotation - movementData.Direction.Y * sinRotation,
+					movementData.Direction.X * sinRotation + movementData.Direction.Y * cosRotation
+				);
+
+				return rotatedDirection;
+			}
+
+			return movementData.Direction;
+		}
+
 		public KCCMovementData ComputeRawMovement(FrameBase f, EntityRef entity, FPVector2 direction)
 		{
 			KCC* kcc = null;
@@ -135,10 +150,10 @@ namespace Quantum
 			Shape2D shape = Shape2D.CreateCircle(Radius);
 
 			var layer = LayerMask;
-			var hits = f.Physics2D.OverlapShape(transform->Position, FP._0, shape, layer,
-				options: QueryOptions.HitStatics | QueryOptions.ComputeDetailedInfo);
-			var count = Math.Min(MaxContacts, hits.Count);
-			if (hits.Count > 0)
+      var hits = f.Physics2D.OverlapShape(transform->Position, FP._0, shape, layer, options: QueryOptions.HitStatics | QueryOptions.ComputeDetailedInfo);
+      int count = Math.Min(MaxContacts, hits.Count);
+
+      if (hits.Count > 0)
 			{
 				Boolean initialized = false;
 				hits.Sort(transform->Position);
@@ -162,10 +177,12 @@ namespace Quantum
 					var localDiff = contactToCenter.Magnitude - Radius;
 
 
+#if DEBUG
 					if (Debug)
 					{
 						Draw.Circle(contactPoint, FP._0_10, ColorRGBA.Red);
 					}
+#endif
 
 					var localNormal = contactToCenter.Normalized;
 
@@ -181,14 +198,18 @@ namespace Quantum
 							var angle = FPVector2.RadiansSkipNormalize(direction.Normalized, localNormal);
 							if (angle >= FP.Rad_90)
 							{
-								var dotProduct = FPVector2.Dot(direction, localNormal);
-								var tangentVelocity = direction - localNormal * dotProduct;
+								var d = FPVector2.Dot(direction, localNormal);
+								var tangentVelocity = direction - localNormal * d;
 								if (tangentVelocity.SqrMagnitude > FP.EN4)
 								{
 									movementPack.Direction = tangentVelocity.Normalized;
 									movementPack.Type = KCCMovementType.Tangent;
 								}
-								
+								else
+								{
+									movementPack.Direction = default;
+									movementPack.Type = KCCMovementType.None;
+								}
 
 							}
 						}
@@ -197,7 +218,7 @@ namespace Quantum
 
 					// any real contact contributes to correction and average normal
 					var localCorrection = localNormal * -localDiff;
-					movementPack.Correction = localCorrection;
+					movementPack.Correction += localCorrection;
 				}
 			}
 
