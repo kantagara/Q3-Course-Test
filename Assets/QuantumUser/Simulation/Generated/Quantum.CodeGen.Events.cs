@@ -73,6 +73,7 @@ namespace Quantum {
         }
       }
       public EventPlayerHealthUpdated PlayerHealthUpdated(EntityRef Entity, FP CurrentHealth, FP MaxHealth) {
+        if (_f.IsPredicted) return null;
         var ev = _f.Context.AcquireEvent<EventPlayerHealthUpdated>(EventPlayerHealthUpdated.ID);
         ev.Entity = Entity;
         ev.CurrentHealth = CurrentHealth;
@@ -136,7 +137,7 @@ namespace Quantum {
         base(id, flags) {
     }
     public EventPlayerHealthUpdated() : 
-        base(0, EventFlags.Server|EventFlags.Client) {
+        base(0, EventFlags.Server|EventFlags.Client|EventFlags.Synced) {
     }
     public new QuantumGame Game {
       get {
