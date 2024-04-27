@@ -1,3 +1,5 @@
+using Photon.Client.StructWrapping;
+using Photon.Deterministic;
 using Quantum;
 using UnityEngine;
 using LayerMask = UnityEngine.LayerMask;
@@ -10,7 +12,6 @@ public unsafe class PlayerView : QuantumEntityViewComponent
     [SerializeField] private GameObject arrow;
     [SerializeField] private GameObject overHeadUi;
     private bool _isLocalPlayer;
-    private PlayerLink* _playerLink;
 
     private Renderer[] _renderers;
 
@@ -21,8 +22,7 @@ public unsafe class PlayerView : QuantumEntityViewComponent
 
     public override void OnActivate(Frame frame)
     {
-        _playerLink = VerifiedFrame.Unsafe.GetPointer<PlayerLink>(EntityRef);
-        _isLocalPlayer = _game.PlayerIsLocal(_playerLink->Player);
+        _isLocalPlayer = _game.PlayerIsLocal(frame.Get<PlayerLink>(EntityRef).Player);
         
         arrow.SetActive(_isLocalPlayer);
         var layer = LayerMask.NameToLayer(_isLocalPlayer ? "Player_Local" : "Player_Remote");
@@ -72,9 +72,13 @@ public unsafe class PlayerView : QuantumEntityViewComponent
     private void UpdateAnimator()
     {
         if (!EntityRef.IsValid) return;
-        if(_playerLink == default) return;
-        var input = PredictedFrame.GetPlayerInput(_playerLink->Player);
-        animator.SetFloat(MoveX, (float)input->Movement.X);
-        animator.SetFloat(MoveZ, (float)input->Movement.Y);
+        //For now we can assume that all players have the same Move Along Rotation field. 
+        //Later on we can change that and introduce some setting field that can be modified at runtime 
+        var input = PredictedFrame.GetPlayerInput(PredictedFrame.Get<PlayerLink>(EntityRef).Player);
+        var kcc = PredictedFrame.Get<KCC>(EntityRef);
+        var kccSettings = PredictedFrame.FindAsset(kcc.Settings);
+        FPVector2 animatorVector = kccSettings.MoveAlongsideRotation ? input->Movement : kcc.Velocity;
+        animator.SetFloat(MoveX, animatorVector.X.AsFloat);
+        animator.SetFloat(MoveZ, animatorVector.Y.AsFloat);
     }
 }
