@@ -6,7 +6,7 @@ component Damageable{
 
 signal PlayerKilled(EntityRef Player);
 
-event PlayerHealthUpdated{
+synced event PlayerHealthUpdated{
     EntityRef Entity;
     FP CurrentHealth;
     FP MaxHealth;
