@@ -3,7 +3,7 @@ using Quantum.Collections;
 
 namespace Quantum
 {
-    public unsafe class SpawnSystem : SystemSignalsOnly, ISignalOnPlayerAdded
+    public unsafe class SpawnSystem : SystemSignalsOnly, ISignalOnPlayerAdded, ISignalOnPlayerDisconnected
     {
         public void OnPlayerAdded(Frame f, PlayerRef player, bool firstTime)
         {
@@ -67,6 +67,18 @@ namespace Quantum
             };
             f.Add(playerEntity, playerLink);
             return playerEntity;
+        }
+
+        public void OnPlayerDisconnected(Frame f, PlayerRef player)
+        {
+            foreach(var playerEntity in f.GetComponentIterator<PlayerLink>())
+            {
+                if (playerEntity.Component.Player == player)
+                {
+                    f.Signals.PlayerKilled(playerEntity.Entity);
+                    f.Destroy(playerEntity.Entity);
+                }
+            }
         }
     }
 }

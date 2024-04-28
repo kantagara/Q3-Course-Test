@@ -49,6 +49,11 @@ namespace Quantum {
   using RuntimeInitializeOnLoadMethodAttribute = UnityEngine.RuntimeInitializeOnLoadMethodAttribute;
   #endif //;
   
+  public enum GameState : int {
+    WaitingForPlayers,
+    Playing,
+    GameOver,
+  }
   public enum WeaponType : int {
     AK,
     Pistol,
@@ -750,6 +755,36 @@ namespace Quantum {
     }
   }
   [StructLayout(LayoutKind.Explicit)]
+  public unsafe partial struct GameManager : Quantum.IComponentSingleton {
+    public const Int32 SIZE = 32;
+    public const Int32 ALIGNMENT = 8;
+    [FieldOffset(0)]
+    public GameState CurrentGameState;
+    [FieldOffset(8)]
+    public AssetRef<GameManagerConfig> GameManagerConfig;
+    [FieldOffset(24)]
+    public FP TimeToWaitForPlayers;
+    [FieldOffset(16)]
+    public FP TimeToDisconnectAfterWinning;
+    public override Int32 GetHashCode() {
+      unchecked { 
+        var hash = 14767;
+        hash = hash * 31 + (Int32)CurrentGameState;
+        hash = hash * 31 + GameManagerConfig.GetHashCode();
+        hash = hash * 31 + TimeToWaitForPlayers.GetHashCode();
+        hash = hash * 31 + TimeToDisconnectAfterWinning.GetHashCode();
+        return hash;
+      }
+    }
+    public static void Serialize(void* ptr, FrameSerializer serializer) {
+        var p = (GameManager*)ptr;
+        serializer.Stream.Serialize((Int32*)&p->CurrentGameState);
+        AssetRef.Serialize(&p->GameManagerConfig, serializer);
+        FP.Serialize(&p->TimeToDisconnectAfterWinning, serializer);
+        FP.Serialize(&p->TimeToWaitForPlayers, serializer);
+    }
+  }
+  [StructLayout(LayoutKind.Explicit)]
   public unsafe partial struct Grass : Quantum.IComponent {
     public const Int32 SIZE = 4;
     public const Int32 ALIGNMENT = 4;
@@ -1047,6 +1082,8 @@ namespace Quantum {
       BuildSignalsArrayOnComponentRemoved<CharacterController3D>();
       BuildSignalsArrayOnComponentAdded<Quantum.Damageable>();
       BuildSignalsArrayOnComponentRemoved<Quantum.Damageable>();
+      BuildSignalsArrayOnComponentAdded<Quantum.GameManager>();
+      BuildSignalsArrayOnComponentRemoved<Quantum.GameManager>();
       BuildSignalsArrayOnComponentAdded<Quantum.Grass>();
       BuildSignalsArrayOnComponentRemoved<Quantum.Grass>();
       BuildSignalsArrayOnComponentAdded<Quantum.KCC>();
@@ -1182,6 +1219,8 @@ namespace Quantum {
       typeRegistry.Register(typeof(FPVector2), FPVector2.SIZE);
       typeRegistry.Register(typeof(FPVector3), FPVector3.SIZE);
       typeRegistry.Register(typeof(FrameMetaData), FrameMetaData.SIZE);
+      typeRegistry.Register(typeof(Quantum.GameManager), Quantum.GameManager.SIZE);
+      typeRegistry.Register(typeof(Quantum.GameState), 4);
       typeRegistry.Register(typeof(Quantum.Grass), Quantum.Grass.SIZE);
       typeRegistry.Register(typeof(HingeJoint), HingeJoint.SIZE);
       typeRegistry.Register(typeof(HingeJoint3D), HingeJoint3D.SIZE);
@@ -1243,10 +1282,11 @@ namespace Quantum {
       typeRegistry.Register(typeof(Quantum._globals_), Quantum._globals_.SIZE);
     }
     static partial void InitComponentTypeIdGen() {
-      ComponentTypeId.Reset(ComponentTypeId.BuiltInComponentCount + 12)
+      ComponentTypeId.Reset(ComponentTypeId.BuiltInComponentCount + 13)
         .AddBuiltInComponents()
         .Add<Quantum.Bullet>(Quantum.Bullet.Serialize, null, null, ComponentFlags.None)
         .Add<Quantum.Damageable>(Quantum.Damageable.Serialize, null, null, ComponentFlags.None)
+        .Add<Quantum.GameManager>(Quantum.GameManager.Serialize, null, null, ComponentFlags.Singleton)
         .Add<Quantum.Grass>(Quantum.Grass.Serialize, null, null, ComponentFlags.None)
         .Add<Quantum.KCC>(Quantum.KCC.Serialize, null, null, ComponentFlags.None)
         .Add<Quantum.LootDrop>(Quantum.LootDrop.Serialize, null, null, ComponentFlags.None)
@@ -1262,6 +1302,7 @@ namespace Quantum {
     [Preserve()]
     public static void EnsureNotStrippedGen() {
       FramePrinter.EnsureNotStripped();
+      FramePrinter.EnsurePrimitiveNotStripped<Quantum.GameState>();
       FramePrinter.EnsurePrimitiveNotStripped<Quantum.InputButtons>();
       FramePrinter.EnsurePrimitiveNotStripped<Quantum.WeaponType>();
     }

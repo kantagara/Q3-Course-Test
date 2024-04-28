@@ -120,6 +120,8 @@ MonoBehaviour:
     - rid: 1309350638798241793
     - rid: 1309350638798241794
     - rid: 1309350638798241795
+  - Components:
+    - rid: 9199020042585374720
   SerializedTriangleDataUncompressedSize: 8
   references:
     version: 2
@@ -525,3 +527,15 @@ MonoBehaviour:
       type: {class: GrassPrototype, ns: Quantum.Prototypes, asm: Quantum.Simulation}
       data:
         _empty_prototype_dummy_field_: 0
+    - rid: 9199020042585374720
+      type: {class: GameManagerPrototype, ns: Quantum.Prototypes, asm: Quantum.Simulation}
+      data:
+        CurrentGameState:
+          Value: 0
+        GameManagerConfig:
+          Id:
+            Value: 268774814393874921
+        TimeToWaitForPlayers:
+          RawValue: 0
+        TimeToDisconnectAfterWinning:
+          RawValue: 0

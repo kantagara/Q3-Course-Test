@@ -15,6 +15,7 @@ namespace QuantumUser.Simulation.Systems
 
         public override void Update(Frame f, ref Filter filter)
         {
+            if(f.GetSingleton<GameManager>().CurrentGameState != GameState.Playing) return;
             UpdateState(f);
             CheckIfPlayerIsOutsideCircle(f, filter);
         }

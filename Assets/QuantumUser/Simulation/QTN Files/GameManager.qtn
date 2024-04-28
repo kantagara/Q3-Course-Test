@@ -1,0 +1,24 @@
+singleton component GameManager
+{
+    GameState CurrentGameState;
+    AssetRef<GameManagerConfig> GameManagerConfig;
+    FP TimeToWaitForPlayers;
+    FP TimeToDisconnectAfterWinning;
+}
+
+synced event GameEnded
+{
+    EntityRef Winner;
+}
+
+event GameManagerChangedState
+{
+    GameState NewState;
+}
+
+enum GameState
+{
+    WaitingForPlayers,
+    Playing,
+    GameOver
+}

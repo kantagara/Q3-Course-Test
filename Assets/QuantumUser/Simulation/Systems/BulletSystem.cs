@@ -2,7 +2,7 @@
 
 namespace Quantum.Systems
 {
-    public unsafe class BulletSystem : SystemMainThreadFilter<BulletSystem.Filter>, ISignalCreateBullet
+    public unsafe class BulletSystem : SystemMainThreadFilter<BulletSystem.Filter>, ISignalCreateBullet, ISignalPlayerKilled
     {
 
         public struct Filter
@@ -96,5 +96,15 @@ namespace Quantum.Systems
             bullet->Time = bulletData.Duration; 
             bullet->Damage = weaponData.Damage;
         }
+
+        public void PlayerKilled(Frame f, EntityRef player)
+        {
+            foreach (var bulletPair in f.GetComponentIterator<Bullet>())
+            {
+                if (bulletPair.Component.Owner == player)
+                    f.Destroy(bulletPair.Entity);
+            }
+        }
+
     }
 }
