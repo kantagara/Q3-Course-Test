@@ -2,7 +2,7 @@
 
 namespace Quantum.Systems
 {
-    public unsafe class BulletSystem : SystemMainThreadFilter<BulletSystem.Filter>, ISignalCreateBullet, ISignalPlayerKilled
+    public unsafe class BulletSystem : SystemMainThreadFilter<BulletSystem.Filter>, ISignalCreateBullet, ISignalBeforePlayerKilled
     {
 
         public struct Filter
@@ -97,7 +97,7 @@ namespace Quantum.Systems
             bullet->Damage = weaponData.Damage;
         }
 
-        public void PlayerKilled(Frame f, EntityRef player)
+        public void BeforePlayerKilled(Frame f, EntityRef player)
         {
             foreach (var bulletPair in f.GetComponentIterator<Bullet>())
             {

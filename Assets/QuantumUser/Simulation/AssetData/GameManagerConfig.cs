@@ -5,6 +5,5 @@ namespace Quantum
     public class GameManagerConfig : AssetObject
     {
         public FP TimeToWaitForPlayers;
-        public FP TimeToDisconnectAfterWinning;
     }
 }

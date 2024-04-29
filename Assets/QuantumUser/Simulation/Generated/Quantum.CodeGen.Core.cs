@@ -756,23 +756,20 @@ namespace Quantum {
   }
   [StructLayout(LayoutKind.Explicit)]
   public unsafe partial struct GameManager : Quantum.IComponentSingleton {
-    public const Int32 SIZE = 32;
+    public const Int32 SIZE = 24;
     public const Int32 ALIGNMENT = 8;
     [FieldOffset(0)]
     public GameState CurrentGameState;
     [FieldOffset(8)]
     public AssetRef<GameManagerConfig> GameManagerConfig;
-    [FieldOffset(24)]
-    public FP TimeToWaitForPlayers;
     [FieldOffset(16)]
-    public FP TimeToDisconnectAfterWinning;
+    public FP TimeToWaitForPlayers;
     public override Int32 GetHashCode() {
       unchecked { 
         var hash = 14767;
         hash = hash * 31 + (Int32)CurrentGameState;
         hash = hash * 31 + GameManagerConfig.GetHashCode();
         hash = hash * 31 + TimeToWaitForPlayers.GetHashCode();
-        hash = hash * 31 + TimeToDisconnectAfterWinning.GetHashCode();
         return hash;
       }
     }
@@ -780,7 +777,6 @@ namespace Quantum {
         var p = (GameManager*)ptr;
         serializer.Stream.Serialize((Int32*)&p->CurrentGameState);
         AssetRef.Serialize(&p->GameManagerConfig, serializer);
-        FP.Serialize(&p->TimeToDisconnectAfterWinning, serializer);
         FP.Serialize(&p->TimeToWaitForPlayers, serializer);
     }
   }
@@ -1049,7 +1045,10 @@ namespace Quantum {
     }
   }
   public unsafe partial interface ISignalPlayerKilled : ISignal {
-    void PlayerKilled(Frame f, EntityRef Player);
+    void PlayerKilled(Frame f);
+  }
+  public unsafe partial interface ISignalBeforePlayerKilled : ISignal {
+    void BeforePlayerKilled(Frame f, EntityRef Player);
   }
   public unsafe partial interface ISignalCreateBullet : ISignal {
     void CreateBullet(Frame f, EntityRef Owner, AssetRef<FiringWeaponData> Weapon);
@@ -1058,6 +1057,7 @@ namespace Quantum {
   }
   public unsafe partial class Frame {
     private ISignalPlayerKilled[] _ISignalPlayerKilledSystems;
+    private ISignalBeforePlayerKilled[] _ISignalBeforePlayerKilledSystems;
     private ISignalCreateBullet[] _ISignalCreateBulletSystems;
     partial void AllocGen() {
       _globals = (_globals_*)Context.Allocator.AllocAndClear(sizeof(_globals_));
@@ -1071,6 +1071,7 @@ namespace Quantum {
     partial void InitGen() {
       Initialize(this, this.SimulationConfig.Entities);
       _ISignalPlayerKilledSystems = BuildSignalsArray<ISignalPlayerKilled>();
+      _ISignalBeforePlayerKilledSystems = BuildSignalsArray<ISignalBeforePlayerKilled>();
       _ISignalCreateBulletSystems = BuildSignalsArray<ISignalCreateBullet>();
       _ComponentSignalsOnAdded = new ComponentReactiveCallbackInvoker[ComponentTypeId.Type.Length];
       _ComponentSignalsOnRemoved = new ComponentReactiveCallbackInvoker[ComponentTypeId.Type.Length];
@@ -1158,12 +1159,21 @@ namespace Quantum {
       Physics3D.Init(_globals->PhysicsState3D.MapStaticCollidersState.TrackedMap);
     }
     public unsafe partial struct FrameSignals {
-      public void PlayerKilled(EntityRef Player) {
+      public void PlayerKilled() {
         var array = _f._ISignalPlayerKilledSystems;
         for (Int32 i = 0; i < array.Length; ++i) {
           var s = array[i];
           if (_f.SystemIsEnabledInHierarchy((SystemBase)s)) {
-            s.PlayerKilled(_f, Player);
+            s.PlayerKilled(_f);
+          }
+        }
+      }
+      public void BeforePlayerKilled(EntityRef Player) {
+        var array = _f._ISignalBeforePlayerKilledSystems;
+        for (Int32 i = 0; i < array.Length; ++i) {
+          var s = array[i];
+          if (_f.SystemIsEnabledInHierarchy((SystemBase)s)) {
+            s.BeforePlayerKilled(_f, Player);
           }
         }
       }

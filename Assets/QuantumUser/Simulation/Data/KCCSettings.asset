@@ -32,4 +32,4 @@ MonoBehaviour:
     RawValue: 3276800
   LayerMask:
     BitMask: 1023
-  MoveAlongsideRotation: 1
+  MoveAlongsideRotation: 0

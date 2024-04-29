@@ -74,9 +74,9 @@ public unsafe class PlayerView : QuantumEntityViewComponent
         if (!EntityRef.IsValid) return;
         //For now we can assume that all players have the same Move Along Rotation field. 
         //Later on we can change that and introduce some setting field that can be modified at runtime 
-        var input = PredictedFrame.GetPlayerInput(PredictedFrame.Get<PlayerLink>(EntityRef).Player);
-        var kcc = PredictedFrame.Get<KCC>(EntityRef);
-        var kccSettings = PredictedFrame.FindAsset(kcc.Settings);
+        var input = PredictedFrame.GetPlayerInput(VerifiedFrame.Get<PlayerLink>(EntityRef).Player);
+        var kcc = VerifiedFrame.Get<KCC>(EntityRef);
+        var kccSettings = VerifiedFrame.FindAsset(kcc.Settings);
         FPVector2 animatorVector = kccSettings.MoveAlongsideRotation ? input->Movement : kcc.Velocity;
         animator.SetFloat(MoveX, animatorVector.X.AsFloat);
         animator.SetFloat(MoveZ, animatorVector.Y.AsFloat);

@@ -1,4 +1,5 @@
-﻿using Quantum;
+﻿using Photon.Deterministic;
+using Quantum;
 
 namespace QuantumUser.Simulation.Systems
 {
@@ -20,9 +21,7 @@ namespace QuantumUser.Simulation.Systems
                 {
                     if (ThereIsWinner(f, out var winner))
                     {
-                        filter.GameManager->CurrentGameState = GameState.GameOver;
-                        f.Events.GameManagerChangedState(GameState.GameOver);
-                        f.Events.GameEnded(winner.Entity);
+                        GameOver(f, filter.GameManager, winner.Entity);
                     }
                     else
                     {
@@ -31,65 +30,48 @@ namespace QuantumUser.Simulation.Systems
                     }
                 }
             }
-            else if (filter.GameManager->CurrentGameState == GameState.GameOver)
-            {
-                filter.GameManager->TimeToDisconnectAfterWinning -= f.DeltaTime;
-                if (filter.GameManager->TimeToDisconnectAfterWinning <= 0)
-                {
-                    
-                }
-            }
         }
+
+        private void GameOver(Frame f, GameManager* gameManager, EntityRef winner)
+        {
+            gameManager->CurrentGameState = GameState.GameOver;
+            f.Events.GameManagerChangedState(GameState.GameOver);
+            f.Events.GameEnded(winner);
+        }
+       
 
         public void OnAdded(Frame f, EntityRef entity, GameManager* gameManager)
         {
             var config = f.FindAsset(gameManager->GameManagerConfig);
             gameManager->CurrentGameState = GameState.WaitingForPlayers;
             gameManager->TimeToWaitForPlayers = config.TimeToWaitForPlayers;
-            gameManager->TimeToDisconnectAfterWinning = config.TimeToDisconnectAfterWinning;
         }
 
         public void OnPlayerDisconnected(Frame f, PlayerRef player)
         {
             if (!ThereIsWinner(f, out var winner))
                 return;
-            var gameManager = f.Unsafe.GetPointerSingleton<GameManager>();
-            gameManager->CurrentGameState = GameState.GameOver;
-            f.Events.GameManagerChangedState(GameState.GameOver);
-            f.Events.GameEnded(winner.Entity);
-
+            GameOver(f, f.Unsafe.GetPointerSingleton<GameManager>(), winner.Entity);
         }
 
-        public void PlayerKilled(Frame f, EntityRef player)
+        public void PlayerKilled(Frame f)
         {
             if (!ThereIsWinner(f, out var winner))
                 return;
-            var gameManager = f.Unsafe.GetPointerSingleton<GameManager>();
-            gameManager->CurrentGameState = GameState.GameOver;
-            f.Events.GameManagerChangedState(GameState.GameOver);
-            f.Events.GameEnded(winner.Entity);
+            GameOver(f, f.Unsafe.GetPointerSingleton<GameManager>(), winner.Entity);
         }
 
         private bool ThereIsWinner(Frame f, out EntityComponentPair<PlayerLink> winner)
         {
-            var count = 0;
             winner = default;
-            foreach (var pair in f.GetComponentIterator<PlayerLink>())
+            var count = 0;
+            foreach (var player in f.GetComponentIterator<PlayerLink>())
             {
+                winner = player;
                 count++;
-                winner = pair;
             }
-
-            if (count > 1)
-                return false;
             
-            if (count < 0)
-            {
-                Log.Warn("No winners found.");
-                return false;
-            }
-
-            return true;
+            return count == 1;
         }
     }
 }

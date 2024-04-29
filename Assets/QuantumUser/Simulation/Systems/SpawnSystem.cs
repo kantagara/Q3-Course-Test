@@ -75,7 +75,7 @@ namespace Quantum
             {
                 if (playerEntity.Component.Player == player)
                 {
-                    f.Signals.PlayerKilled(playerEntity.Entity);
+                    f.Signals.PlayerKilled();
                     f.Destroy(playerEntity.Entity);
                 }
             }

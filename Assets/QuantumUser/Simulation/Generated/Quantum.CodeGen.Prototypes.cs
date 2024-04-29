@@ -128,7 +128,6 @@ namespace Quantum.Prototypes {
     public Quantum.QEnum32<GameState> CurrentGameState;
     public AssetRef<GameManagerConfig> GameManagerConfig;
     public FP TimeToWaitForPlayers;
-    public FP TimeToDisconnectAfterWinning;
     partial void MaterializeUser(Frame frame, ref Quantum.GameManager result, in PrototypeMaterializationContext context);
     public override Boolean AddToEntity(FrameBase f, EntityRef entity, in PrototypeMaterializationContext context) {
         Quantum.GameManager component = default;
@@ -139,7 +138,6 @@ namespace Quantum.Prototypes {
         result.CurrentGameState = this.CurrentGameState;
         result.GameManagerConfig = this.GameManagerConfig;
         result.TimeToWaitForPlayers = this.TimeToWaitForPlayers;
-        result.TimeToDisconnectAfterWinning = this.TimeToDisconnectAfterWinning;
         MaterializeUser(frame, ref result, in context);
     }
   }

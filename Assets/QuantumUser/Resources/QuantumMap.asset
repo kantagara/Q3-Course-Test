@@ -537,5 +537,3 @@ MonoBehaviour:
             Value: 268774814393874921
         TimeToWaitForPlayers:
           RawValue: 0
-        TimeToDisconnectAfterWinning:
-          RawValue: 0

@@ -3,7 +3,6 @@ singleton component GameManager
     GameState CurrentGameState;
     AssetRef<GameManagerConfig> GameManagerConfig;
     FP TimeToWaitForPlayers;
-    FP TimeToDisconnectAfterWinning;
 }
 
 synced event GameEnded

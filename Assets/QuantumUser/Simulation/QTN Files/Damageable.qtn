@@ -4,7 +4,8 @@ component Damageable{
     AssetRef<DamageableBase> DamageableBase;
 }
 
-signal PlayerKilled(EntityRef Player);
+signal PlayerKilled();
+signal BeforePlayerKilled(EntityRef Player);
 
 synced event PlayerHealthUpdated{
     EntityRef Entity;
