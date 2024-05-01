@@ -24,7 +24,7 @@ MonoBehaviour:
     Y:
       RawValue: 58982
     Z:
-      RawValue: 65536
+      RawValue: 131072
   Cooldown:
     RawValue: 131072
   Damage:

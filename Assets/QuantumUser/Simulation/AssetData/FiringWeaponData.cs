@@ -39,6 +39,19 @@ namespace Quantum
             
             filter.Weapon->CooldownTime -= f.DeltaTime;
         }
+
+        protected void FireWeapon(Frame f, WeaponSystem.Filter filter)
+        {
+            if (filter.Weapon->CooldownTime <= FP._0 && NoObstacleInFront(f, filter) && filter.Weapon->Ammo > 0)
+            {
+                var weaponData = f.FindAsset(filter.Weapon->WeaponData) as FiringWeaponData;
+                filter.Weapon->CooldownTime = weaponData.Cooldown;
+                filter.Weapon->Ammo--;
+                f.Events.OnAmmoChanged(filter.PlayerLink->Player, filter.Weapon->Ammo);
+                f.Signals.CreateBullet(filter.Entity, weaponData);
+                f.Events.WeaponFired(filter.Entity, weaponData.Offset);
+            }
+        }
         
         
         protected static bool NoObstacleInFront(Frame f, WeaponSystem.Filter filter)

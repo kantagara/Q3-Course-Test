@@ -65,16 +65,6 @@ namespace Quantum.Systems
       
         
         
-        // Helper method to rotate a vector by a given angle
-        private FPVector2 RotateVector(FPVector2 vector, FP angle)
-        {
-            FP cos = FPMath.Cos(angle);
-            FP sin = FPMath.Sin(angle);
-            return new FPVector2(
-                vector.X * cos - vector.Y * sin,
-                vector.X * sin + vector.Y * cos
-            );
-        }
 
 
         public void CreateBullet(Frame f, EntityRef owner, AssetRef<FiringWeaponData> weapon)
@@ -87,7 +77,7 @@ namespace Quantum.Systems
             var bulletTransform = f.Unsafe.GetPointer<Transform2D>(bulletEntity);
             var sourceTransform = f.Get<Transform2D>(owner);
 
-            bulletTransform->Position = sourceTransform.Position + RotateVector(weaponData.Offset.XZ, sourceTransform.Rotation);
+            bulletTransform->Position = sourceTransform.Position + weaponData.Offset.XZ.Rotate(sourceTransform.Rotation);
             bulletTransform->Rotation = f.Get<Transform2D>(owner).Rotation;
             bullet->Speed = bulletData.Speed;
             bullet->HeightOffset = weaponData.Offset.Y;

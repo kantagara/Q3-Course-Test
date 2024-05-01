@@ -28,6 +28,12 @@ enum WeaponType
 
 signal CreateBullet(EntityRef Owner,AssetRef<FiringWeaponData> Weapon);
 
+event WeaponFired
+{
+    EntityRef Owner;
+    FPVector3 Offset;
+}
+
 event OnAmmoChanged
 {
     local PlayerRef Player;

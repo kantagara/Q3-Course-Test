@@ -1,43 +1,27 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using Quantum;
 using UnityEngine;
 using UnityEngine.Pool;
-using UnityEngine.Serialization;
 
-public class VFXPool : MonoBehaviour
+[Serializable]
+public class ParticleSystemPool
 {
-    [SerializeField] private ParticleSystem vfx;
-    ObjectPool<ParticleSystem> _bulletImpactPool;
+    [SerializeField] private ParticleSystem particle;
 
-    void Start()
+    private ObjectPool<ParticleSystem> _particlesPool;
+
+    public void Init()
     {
-        // Initialize the particle system pool
-        _bulletImpactPool = new ObjectPool<ParticleSystem>(
-            createFunc: CreateParticleSystem, // Function to create a new ParticleSystem
-            actionOnGet: OnParticleSystemGet, // Action to perform when a ParticleSystem is taken from the pool
-            actionOnRelease: OnParticleSystemRelease, // Action to perform when a ParticleSystem is returned to the pool
-            actionOnDestroy: OnDestroyParticleSystem, // Action to perform when a ParticleSystem is destroyed
-            collectionCheck: false, // Enable this for additional safety checks in development
-            defaultCapacity: 10, // Initial capacity
-            maxSize: 20 // Maximum number of objects the pool can hold
-        );
-
-        QuantumEvent.Subscribe<EventBulletHit>(this, BulletHit);
-    }
-
-    private void BulletHit(EventBulletHit callback)
-    {
-        var f = callback.Game.Frames.Verified;
-        var bullet = f.Get<Bullet>(callback.Bullet);
-        var bulletTransform = f.Get<Transform2D>(callback.Bullet);
-        var impact = _bulletImpactPool.Get();
-        impact.transform.position = new Vector3(bulletTransform.Position.X.AsFloat, bullet.HeightOffset.AsFloat, bulletTransform.Position.Y.AsFloat);
+        _particlesPool = new ObjectPool<ParticleSystem>(CreateParticleSystem, OnParticleSystemGet,
+            OnParticleSystemRelease, OnDestroyParticleSystem);
     }
 
     // Function to create a new ParticleSystem
     private ParticleSystem CreateParticleSystem()
     {
-        ParticleSystem ps = Instantiate(vfx);
+        ParticleSystem ps = UnityEngine.Object.Instantiate(particle);
         ps.gameObject.SetActive(false); // Start inactive
         return ps;
     }
@@ -49,16 +33,54 @@ public class VFXPool : MonoBehaviour
         ps.Play();
     }
 
-    // Action to perform when a ParticleSystem is returned to the pool
     private void OnParticleSystemRelease(ParticleSystem ps)
     {
         ps.Stop();
         ps.gameObject.SetActive(false);
     }
 
-    // Action to perform when a ParticleSystem is destroyed (optional)
     private void OnDestroyParticleSystem(ParticleSystem ps)
     {
-        Destroy(ps.gameObject);
+        UnityEngine.Object.Destroy(ps.gameObject);
+    }
+
+    public ParticleSystem Get()
+    {
+        return _particlesPool.Get();
+    } 
+    public void Release(ParticleSystem particleSystem)
+    {
+        _particlesPool.Release(particleSystem);
+    }
+
+}
+
+
+public class VFXPool : MonoBehaviour
+{
+    [SerializeField] private ParticleSystemPool weaponFiredPool;
+
+
+    private void Awake()
+    {
+        weaponFiredPool.Init();
+        QuantumEvent.Subscribe<EventWeaponFired>(this, OnWeaponFired);
+    }
+
+    private void OnWeaponFired(EventWeaponFired callback)
+    {
+        var f = callback.Game.Frames.Predicted;
+        
+        var ownerTransform = f.Get<Transform2D>(callback.Owner);
+        var position = ownerTransform.Position + callback.Offset.XZ.Rotate(ownerTransform.Rotation);
+        var ps = weaponFiredPool.Get();
+        ps.transform.position = position.XOY.ToUnityVector3() + Vector3.up * callback.Offset.Y.AsFloat;
+        StartCoroutine(ReturnBackInPool(ps, weaponFiredPool));
+    }
+
+    private IEnumerator ReturnBackInPool(ParticleSystem ps, ParticleSystemPool particleSystemPool)
+    {
+        yield return new WaitForSeconds(ps.main.duration);
+        particleSystemPool.Release(ps);
     }
 }

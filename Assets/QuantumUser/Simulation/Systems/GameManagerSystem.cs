@@ -14,20 +14,18 @@ namespace QuantumUser.Simulation.Systems
 
         public override void Update(Frame f, ref Filter filter)
         {
-            if (filter.GameManager->CurrentGameState == GameState.WaitingForPlayers)
+            if (filter.GameManager->CurrentGameState != GameState.WaitingForPlayers) return;
+            filter.GameManager->TimeToWaitForPlayers -= f.DeltaTime;
+            if (filter.GameManager->TimeToWaitForPlayers <= 0)
             {
-                filter.GameManager->TimeToWaitForPlayers -= f.DeltaTime;
-                if (filter.GameManager->TimeToWaitForPlayers <= 0)
+                if (ThereIsWinner(f, out var winner))
                 {
-                    if (ThereIsWinner(f, out var winner))
-                    {
-                        GameOver(f, filter.GameManager, winner.Entity);
-                    }
-                    else
-                    {
-                        filter.GameManager->CurrentGameState = GameState.Playing;
-                        f.Events.GameManagerChangedState(GameState.Playing);
-                    }
+                    GameOver(f, filter.GameManager, winner.Entity);
+                }
+                else
+                {
+                    filter.GameManager->CurrentGameState = GameState.Playing;
+                    f.Events.GameManagerChangedState(filter.GameManager->CurrentGameState);
                 }
             }
         }
@@ -35,7 +33,7 @@ namespace QuantumUser.Simulation.Systems
         private void GameOver(Frame f, GameManager* gameManager, EntityRef winner)
         {
             gameManager->CurrentGameState = GameState.GameOver;
-            f.Events.GameManagerChangedState(GameState.GameOver);
+            f.Events.GameManagerChangedState(gameManager->CurrentGameState);
             f.Events.GameEnded(winner);
         }
        

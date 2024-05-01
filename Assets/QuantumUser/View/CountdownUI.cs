@@ -15,12 +15,15 @@ public class CountdownUI : QuantumSceneViewComponent
         base.OnActivate(frame);
         QuantumEvent.Subscribe<EventCircleChangedState>(this, CircleChangedState);
         QuantumEvent.Subscribe<EventGameManagerChangedState>(this, GameManagerChangedState);
+        
+        if(frame.GetSingleton<GameManager>().CurrentGameState == GameState.WaitingForPlayers)
+            message.SetText("Waiting for all players");
     }
 
     private void GameManagerChangedState(EventGameManagerChangedState callback)
     {
         if (callback.NewState != GameState.Playing) return;
-        MessageTextBasedOnState(callback.Game.Frames.Verified.GetSingleton<ShrinkingCircle>());
+        message.SetText(MessageTextBasedOnState(callback.Game.Frames.Verified.GetSingleton<ShrinkingCircle>()));
     }
 
     public override void OnDeactivate()
@@ -37,7 +40,7 @@ public class CountdownUI : QuantumSceneViewComponent
     public override void OnUpdateView()
     {
         base.OnUpdateView();
-        var f = PredictedFrame;
+        var f = VerifiedFrame;
         var gameManager = f.GetSingleton<GameManager>();
         
         switch (gameManager.CurrentGameState)
@@ -57,7 +60,7 @@ public class CountdownUI : QuantumSceneViewComponent
     {
         var gameManager = f.GetSingleton<GameManager>();
         var gameManagerConfig = f.FindAsset(gameManager.GameManagerConfig);
-        message.SetText("Waiting for all players");
+        
         countdown.SetText($"{Mathf.CeilToInt(gameManager.TimeToWaitForPlayers.AsFloat)}");
         image.fillAmount = gameManager.TimeToWaitForPlayers.AsFloat / gameManagerConfig.TimeToWaitForPlayers.AsFloat ;
     }
@@ -82,14 +85,16 @@ public class CountdownUI : QuantumSceneViewComponent
 
     private static string MessageTextBasedOnState(ShrinkingCircle shrinkingCircle)
     {
-        return shrinkingCircle.CurrentState.CircleStateUnion.Field switch
+        var currentState = shrinkingCircle.CurrentState.CircleStateUnion.Field;
+
+        return currentState switch
         {
             CircleStateUnion.PRESHRINKSTATE => "Go to the safe area!",
             CircleStateUnion.SHRINKSTATE => "Area shrinking!",
             CircleStateUnion.INITIALSTATE => "Area initialized!",
             CircleStateUnion.COOLDOWNSTATE => "Cooldown!",
             _ => throw new ArgumentOutOfRangeException(
-                $"Unknown state {shrinkingCircle.CurrentState.CircleStateUnion.Field}")
+                $"Unknown state {currentState}")
         };
     }
 }
