@@ -526,12 +526,14 @@ PrefabInstance:
         type: 3}
       propertyPath: DefaultConnectionArgs.SessionConfig
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 11400000, guid: 7b906fb35c9b723448d40e7d6376f2d2,
+        type: 2}
     - target: {fileID: 7243461719588803421, guid: 7d78f8a9ae2bcc1408312ef78f87bdf0,
         type: 3}
       propertyPath: DefaultConnectionArgs.ServerSettings
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 11400000, guid: f5e3f77a9e97fbb4283c970c5539be2c,
+        type: 2}
     - target: {fileID: 7243461719588803421, guid: 7d78f8a9ae2bcc1408312ef78f87bdf0,
         type: 3}
       propertyPath: DefaultConnectionArgs.RuntimeConfig.Map.Id.Value

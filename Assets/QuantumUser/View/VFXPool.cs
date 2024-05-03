@@ -58,7 +58,7 @@ public class ParticleSystemPool
 
 public class VFXPool : MonoBehaviour
 {
-    [SerializeField] private ParticleSystemPool weaponFiredPool;
+    /*[SerializeField] private ParticleSystemPool weaponFiredPool;
 
 
     private void Awake()
@@ -82,5 +82,5 @@ public class VFXPool : MonoBehaviour
     {
         yield return new WaitForSeconds(ps.main.duration);
         particleSystemPool.Release(ps);
-    }
+    }*/
 }

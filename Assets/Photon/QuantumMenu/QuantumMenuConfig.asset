@@ -29,7 +29,16 @@ MonoBehaviour:
   - kr
   - us
   - usw
-  _availableScenes: []
+  _availableScenes:
+  - Name: Quantum Game Scene
+    ScenePath: Assets/QuantumUser/Scenes/QuantumGameScene.unity
+    Preview: {fileID: 0}
+    Map:
+      Id:
+        Value: 362086093035979058
+    SystemsConfig:
+      Id:
+        Value: 1874906840667048947
   _machineId: {fileID: -755480892457977500, guid: fbd1d0c57fd428c44b08e505acb8d851,
     type: 3}
   _codeGenerator: {fileID: 11400000, guid: e38f1fac5a1a5c94da2b4ef21bd48419, type: 2}
