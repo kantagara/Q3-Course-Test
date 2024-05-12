@@ -71,20 +71,8 @@ namespace Quantum.Systems
         {
             var weaponData = f.FindAsset(weapon);
             var bulletData = weaponData.BulletData;
-            
-            var bulletEntity = f.Create(bulletData.Entity);
-            var bullet = f.Unsafe.GetPointer<Bullet>(bulletEntity);
-            var bulletTransform = f.Unsafe.GetPointer<Transform2D>(bulletEntity);
-            var sourceTransform = f.Get<Transform2D>(owner);
 
-            bulletTransform->Position = sourceTransform.Position + weaponData.Offset.XZ.Rotate(sourceTransform.Rotation);
-            bulletTransform->Rotation = f.Get<Transform2D>(owner).Rotation;
-            bullet->Speed = bulletData.Speed;
-            bullet->HeightOffset = weaponData.Offset.Y;
-            bullet->Owner = owner;
-            bullet->Direction = f.Get<Transform2D>(owner).Up;
-            bullet->Time = bulletData.Duration; 
-            bullet->Damage = weaponData.Damage;
+            bulletData.CreateBullet(f, weaponData, owner);
         }
 
         public void BeforePlayerKilled(Frame f, EntityRef player)

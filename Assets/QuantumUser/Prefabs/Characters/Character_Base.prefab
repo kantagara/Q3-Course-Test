@@ -235,6 +235,7 @@ GameObject:
   - component: {fileID: 922460355526489083}
   - component: {fileID: 477268824446172245}
   - component: {fileID: 5022768947933942807}
+  - component: {fileID: 2549237700841913675}
   m_Layer: 6
   m_Name: Character_Base
   m_TagString: Untagged
@@ -641,6 +642,22 @@ MonoBehaviour:
     WeaponLoot:
       Id:
         Value: 1487228309458099876
+--- !u!114 &2549237700841913675
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1326267824891306075}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1bc7145176125c409b9b458ddb5cb9e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Prototype:
+    PlayerStatsConfig:
+      Id:
+        Value: 0
 --- !u!1 &1739315570316238824
 GameObject:
   m_ObjectHideFlags: 0

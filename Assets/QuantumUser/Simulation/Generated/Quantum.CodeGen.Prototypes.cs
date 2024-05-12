@@ -56,7 +56,6 @@ namespace Quantum.Prototypes {
     public FP Damage;
     public FP Time;
     public FP Speed;
-    public FPVector2 Direction;
     public FP HeightOffset;
     public override Boolean AddToEntity(FrameBase f, EntityRef entity, in PrototypeMaterializationContext context) {
         Quantum.Bullet component = default;
@@ -68,7 +67,6 @@ namespace Quantum.Prototypes {
         result.Damage = this.Damage;
         result.Time = this.Time;
         result.Speed = this.Speed;
-        result.Direction = this.Direction;
         result.HeightOffset = this.HeightOffset;
     }
   }

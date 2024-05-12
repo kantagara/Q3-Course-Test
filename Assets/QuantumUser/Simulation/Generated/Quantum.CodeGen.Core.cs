@@ -692,7 +692,7 @@ namespace Quantum {
   }
   [StructLayout(LayoutKind.Explicit)]
   public unsafe partial struct Bullet : Quantum.IComponent {
-    public const Int32 SIZE = 56;
+    public const Int32 SIZE = 40;
     public const Int32 ALIGNMENT = 8;
     [FieldOffset(0)]
     public EntityRef Owner;
@@ -702,8 +702,6 @@ namespace Quantum {
     public FP Time;
     [FieldOffset(24)]
     public FP Speed;
-    [FieldOffset(40)]
-    public FPVector2 Direction;
     [FieldOffset(16)]
     public FP HeightOffset;
     public override Int32 GetHashCode() {
@@ -713,7 +711,6 @@ namespace Quantum {
         hash = hash * 31 + Damage.GetHashCode();
         hash = hash * 31 + Time.GetHashCode();
         hash = hash * 31 + Speed.GetHashCode();
-        hash = hash * 31 + Direction.GetHashCode();
         hash = hash * 31 + HeightOffset.GetHashCode();
         return hash;
       }
@@ -725,7 +722,6 @@ namespace Quantum {
         FP.Serialize(&p->HeightOffset, serializer);
         FP.Serialize(&p->Speed, serializer);
         FP.Serialize(&p->Time, serializer);
-        FPVector2.Serialize(&p->Direction, serializer);
     }
   }
   [StructLayout(LayoutKind.Explicit)]

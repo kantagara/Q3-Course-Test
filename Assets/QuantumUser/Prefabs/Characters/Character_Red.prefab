@@ -3244,6 +3244,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Character_Red
       objectReference: {fileID: 0}
+    - target: {fileID: 2549237700841913675, guid: 087898557506e714b83fb874784c9772,
+        type: 3}
+      propertyPath: Prototype.PlayerStatsConfig.Id.Value
+      value: 305594962581709274
+      objectReference: {fileID: 0}
     - target: {fileID: 3014794430628324286, guid: 087898557506e714b83fb874784c9772,
         type: 3}
       propertyPath: m_LocalScale.x

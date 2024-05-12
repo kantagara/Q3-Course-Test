@@ -12,7 +12,6 @@ component Bullet
     FP Damage;
     FP Time;
     FP Speed;
-    FPVector2 Direction;   
     FP HeightOffset;
 }
 
