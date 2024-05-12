@@ -18,9 +18,9 @@ MonoBehaviour:
       Value: 384054636541946353
   Entity: {fileID: 3097001405596171208, guid: f5263705712eb484dac0fc88b8b9c377, type: 3}
   Duration:
-    RawValue: 655360
+    RawValue: 196608
   Speed:
     RawValue: 2621440
   NumberOfBullets: 3
   SpreadAngle:
-    RawValue: 1310720
+    RawValue: 196608

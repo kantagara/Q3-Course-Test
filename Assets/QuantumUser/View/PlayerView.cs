@@ -9,7 +9,6 @@ public unsafe class PlayerView : QuantumEntityViewComponent
     private static readonly int MoveZ = Animator.StringToHash("moveZ");
     private static readonly int MoveX = Animator.StringToHash("moveX");
     [SerializeField] private Animator animator;
-    [SerializeField] private GameObject arrow;
     [SerializeField] private GameObject overHeadUi;
     private bool _isLocalPlayer;
 
@@ -24,7 +23,6 @@ public unsafe class PlayerView : QuantumEntityViewComponent
     {
         _isLocalPlayer = _game.PlayerIsLocal(frame.Get<PlayerLink>(EntityRef).Player);
         
-        arrow.SetActive(_isLocalPlayer);
         var layer = LayerMask.NameToLayer(_isLocalPlayer ? "Player_Local" : "Player_Remote");
 
 
