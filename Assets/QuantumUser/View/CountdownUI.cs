@@ -22,8 +22,12 @@ public class CountdownUI : QuantumSceneViewComponent
 
     private void GameManagerChangedState(EventGameManagerChangedState callback)
     {
+        //Happens when the runner is a debug runner.
+        if(QuantumRunner.Default.NetworkClient.CurrentRoom == null) return;
+        QuantumRunner.Default.NetworkClient.CurrentRoom.IsVisible = false;
         if (callback.NewState != GameState.Playing) return;
         message.SetText(MessageTextBasedOnState(callback.Game.Frames.Verified.GetSingleton<ShrinkingCircle>()));
+        
     }
 
     public override void OnDeactivate()

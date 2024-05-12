@@ -21,7 +21,7 @@ namespace Quantum
         public override void OnUpdate(Frame f, WeaponSystem.Filter filter)
         {
             var playerInput = f.GetPlayerInput(filter.PlayerLink->Player);
-            
+            var playerStatsConfig = f.FindAsset(filter.PlayerStats->PlayerStatsConfig);
             if (playerInput->Fire.WasPressed)
             {
                 OnFirePressed(f,filter);
@@ -37,7 +37,7 @@ namespace Quantum
             
             if(filter.Weapon->CooldownTime <= FP._0) return;
             
-            filter.Weapon->CooldownTime -= f.DeltaTime;
+            filter.Weapon->CooldownTime -= f.DeltaTime * playerStatsConfig.FireRateModifier;
         }
 
         protected void FireWeapon(Frame f, WeaponSystem.Filter filter)

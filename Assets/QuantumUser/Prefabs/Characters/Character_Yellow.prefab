@@ -3226,17 +3226,17 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Data.m_Mid
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 8020118014179034392}
     - target: {fileID: 1079595735002374523, guid: 087898557506e714b83fb874784c9772,
         type: 3}
       propertyPath: m_Data.m_Tip
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 3235912508168677192}
     - target: {fileID: 1079595735002374523, guid: 087898557506e714b83fb874784c9772,
         type: 3}
       propertyPath: m_Data.m_Root
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 6396825705324838211}
     - target: {fileID: 1326267824891306075, guid: 087898557506e714b83fb874784c9772,
         type: 3}
       propertyPath: m_Name

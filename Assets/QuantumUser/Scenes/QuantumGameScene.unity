@@ -741,9 +741,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe8f13c47f0e1ef47a5d02c723c3bdc4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  weaponFiredPool:
-    particle: {fileID: 198572881580852744, guid: 7e48ba6b1b968764490bbc70b66e3fe1,
-      type: 3}
 --- !u!4 &307938670
 Transform:
   m_ObjectHideFlags: 0
@@ -1108,7 +1105,7 @@ MonoBehaviour:
   LocalPlayers:
   - PlayerAvatar:
       Id:
-        Value: 1386563459808997455
+        Value: 1272993794065760460
     PlayerNickname: garabanda
   MaxPlayerCount: 8
   SimulationSpeedMultiplier: 1

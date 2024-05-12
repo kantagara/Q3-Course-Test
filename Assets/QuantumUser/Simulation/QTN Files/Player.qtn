@@ -2,6 +2,11 @@ component PlayerLink{
     PlayerRef Player;
 }
 
+component PlayerStats
+{
+    AssetRef<PlayerStatsConfig> PlayerStatsConfig;
+}
+
 event OnPlayerSpawned
 {
     EntityRef Entity;

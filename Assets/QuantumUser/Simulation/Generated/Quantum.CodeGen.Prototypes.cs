@@ -253,6 +253,21 @@ namespace Quantum.Prototypes {
     }
   }
   [System.SerializableAttribute()]
+  [Quantum.Prototypes.Prototype(typeof(Quantum.PlayerStats))]
+  public unsafe partial class PlayerStatsPrototype : ComponentPrototype<Quantum.PlayerStats> {
+    public AssetRef<PlayerStatsConfig> PlayerStatsConfig;
+    partial void MaterializeUser(Frame frame, ref Quantum.PlayerStats result, in PrototypeMaterializationContext context);
+    public override Boolean AddToEntity(FrameBase f, EntityRef entity, in PrototypeMaterializationContext context) {
+        Quantum.PlayerStats component = default;
+        Materialize((Frame)f, ref component, in context);
+        return f.Set(entity, component) == SetResult.ComponentAdded;
+    }
+    public void Materialize(Frame frame, ref Quantum.PlayerStats result, in PrototypeMaterializationContext context = default) {
+        result.PlayerStatsConfig = this.PlayerStatsConfig;
+        MaterializeUser(frame, ref result, in context);
+    }
+  }
+  [System.SerializableAttribute()]
   [Quantum.Prototypes.Prototype(typeof(Quantum.PreShrinkState))]
   public unsafe partial class PreShrinkStatePrototype : StructPrototype {
     public FP TargetRadius;

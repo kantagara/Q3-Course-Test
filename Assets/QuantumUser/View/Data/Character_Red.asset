@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84a76a278728e5b4c8d774f2783146a5, type: 3}
+  m_Name: Character_Red
+  m_EditorClassIdentifier: 
+  <CharacterSprite>k__BackingField: {fileID: 21300000, guid: 2442fe75ea07b1a409c49b450e9bec07,
+    type: 3}
+  <Name>k__BackingField: RedGuy
+  <EntityPrototype>k__BackingField: {fileID: 3097001405596171208, guid: b27c837b1108deb48888832c172ac37c,
+    type: 3}
+  <Configuration>k__BackingField: {fileID: 11400000, guid: c6ce23c070fa705478fcf8765157b21e,
+    type: 2}

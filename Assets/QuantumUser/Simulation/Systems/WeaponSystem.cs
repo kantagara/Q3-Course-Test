@@ -15,6 +15,7 @@ namespace Quantum
         {
             public EntityRef Entity;
             public PlayerLink* PlayerLink;
+            public PlayerStats* PlayerStats;
             public Transform2D* Transform;
             public Weapon* Weapon;
         }
