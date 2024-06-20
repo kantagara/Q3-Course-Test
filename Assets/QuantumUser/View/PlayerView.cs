@@ -31,9 +31,8 @@ public unsafe class PlayerView : QuantumEntityViewComponent
             renderer.gameObject.layer = layer;
             renderer.enabled = true;
         }
-        
+        Instantiate()
         overHeadUi.SetActive(true);
-
         QuantumEvent.Subscribe<EventOnPlayerEnteredGrass>(this, OnPlayerEnterGrass);
         QuantumEvent.Subscribe<EventOnPlayerExitGrass>(this, OnPlayerExitGrass);
         QuantumEvent.Subscribe<EventOnPlayerExitGrass>(this, OnPlayerExitGrass);
