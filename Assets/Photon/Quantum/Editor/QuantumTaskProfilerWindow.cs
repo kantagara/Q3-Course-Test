@@ -78,7 +78,7 @@ namespace Quantum.Editor {
 
 
     [MenuItem("Window/Quantum/Task Profiler")]
-    [MenuItem("Tools/Quantum/Window/Task Profiler", false, (int)QuantumEditorMenuPriority.Window + 5)]
+    [MenuItem("Tools/Quantum/Window/Task Profiler", false, (int)QuantumEditorMenuPriority.Window + 15)]
     public static void ShowWindow() {
       GetWindow(typeof(QuantumTaskProfilerWindow));
     }

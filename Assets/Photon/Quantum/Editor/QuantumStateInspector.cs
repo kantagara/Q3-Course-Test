@@ -3,7 +3,6 @@ namespace Quantum.Editor {
   using System.Collections.Generic;
   using System.Collections.ObjectModel;
   using System.Linq;
-  using System.Reflection;
   using Photon.Deterministic;
   using Quantum.Core;
   using UnityEditor;
@@ -12,6 +11,10 @@ namespace Quantum.Editor {
   using Object = UnityEngine.Object;
   using static QuantumUnityExtensions;
 
+  /// <summary>
+  /// An editor class that renders the Quantum state inspector used to reveal internal state of Quantum entities during run-time.
+  /// Open the window by using Tools > Quantum > Window > State Inspectors
+  /// </summary>
   public unsafe partial class QuantumStateInspector : EditorWindow {
     private static Lazy<Skin> _skin = new Lazy<Skin>(() => new Skin());
 
@@ -21,10 +24,8 @@ namespace Quantum.Editor {
     private bool _syncWithActiveGameObject;
     private bool _useVerifiedFrame;
 
-#pragma warning disable CS0618
-    private ComponentTypeSetSelector _prohibitedComponents = new ComponentTypeSetSelector() { ComponentTypeNames = Array.Empty<string>() };
-    private ComponentTypeSetSelector _requiredComponents   = new ComponentTypeSetSelector() { ComponentTypeNames = Array.Empty<string>() };
-#pragma warning restore CS0618
+    private List<ComponentTypeRef> _prohibitedComponents = new List<ComponentTypeRef>();
+    private List<ComponentTypeRef> _requiredComponents = new List<ComponentTypeRef>();
     
     private TreeViewState _runnersTreeViewState        = new TreeViewState();
     private UnityInternal.SplitterState _splitterState = UnityInternal.SplitterState.FromRelative(new float[] { 0.5f, 0.5f }, new int[] { 100, 100 });
@@ -32,12 +33,12 @@ namespace Quantum.Editor {
     [NonSerialized] private QuantumRunner _currentRunner;
     [NonSerialized] private bool _needsReload;
     [NonSerialized] private bool _needsSelectionSync;
-    [NonSerialized] private bool _addingComponent;
     [NonSerialized] private string _buildEntityRunnerId;
     [NonSerialized] private List<EntityRef> _entityRefBuffer = new List<EntityRef>();
     [NonSerialized] private CommandQueue _pendingDebugCommands = new CommandQueue();
     [NonSerialized] private List<Tuple<string, EntityRef>> _pendingSelection = new List<Tuple<string, EntityRef>>();
     [NonSerialized] private RunnersTreeView _runnersTreeView;
+    [NonSerialized] private SerializedProperty _componentsBeingAdded;
 
     private static Skin skin => _skin.Value;
 
@@ -68,7 +69,7 @@ namespace Quantum.Editor {
     private void OnEnable() {
       _runnersTreeView = new RunnersTreeView(_runnersTreeViewState, _model);
       _runnersTreeView.TreeSelectionChanged += (sender, selection) => {
-        _addingComponent = false;
+        _componentsBeingAdded = null;
         _buildEntityRunnerId = null;
         _runnersTreeView.SetForceShowItems(null);
         if (_syncWithActiveGameObject) {
@@ -77,14 +78,14 @@ namespace Quantum.Editor {
       };
 
       // remove missing component types
-      _requiredComponents.ComponentTypeNames   = _requiredComponents.ComponentTypeNames.Where(x => QuantumEditorUtility.TryGetComponentType(x, out _)).ToArray();
-      _prohibitedComponents.ComponentTypeNames = _prohibitedComponents.ComponentTypeNames.Where(x => QuantumEditorUtility.TryGetComponentType(x, out _)).ToArray();
+      _requiredComponents.RemoveAll(x => QuantumEditorUtility.TryGetComponentType(x, out _) == false);
+      _prohibitedComponents.RemoveAll(x => QuantumEditorUtility.TryGetComponentType(x, out _) == false);
 
       _runnersTreeView.WithComponents = _requiredComponents;
       _runnersTreeView.WithoutComponents = _prohibitedComponents;
       _runnersTreeView.Reload();
-
-      DebugCommand.CommandExecuted       += CommandExecuted;
+      
+      DebugCommand.CommandExecuted       -= CommandExecuted;
       Selection.selectionChanged         -= DeferredSyncWithSelection;
       Selection.selectionChanged         += DeferredSyncWithSelection;
       EditorApplication.hierarchyChanged -= DeferredSyncWithSelection;
@@ -159,6 +160,7 @@ namespace Quantum.Editor {
           _syncWithActiveGameObject = GUILayout.Toggle(_syncWithActiveGameObject, "Sync Selection", EditorStyles.toolbarButton);
           if (GUILayout.Button("Clear", EditorStyles.toolbarButton)) {
             _model.Runners.Clear();
+            _pendingDebugCommands.Clear();
             _needsReload = true;
           }
           DrawComponentDropdown(_requiredComponents, "Entities With");
@@ -282,7 +284,7 @@ namespace Quantum.Editor {
     private static long GenerateCommandId() => AssetGuid.NewGuid().Value;
 
     [MenuItem("Window/Quantum/State Inspector")]
-    [MenuItem("Tools/Quantum/Window/State Inspector", false, (int)QuantumEditorMenuPriority.Window + 4)]
+    [MenuItem("Tools/Quantum/Window/State Inspector", false, (int)QuantumEditorMenuPriority.Window + 14)]
     private static void ShowWindowMenuItem() => ShowWindow(false);
 
     private bool AppendSelectionBuffer(string runnerId, EntityRef entityRef, List<int> selectionBuffer) {
@@ -337,7 +339,11 @@ namespace Quantum.Editor {
         _pendingDebugCommands.Add(Tuple.Create(runner.Id, payload[i]));
       }
 
-      DebugCommand.Send(runner.Game, payload);
+      if (!DebugCommand.Send(runner.Game, payload)) {
+        for (int i = 0; i < payload.Length; ++i) {
+          _pendingDebugCommands.RemoveReturn(payload[i].Id);
+        }
+      }
     }
 
     private void CommandExecuted(DebugCommand.Payload payload, Exception error) {
@@ -395,28 +401,30 @@ namespace Quantum.Editor {
     }
 
     private void DrawAddComponentGUI(QuantumRunner runner, EntityRef entity) {
-      if (!_addingComponent) {
+      if (_componentsBeingAdded?.serializedObject.targetObject == null) {
+        _componentsBeingAdded = null;
+      }
+      if (_componentsBeingAdded == null) {
         using (new GUILayout.HorizontalScope()) {
           GUILayout.FlexibleSpace();
           if (EditorGUILayout.DropdownButton(skin.addComponentContent, FocusType.Passive, UnityInternal.Styles.AddComponentButton)) {
-            _addingComponent = true;
-            QuantumEditorUtility.GetPendingEntityPrototypeRoot(clear: true);
+            _componentsBeingAdded = QuantumEditorUtility.GetPendingEntityPrototypeRoot(clear: true);
           }
           GUILayout.FlexibleSpace();
         }
       } else {
         using (new QuantumEditorGUI.HierarchyModeScope(true))
         using (new QuantumEditorGUI.BoxScope(null)) {
-          QuantumEditorGUI.Inspector(QuantumEditorUtility.GetPendingEntityPrototypeRoot(), skipRoot: true);
+          EditorGUILayout.PropertyField(_componentsBeingAdded);
           using (new GUILayout.HorizontalScope()) {
             using (new EditorGUI.DisabledScope(runner == null)) {
               if (GUILayout.Button("OK")) {
                 CommandEnqueue(runner, DebugCommand.CreateMaterializePayload(entity, QuantumEditorUtility.FinishPendingEntityPrototype(), runner.Game.AssetSerializer));
-                _addingComponent = false;
+                _componentsBeingAdded = null;
               }
             }
             if (GUILayout.Button("Cancel")) {
-              _addingComponent = false;
+              _componentsBeingAdded = null;
             }
           }
         }
@@ -446,17 +454,16 @@ namespace Quantum.Editor {
         }
       }
     }
-
-#pragma warning disable CS0618
-    private void DrawComponentDropdown(ComponentTypeSetSelector selector, string prefix) {
+    
+    private void DrawComponentDropdown(List<ComponentTypeRef> selector, string prefix) {
       GUIContent guiContent;
       float additionalWidth = 0;
 
-      if (selector.ComponentTypeNames.Length == 0) {
+      if (selector.Count == 0) {
         guiContent = new GUIContent($"{prefix}: None");
       } else {
         guiContent = new GUIContent($"{prefix}: ");
-        additionalWidth = QuantumEditorGUI.CalcThumbnailsWidth(selector.ComponentTypeNames.Length);
+        additionalWidth = QuantumEditorGUI.CalcThumbnailsWidth(selector.Count);
       }
 
       var buttonSize = EditorStyles.toolbarDropDown.CalcSize(guiContent);
@@ -468,18 +475,27 @@ namespace Quantum.Editor {
       bool pressed = GUI.Button(buttonRect, guiContent, EditorStyles.toolbarDropDown);
 
       var thumbnailRect = buttonRect.AddX(originalButtonSize.x - skin.toolbarDropdownButtonWidth);
-      foreach (var name in selector.ComponentTypeNames) {
-        thumbnailRect = QuantumEditorGUI.ComponentThumbnailPrefix(thumbnailRect, name, addSpacing: true);
+      foreach (var typeRef in selector) {
+        if (!QuantumEditorUtility.TryGetComponentType(typeRef, out var type)) {
+          continue;
+        }
+        thumbnailRect = QuantumEditorGUI.ComponentThumbnailPrefix(thumbnailRect, type.Name, addSpacing: true);
       }
 
       if (pressed) {
-        QuantumEditorGUI.ShowComponentTypesPicker(buttonRect, selector, onChange: () => {
-          _needsReload = true;
-          Repaint();
-        });
+        QuantumEditorGUI.ShowComponentTypesPicker(buttonRect, 
+          t => selector.Any(x => x.Is(t)),
+          (t, selected) => {
+            if (selected) {
+              selector.Add(ComponentTypeRef.FromType(t));
+            } else {
+              selector.RemoveAll(x => x.Is(t));
+            }
+            _needsReload = true;
+            Repaint();
+          });
       }
     }
-#pragma warning restore CS0618
 
     private void DumpFrame(QuantumRunner runner, bool partial = false) {
       var frame = _useVerifiedFrame ? runner.Game.Frames.Verified : runner.Game.Frames.Predicted;
@@ -638,7 +654,7 @@ namespace Quantum.Editor {
           runnerState.DynamicDB.Add(assetState);
         }
       }
-
+      
       foreach (var pair in _pendingDebugCommands) {
         var runner = _model.FindRunner(pair.Item1);
         if (runner == null) {
@@ -665,36 +681,12 @@ namespace Quantum.Editor {
     }
 
     [Serializable]
-    private struct EntityState {
-      public long ComponentSet0;
-      public long ComponentSet1;
-      public long ComponentSet2;
-      public long ComponentSet3;
+    private unsafe struct EntityState {
+      public ComponentSet EntityComponents;
       public int EntityRefIndex;
       public int EntityRefVersion;
       public int InspectorId;
       public EntityRef Entity => new EntityRef() { Index = EntityRefIndex, Version = EntityRefVersion };
-
-      public ComponentSet EntityComponents {
-        get {
-          if (ComponentSet.SIZE == sizeof(long) * 4) {
-            ComponentSet result = default;
-            long* lp = (long*)&result;
-            lp[0] = ComponentSet0;
-            lp[1] = ComponentSet1;
-            lp[2] = ComponentSet2;
-            lp[3] = ComponentSet3;
-            return result;
-          }
-        }
-        set {
-          long* lp = (long*)&value;
-          ComponentSet0 = lp[0];
-          ComponentSet1 = lp[1];
-          ComponentSet2 = lp[2];
-          ComponentSet3 = lp[3];
-        }
-      }
 
       public bool IsPending => EntityRefIndex < 0;
 
@@ -708,6 +700,7 @@ namespace Quantum.Editor {
         };
       }
     }
+    
 
     [Serializable]
     private class Model {
@@ -960,11 +953,9 @@ namespace Quantum.Editor {
       }
 
       public event Action<RunnersTreeView, IList<int>> TreeSelectionChanged;
-
-#pragma warning disable CS0618 
-      public ComponentTypeSetSelector WithComponents { get; set; }
-      public ComponentTypeSetSelector WithoutComponents { get; set; }
-#pragma warning restore CS0618
+      
+      public List<ComponentTypeRef> WithComponents { get; set; }
+      public List<ComponentTypeRef> WithoutComponents { get; set; }
 
       public RunnersTreeViewItemBase FindById(int id) {
         return (RunnersTreeViewItemBase)this.FindItem(id, rootItem);
@@ -984,19 +975,16 @@ namespace Quantum.Editor {
 
       protected override IList<TreeViewItem> BuildRows(TreeViewItem root) {
         _rowsBuffer.Clear();
+        
 
         ComponentSet withComponents = new ComponentSet();
         ComponentSet withoutComponents = new ComponentSet();
 
-        foreach (var id in _model.GetComponentTypeIds()) {
-          if (QuantumEditorUtility.TryGetComponentType(_model.GetComponentName(id), out var type)) {
-            if (WithComponents?.ComponentTypeNames?.Contains(type.Name) == true) {
-              withComponents.Add(id);
-            }
-            if (WithoutComponents?.ComponentTypeNames?.Contains(type.Name) == true) {
-              withoutComponents.Add(id);
-            }
-          }
+        if (WithComponents != null) {
+          withComponents = ComponentSet.Create(WithComponents.ToArray());
+        }
+        if (WithoutComponents != null) {
+          withoutComponents = ComponentSet.Create(WithoutComponents.ToArray());
         }
 
         foreach (var runner in _model.Runners) {

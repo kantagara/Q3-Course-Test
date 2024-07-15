@@ -1,9 +1,17 @@
-﻿using System;
-using Photon.Client;
+﻿// -----------------------------------------------------------------------------
+// <copyright company="Exit Games GmbH">
+// Photon Realtime API - Copyright (C) 2022 Exit Games GmbH
+// </copyright>
+// <summary>Room creation options.</summary>
+// <author>developer@photonengine.com</author>
+// -----------------------------------------------------------------------------
 
 
 namespace Photon.Realtime
 {
+    using System;
+
+
     /// <summary>Parameters for creating rooms.</summary>
     public class EnterRoomArgs
     {
@@ -15,6 +23,9 @@ namespace Photon.Realtime
         public TypedLobby Lobby;
         /// <summary>A list of users who are expected to join the room along with this client. Reserves slots for rooms with MaxPlayers value.</summary>
         public string[] ExpectedUsers;
+
+        /// <summary>Ticket for matchmaking. Provided by a plugin / server and contains a list of party members who should join the same room (among other things).</summary>
+        public object Ticket;
 
         /// <summary>Internally used value to skip some values when the operation is sent to the Master Server.</summary>
         protected internal bool OnGameServer = true; // defaults to true! better send more parameter than too few (GS needs all)
@@ -49,6 +60,7 @@ namespace Photon.Realtime
                 result.RoomOptions = o.RoomOptions;
                 result.Lobby = o.Lobby;
                 result.ExpectedUsers = o.ExpectedUsers;
+                result.Ticket = o.Ticket;
                 result.JoinMode = o.JoinMode;
             }
 

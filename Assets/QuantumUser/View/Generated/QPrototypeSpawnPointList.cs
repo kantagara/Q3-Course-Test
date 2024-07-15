@@ -15,6 +15,7 @@ namespace Quantum {
   
   [UnityEngine.DisallowMultipleComponent()]
   public unsafe partial class QPrototypeSpawnPointList : QuantumUnityComponentPrototype<Quantum.Prototypes.SpawnPointListPrototype>, IQuantumUnityPrototypeWrapperForComponent<Quantum.SpawnPointList> {
+    partial void CreatePrototypeUser(Quantum.QuantumEntityPrototypeConverter converter, ref Quantum.Prototypes.SpawnPointListPrototype prototype);
     [DrawInline()]
     [ReadOnly(InEditMode = false)]
     public Quantum.Prototypes.Unity.SpawnPointListPrototype Prototype;
@@ -26,6 +27,7 @@ namespace Quantum {
     public override ComponentPrototype CreatePrototype(Quantum.QuantumEntityPrototypeConverter converter) {
       Quantum.Prototypes.SpawnPointListPrototype result;
       converter.Convert(Prototype, out result);
+      CreatePrototypeUser(converter, ref result);
       return result;
     }
   }

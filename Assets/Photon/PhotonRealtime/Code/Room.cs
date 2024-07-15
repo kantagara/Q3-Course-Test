@@ -408,8 +408,8 @@ namespace Photon.Realtime
         /// <param name="propertiesToSet">PhotonHashtable of Custom Properties that changes.</param>
         /// <param name="expectedValues">Provide some keys/values to use as condition for setting the new values. Client must be in room.</param>
         /// <returns>
-        /// False if propertiesToSet is null or empty or have zero string keys.
-        /// True in offline mode even if expectedProperties or webFlags are used.
+        /// False if propertiesToSet is null or empty or have no keys (of allowed types).
+        /// True in offline mode even if expectedProperties are used.
         /// Otherwise, returns if this operation could be sent to the server.
         /// </returns>
         public virtual bool SetCustomProperties(PhotonHashtable propertiesToSet, PhotonHashtable expectedValues = null)
@@ -614,7 +614,7 @@ namespace Photon.Realtime
             return this.SetExpectedUsers(newExpectedUsers, this.ExpectedUsers);
         }
 
-        private bool SetExpectedUsers(string[] newExpectedUsers, string[] oldExpectedUsers)
+        private bool SetExpectedUsers(string[] newExpectedUsers, string[] currentKnownExpectedUsers)
         {
             if (this.isOffline)
             {
@@ -622,12 +622,10 @@ namespace Photon.Realtime
             }
             PhotonHashtable gameProperties = new PhotonHashtable(1);
             gameProperties.Add(GamePropertyKey.ExpectedUsers, newExpectedUsers);
-            PhotonHashtable expectedProperties = null;
-            if (oldExpectedUsers != null)
-            {
-                expectedProperties = new PhotonHashtable(1);
-                expectedProperties.Add(GamePropertyKey.ExpectedUsers, oldExpectedUsers);
-            }
+
+            PhotonHashtable expectedProperties = new PhotonHashtable(1);
+            expectedProperties.Add(GamePropertyKey.ExpectedUsers, currentKnownExpectedUsers);
+
             return this.RealtimeClient.OpSetPropertiesOfRoom(gameProperties, expectedProperties);
         }
 

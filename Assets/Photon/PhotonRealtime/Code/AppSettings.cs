@@ -155,6 +155,8 @@ namespace Photon.Realtime
             get { return this.Port <= 0; }
         }
 
+
+        /// <summary>Creates an AppSettings instance with default values.</summary>
         public AppSettings()
         {
         }
@@ -193,6 +195,8 @@ namespace Photon.Realtime
         }
 
 
+        /// <summary>Tries to detect the ClientAppType, based on which AppId values are present. Can detect Realtime, Fusion or Quantum. Used when the RealtimeClient.ClientType is set to detect.</summary>
+        /// <returns>Most likely to be used ClientAppType or ClientAppType.Detect in conflicts.</returns>
         public ClientAppType ClientTypeDetect()
         {
             bool ra = !string.IsNullOrEmpty(this.AppIdRealtime);
@@ -225,18 +229,18 @@ namespace Photon.Realtime
                                  "use ns: {4}, reg: {5}, {9}, " +
                                  "{6}{7}{8}" +
                                  "auth: {10}",
-                                 String.IsNullOrEmpty(this.AppIdRealtime) ? string.Empty : "Realtime/PUN: " + this.HideAppId(this.AppIdRealtime) + ", ",
-                                 String.IsNullOrEmpty(this.AppIdFusion) ? string.Empty : "Fusion: " + this.HideAppId(this.AppIdFusion) + ", ",
-                                 String.IsNullOrEmpty(this.AppIdQuantum) ? string.Empty : "Quantum: " + this.HideAppId(this.AppIdQuantum) + ", ",
-                                 String.IsNullOrEmpty(this.AppIdChat) ? string.Empty : "Chat: " + this.HideAppId(this.AppIdChat) + ", ",
-                                 String.IsNullOrEmpty(this.AppIdVoice) ? string.Empty : "Voice: " + this.HideAppId(this.AppIdVoice) + ", ",
-                                 String.IsNullOrEmpty(this.AppVersion) ? string.Empty : "AppVersion: " + this.AppVersion + ", ",
+                                 string.IsNullOrEmpty(this.AppIdRealtime) ? string.Empty : "Realtime/PUN: " + this.HideAppId(this.AppIdRealtime) + ", ",
+                                 string.IsNullOrEmpty(this.AppIdFusion) ? string.Empty : "Fusion: " + this.HideAppId(this.AppIdFusion) + ", ",
+                                 string.IsNullOrEmpty(this.AppIdQuantum) ? string.Empty : "Quantum: " + this.HideAppId(this.AppIdQuantum) + ", ",
+                                 string.IsNullOrEmpty(this.AppIdChat) ? string.Empty : "Chat: " + this.HideAppId(this.AppIdChat) + ", ",
+                                 string.IsNullOrEmpty(this.AppIdVoice) ? string.Empty : "Voice: " + this.HideAppId(this.AppIdVoice) + ", ",
+                                 string.IsNullOrEmpty(this.AppVersion) ? string.Empty : "AppVersion: " + this.AppVersion + ", ",
                                  "UseNameServer: " + this.UseNameServer + ", ",
                                  "Fixed Region: " + this.FixedRegion + ", ",
                                  //this.BestRegionSummaryFromStorage,
-                                 String.IsNullOrEmpty(this.Server) ? string.Empty : "Server: " + this.Server + ", ",
+                                 string.IsNullOrEmpty(this.Server) ? string.Empty : "Server: " + this.Server + ", ",
                                  this.IsDefaultPort ? string.Empty : "Port: " + this.Port + ", ",
-                                 String.IsNullOrEmpty(ProxyServer) ? string.Empty : "Proxy: " + this.ProxyServer + ", ",
+                                 string.IsNullOrEmpty(this.ProxyServer) ? string.Empty : "Proxy: " + this.ProxyServer + ", ",
                                  this.Protocol,
                                  this.AuthMode
                                  //this.EnableLobbyStatistics,

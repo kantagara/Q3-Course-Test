@@ -1,8 +1,17 @@
-using Photon.Client;
+// -----------------------------------------------------------------------------
+// <copyright company="Exit Games GmbH">
+// Photon Realtime API - Copyright (C) 2022 Exit Games GmbH
+// </copyright>
+// <summary>Room creation options.</summary>
+// <author>developer@photonengine.com</author>
+// -----------------------------------------------------------------------------
 
 
 namespace Photon.Realtime
 {
+    using Photon.Client;
+
+
     /// <summary>Wraps up common room properties needed when you create rooms. Read the individual entries for more details.</summary>
     /// <remarks>This directly maps to the fields in the Room class.</remarks>
     public class RoomOptions
@@ -13,7 +22,7 @@ namespace Photon.Realtime
         /// An invisible room can be joined by name but is excluded from random matchmaking.
         ///
         /// Use this to "hide" a room and simulate "private rooms". Players can exchange a roomname and create it
-        /// invisble to avoid anyone else joining it.
+        /// invisible to avoid anyone else joining it.
         /// </remarks>
         public bool IsVisible { get { return this.isVisible; } set { this.isVisible = value; } }
         private bool isVisible = true;

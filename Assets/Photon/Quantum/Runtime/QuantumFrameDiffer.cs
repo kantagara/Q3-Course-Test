@@ -1,10 +1,21 @@
 namespace Quantum {
   using Photon.Realtime;
+  using System.IO;
+  using System;
   using UnityEngine;
   using static QuantumUnityExtensions;
 
+  /// <summary>
+  /// The frame differ shows the frame dumps of all clients in a game and allows to compare them after a checksum error.
+  /// This class renders the GUI on the screen and is usable in builds.
+  /// </summary>
   public class QuantumFrameDiffer : QuantumMonoBehaviour {
+    /// <summary>
+    /// The state saves the frame dumps to be displayed.
+    /// </summary>
     public QuantumFrameDifferGUI.FrameDifferState State = new QuantumFrameDifferGUI.FrameDifferState();
+
+    QuantumFrameDifferGUI _gui;
 
     class QuantumFrameDifferGUIRuntime : QuantumFrameDifferGUI {
       public QuantumFrameDifferGUIRuntime(FrameDifferState state) : base(state) {
@@ -29,14 +40,21 @@ namespace Quantum {
           if (GUILayout.Button("Hide", MiniButton, GUILayout.Height(16))) {
             _hidden = true;
           }
+          if (GUILayout.Button("Save", MiniButton, GUILayout.Height(16))) {
+            var dateString = DateTime.Now.ToString("yyyy-MM-dd-hh-mm-ss");
+
+#if UNITY_EDITOR
+            dateString += "-Editor";
+#endif
+
+            var savePath = Path.Combine(Application.persistentDataPath, $"Diff_{dateString}.json");
+
+            File.WriteAllText(savePath, JsonUtility.ToJson(State));
+          }
         }
       }
     }
 
-    // gui instance
-    QuantumFrameDifferGUI _gui;
-
-    // draw stuff... lol
     void OnGUI() {
       if (_gui == null) {
         _gui = new QuantumFrameDifferGUIRuntime(State);
@@ -49,6 +67,10 @@ namespace Quantum {
       GUILayout.EndArea();
     }
 
+    /// <summary>
+    /// Find and or create a new <see cref="QuantumFrameDiffer"/> component and show the GUI.
+    /// </summary>
+    /// <returns>The frame differ component.</returns>
     public static QuantumFrameDiffer Show() {
       var instance = FindFirstObjectByType<QuantumFrameDiffer>();
       if (instance) {
@@ -69,6 +91,12 @@ namespace Quantum {
       return differ;
     }
 
+    /// <summary>
+    /// A helper method to try to get the Photon nickname of a player using its Photon actor id.
+    /// </summary>
+    /// <param name="client">Client connection object</param>
+    /// <param name="actorId">Photon actor id</param>
+    /// <returns>A nickname or null</returns>
     public static string TryGetPhotonNickname(RealtimeClient client, int actorId) {
       // Try to get Photon nickname
       if (client != null && client.CurrentRoom != null) {

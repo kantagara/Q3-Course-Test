@@ -49,10 +49,16 @@ namespace Quantum {
     GameObject _input;
     QuantumEntityViewUpdater _evu;
 
+    /// <summary>
+    /// Constructor.
+    /// </summary>
     public QuantumMultiClientPlayer() {
       LocalPlayers = new List<QuantumMultiClientPlayer>();
     }
 
+    /// <summary>
+    /// Tries to allocate a free player slot for this player. Returns a valid player slot or -1 if no slot is available.
+    /// </summary>
     public int CreateFreeClientPlayerSlot(int maxLocalPlayers) {
       for (int i = 1; i < maxLocalPlayers; i++) {
         if (LocalPlayers.Any(p => p.PlayerSlot == i) == false) {
@@ -62,6 +68,10 @@ namespace Quantum {
       return -1;
     }
 
+    /// <summary>
+    /// Gets the highest sibling index of this player and all local players used to correctly name GameObjects.
+    /// </summary>
+    /// <returns></returns>
     public int GetHighestSiblingIndex() {
       var siblingIndex = View.transform.GetSiblingIndex();
       foreach (var p in LocalPlayers) {
@@ -71,6 +81,9 @@ namespace Quantum {
       return siblingIndex;
     }
 
+    /// <summary>
+    /// Instantiates an input script from a template.
+    /// </summary>
     public void CreateInput(GameObject playerInputTemplate) {
       if (playerInputTemplate != null) {
         _input = Instantiate(playerInputTemplate);
@@ -79,6 +92,9 @@ namespace Quantum {
       }
     }
 
+    /// <summary>
+    /// Instantiates an entity view updater script from a template.
+    /// </summary>
     public void CreateEntityViewUpdater(QuantumEntityViewUpdater entityViewUpdaterTemplate, QuantumGame game) {
       if (entityViewUpdaterTemplate != null) {
         // Use EVU template from parent
@@ -96,6 +112,9 @@ namespace Quantum {
       _evu.transform.SetParent(gameObject.transform);
     }
 
+    /// <summary>
+    /// Binds a player view to this player.
+    /// </summary>
     public void BindView(QuantumMultiClientPlayerView view, bool isFirstPlayer, bool isAddPlayerEnabled) {
       _ui = view;
       _ui.SetRunning(isAddPlayerEnabled);
@@ -110,6 +129,9 @@ namespace Quantum {
       _ui.Gizmos.isOn = false;
     }
 
+    /// <summary>
+    /// Unity destroy callback shuts down the player (ui, input and evu).
+    /// </summary>
     public void Destroy() {
       ShutdownHandler?.Dispose();
       ShutdownHandler = null;

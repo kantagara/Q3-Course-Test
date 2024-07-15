@@ -7,12 +7,23 @@ namespace Quantum {
   ///   <see cref="QuantumRunnerLocalDebug" />  to start game scenes directly).
   /// </summary>
   public class QuantumAddRuntimePlayers : QuantumMonoBehaviour {
+    /// <summary>
+    /// These RuntimePlayer represent the players that will be added on game start.
+    /// </summary>
     public RuntimePlayer[] Players;
 
+    /// <summary>
+    /// Unity Awake event, used to subscribe to the game start event of <see cref="QuantumRunner.Default"/>.
+    /// </summary>
     public void Awake() {
       QuantumCallback.Subscribe(this, (CallbackGameStarted c) => OnGameStarted(c.Game, c.IsResync), game => game == QuantumRunner.Default.Game);
     }
 
+    /// <summary>
+    /// Add all players to the game.
+    /// </summary>
+    /// <param name="game">Quantum game</param>
+    /// <param name="isResync">IsResync indicates the client is late-joining or reconnecting to a Quantum game</param>
     public void OnGameStarted(QuantumGame game, bool isResync) {
       for (int i = 0; i < Players.Length; i++) {
         game.AddPlayer(i, Players[i]);

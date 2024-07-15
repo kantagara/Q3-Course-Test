@@ -3,7 +3,6 @@ namespace Quantum {
   using System.Collections.Concurrent;
   using System.Collections.Generic;
   using System.Threading;
-  using JetBrains.Annotations;
   using Photon.Deterministic;
   using Profiling;
   using Task;
@@ -13,12 +12,20 @@ namespace Quantum {
   using Sirenix.OdinInspector;
 #endif
 
+  /// <summary>
+  /// At runtime, servers as the default implementation of <see cref="IResourceManager"/> for Unity. During edit time,
+  /// it collects and keeps track of all the <see cref="AssetObject"/> assets in the project. Collected assets are stored as
+  /// <see cref="IQuantumAssetObjectSource"/> references, avoiding forming hard-references to the actual assets (if possible).
+  /// </summary>
   [QuantumGlobalScriptableObject(DefaultPath)]
   public partial class QuantumUnityDB : QuantumGlobalScriptableObject<QuantumUnityDB>, IResourceManager {
     /// <summary>
     /// The default location of the DB asset.
     /// </summary>
     public const string DefaultPath = "Assets/QuantumUser/Resources/QuantumUnityDB.qunitydb";
+    /// <summary>
+    /// Character used to separate nested assets names from their parents path.
+    /// </summary>
     public const char NestedPathSeparator = '|';
 
     /// <summary>
@@ -60,6 +67,11 @@ namespace Quantum {
     /// Actual loading is done on the main thread, but the loading is scheduled from the worker threads.
     /// </summary>
     private int _mainThreadId;
+
+    /// <summary>
+    /// Increased every time the DB is updated.
+    /// </summary>
+    private uint _version;
     
     /// <summary>
     /// Exposes the list of entries in the DB. Can be used to iterate asset sources at both runtime and edit time.
@@ -73,7 +85,10 @@ namespace Quantum {
 
     #region Unity Messages
     
-    private void OnEnable() {
+    /// <summary>
+    /// Initializes the DB with asset sources collected from the project.
+    /// </summary>
+    protected void OnEnable() {
       FPMathUtils.LoadLookupTables();
       Native.Utils ??= new QuantumUnityNativeUtility();
 
@@ -87,10 +102,16 @@ namespace Quantum {
         } 
         AddSourceMapping(i, _entries[i].Guid, _entries[i].Path);
       }
+
+      ++_version;
     }
 
-    private void OnDisable() {
+    /// <summary>
+    /// Disposes all the assets that have been loaded by the DB.
+    /// </summary>
+    protected override void OnDisable() {
       ((IDisposable)this).Dispose();
+      base.OnDisable();
     }
     
     #endregion
@@ -127,6 +148,11 @@ namespace Quantum {
         DisposeAllAssetsImmediate();
       }
     }
+
+    /// <summary>
+    /// A version number that is increased every time an asset is added or removed.
+    /// </summary>
+    public uint Version => _version;
     
     /// <summary>
     /// Registers a source for the asset with the given <paramref name="guid"/> and an optional <paramref name="path"/>.
@@ -152,6 +178,17 @@ namespace Quantum {
         AddSourceMapping(index, guid, path);
         _entries[index] = entry;
       }
+
+      ++_version;
+    }
+    
+    /// <summary>
+    /// Registers a static asset. This is equivalent to calling <see cref="AddSource"/> with a <see cref="QuantumAssetObjectSourceStatic"/>.
+    /// </summary>
+    /// <param name="asset"></param>
+    public void AddAsset(AssetObject asset) {
+      Assert.Check(asset);
+      AddSource(new QuantumAssetObjectSourceStatic(asset), asset.Guid, asset.Path);
     }
 
     /// <summary>
@@ -159,7 +196,7 @@ namespace Quantum {
     /// </summary>
     /// <param name="guid"></param>
     /// <param name="result"></param>
-    /// <returns></returns>
+    /// <returns><c>true</c> if there was a matching source to remove</returns>
     public bool RemoveSource(AssetGuid guid, out (IQuantumAssetObjectSource source, bool isAcquired) result) {
       if (!_guidToIndex.TryGetValue(guid, out var index)) {
         result = default;
@@ -177,9 +214,15 @@ namespace Quantum {
         _pathToIndex.Remove(entry.Path);
       }
 
+      _version++;
       return true;
     }
 
+    /// <summary>
+    /// Removes the source for the asset with the given <paramref name="guid"/>.
+    /// </summary>
+    /// <param name="guid"></param>
+    /// <returns><c>true</c> if there was a matching source to remove</returns>
     public bool RemoveSource(AssetGuid guid) {
       return RemoveSource(guid, out _);
     }
@@ -213,6 +256,7 @@ namespace Quantum {
     }
 
 
+    /// <inheritdoc cref="DisposeAsset"/>
     public static bool DisposeGlobalAsset(AssetGuid assetGuid, bool immediate = false) {
       if (!IsGlobalLoadedInternal) {
         return false;
@@ -221,78 +265,86 @@ namespace Quantum {
       return Global.DisposeAsset(assetGuid, immediate);
     }
     
+    /// <inheritdoc cref="IResourceManagerExtensions.FindAssetGuid"/>
     public static AssetGuid FindGlobalAssetGuid(AssetObjectQuery query) {
       return Global.FindAssetGuid(query);
     }
     
+    /// <inheritdoc cref="IResourceManagerExtensions.FindAssetGuids(Quantum.IResourceManager,Quantum.AssetObjectQuery,System.Collections.Generic.List{Quantum.AssetGuid})"/>
     public static void FindGlobalAssetGuids(AssetObjectQuery query, List<AssetGuid> result) {
       Global.FindAssetGuids(query, result);
     }
     
-
+    /// <inheritdoc cref="IResourceManagerExtensions.FindAssetGuids(Quantum.IResourceManager,Quantum.AssetObjectQuery)"/>
     public static List<AssetGuid> FindGlobalAssetGuids(AssetObjectQuery query) {
       return Global.FindAssetGuids(query);
     }
     
-
+    /// <inheritdoc cref="GetAssetSource(Quantum.AssetGuid)"/>
     public static IQuantumAssetObjectSource GetGlobalAssetSource(AssetGuid assetGuid) {
       return Global.GetAssetSource(assetGuid);
     }
     
-  
+    /// <inheritdoc cref="GetAssetSource(string)"/>
     public static IQuantumAssetObjectSource GetGlobalAssetSource(string assetPath) {
       return Global.GetAssetSource(assetPath);
     }
     
-
+    /// <inheritdoc cref="GetAssetPath(AssetGuid)"/>
     public static string GetGlobalAssetPath(AssetGuid assetGuid) {
       return Global.GetAssetPath(assetGuid);
     }
     
-
+    /// <inheritdoc cref="GetAssetGuid(string)"/>
     public static AssetGuid GetGlobalAssetGuid(string path) {
       return Global.GetAssetGuid(path);
     }
     
-
+    /// <inheritdoc cref="GetAssetState(AssetGuid)"/>
     public static AssetObjectState GetGlobalAssetState(AssetGuid guid) {
       return Global.GetAssetState(guid);
     }
     
-
+    /// <inheritdoc cref="GetAssetType(AssetGuid)"/>
     public static Type GetGlobalAssetType(AssetGuid guid) {
       return Global.GetAssetType(guid);
     }
-
-
+    
+    /// <inheritdoc cref="IResourceManagerExtensions.GetAsset(Quantum.IResourceManager,Quantum.AssetRef)"/>
     public static AssetObject GetGlobalAsset(AssetRef assetRef) {
       return Global.GetAsset(assetRef.Id);
     }
-
     
+    /// <inheritdoc cref="IResourceManagerExtensions.GetAsset(Quantum.IResourceManager,Quantum.AssetRef)"/>
+    /// <returns>The loaded asset object or <c>null</c>, if not found or its type does not match <typeparamref name="T"/>.</returns>
     public static T GetGlobalAsset<T>(AssetRef<T> assetRef) where T : AssetObject {
       return Global.GetAsset(assetRef.Id) as T;
     }
 
+    /// <inheritdoc cref="IResourceManagerExtensions.GetAsset(Quantum.IResourceManager,string)"/>
     public static AssetObject GetGlobalAsset(string assetPath) {
       return Global.GetAsset(assetPath);
     }
-
+    
+    /// <inheritdoc cref="IResourceManagerExtensions.TryGetAsset{T}(Quantum.IResourceManager,Quantum.AssetGuid,out T)"/>
     public static bool TryGetGlobalAsset<T>(AssetGuid assetGuid, out T result)
       where T : AssetObject {
-      return Global.TryGetAsset(new AssetRef(assetGuid), out result);
+      return Global.TryGetAsset(assetGuid, out result);
     }
 
+    /// <inheritdoc cref="IResourceManagerExtensions.TryGetAsset{T}(Quantum.IResourceManager,Quantum.AssetRef,out T)"/>
     public static bool TryGetGlobalAsset<T>(AssetRef assetRef, out T result)
       where T : AssetObject {
       return Global.TryGetAsset(assetRef, out result);
     }
 
+    /// <inheritdoc cref="IResourceManagerExtensions.TryGetAsset{T}(Quantum.IResourceManager,Quantum.AssetRef,out T)"/>
     public static bool TryGetGlobalAsset<T>(AssetRef<T> assetRef, out T result)
       where T : AssetObject {
       return Global.TryGetAsset(assetRef, out result);
     }
 
+    /// <inheritdoc cref="IResourceManagerExtensions.TryGetAsset{T}(Quantum.IResourceManager,string,out T)"/>
     public static bool TryGetGlobalAsset<T>(string assetPath, out T result)
       where T : AssetObject {
       return Global.TryGetAsset(assetPath, out result);
@@ -318,6 +370,11 @@ namespace Quantum {
       };
     }
     
+    /// <summary>
+    /// Returns the asset source with the given <paramref name="assetGuid"/>. Asset does not get loaded in the process.
+    /// </summary>
+    /// <param name="assetGuid"></param>
+    /// <returns>Asset source or <c>null</c> if the asset is not found</returns>
     public IQuantumAssetObjectSource GetAssetSource(AssetGuid assetGuid) {
       if (_guidToIndex.TryGetValue(assetGuid, out var index)) {
         return _entries[index].Source;
@@ -326,6 +383,11 @@ namespace Quantum {
       return default;
     }
     
+    /// <summary>
+    /// Returns the asset source with the given <paramref name="assetPath"/>. Asset does not get loaded in the process.
+    /// </summary>
+    /// <param name="assetPath"></param>
+    /// <returns>Asset source or <c>null</c> if the asset is not found</returns>
     public IQuantumAssetObjectSource GetAssetSource(string assetPath) {
       if (_pathToIndex.TryGetValue(assetPath, out var index)) {
         return _entries[index].Source;
@@ -347,6 +409,11 @@ namespace Quantum {
       return default;
     }
     
+    /// <summary>
+    /// Returns path for the asset with the given <paramref name="assetGuid"/>. Asset does not get loaded in the process.
+    /// </summary>
+    /// <param name="assetGuid"></param>
+    /// <returns>Asset path or an empty string, if not found</returns>
     public string GetAssetPath(AssetGuid assetGuid) {
       if (_guidToIndex.TryGetValue(assetGuid, out var index)) {
         return _entries[index].Path;
@@ -355,6 +422,14 @@ namespace Quantum {
       return string.Empty;
     }
     
+    /// <summary>
+    /// Disposes the asset with the given <paramref name="guid"/>. If <paramref name="immediate"/> is <c>true</c>, the asset
+    /// is disposed immediately, otherwise it's scheduled for disposal during the next update.
+    /// </summary>
+    /// <param name="guid"></param>
+    /// <param name="immediate"></param>
+    /// <returns><c>false</c> if the asset is not found</returns> 
+    /// <exception cref="InvalidOperationException">If called from non-main thread</exception>
     public bool DisposeAsset(AssetGuid guid, bool immediate = false) {
       if (!_guidToIndex.TryGetValue(guid, out var index)) {
         return false;
@@ -384,6 +459,10 @@ namespace Quantum {
       return true;
     }
 
+    /// <summary>
+    /// Disposes all the assets that have been loaded by the DB.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">If called from non-main thread</exception>
     public void DisposeAllAssetsImmediate() {
       if (_mainThreadId != Thread.CurrentThread.ManagedThreadId) {
         throw new InvalidOperationException($"Immediate disposal can only be requested from the main thread.");
@@ -414,6 +493,13 @@ namespace Quantum {
       _workedThreadLoadQueue.Clear();
     }
     
+
+    
+    /// <summary>
+    /// Loads the asset with the given <paramref name="guid"/> synchronously.
+    /// </summary>
+    /// <param name="guid">Guid of the asset to load</param>
+    /// <returns>Asset reference or <c>null</c> if the asset is not found</returns>
     public AssetObject GetAsset(AssetGuid guid) {
       if (!_guidToIndex.TryGetValue(guid, out var index)) {
         return null;
@@ -421,6 +507,11 @@ namespace Quantum {
       return GetAssetInternal(_entries[index], synchronous: true);
     }
 
+    /// <summary>
+    /// Loads the asset with the given <paramref name="guid"/> asynchronously.
+    /// </summary>
+    /// <param name="guid">Guid of the asset to load</param>
+    /// <returns><c>false</c> if the asset is not found, <c>true</c> otherwise</returns>
     public bool LoadAssetAsync(AssetGuid guid) {
       if (!_guidToIndex.TryGetValue(guid, out var index)) {
         return false;
@@ -430,6 +521,7 @@ namespace Quantum {
       return true;
     }
     
+    /// <inheritdoc cref="IResourceManager.FindNextAssetGuid"/>
     public bool FindNextAssetGuid(ref AssetObjectQuery query, out AssetGuid guid) {
       ref int i = ref query.ResourceManagerStateValue;
       for ( ; i < _entries.Count; ++i) {
@@ -455,6 +547,7 @@ namespace Quantum {
       return false;
     }
 
+    /// <inheritdoc cref="IResourceManager.GetAssetState"/>
     public AssetObjectState GetAssetState(AssetGuid guid) {
       if (!_guidToIndex.TryGetValue(guid, out var index)) {
         return AssetObjectState.NotFound;
@@ -463,6 +556,11 @@ namespace Quantum {
       return ToAssetObjectState(_entries[index].State.Value);
     }
     
+    /// <summary>
+    /// Returns the type of the asset with the given <paramref name="guid"/>. 
+    /// </summary>
+    /// <param name="guid">Guid of the asset to find</param>
+    /// <returns><c>null</c> if the asset is not found or its source does not have type info, type instance otherwise.</returns>
     public Type GetAssetType(AssetGuid guid) {
       if (!_guidToIndex.TryGetValue(guid, out var index)) {
         return default;
@@ -584,15 +682,15 @@ namespace Quantum {
       }
 
 
-      AssetObject ExpectValidAsset(Entry entry) {
-        var asset = entry.LoadedAsset;
-        if (asset == null) {
-          throw new InvalidOperationException($"Expected asset to be loaded: {entry.Guid}");
+      AssetObject ExpectValidAsset(Entry assetEntry) {
+        var asset = assetEntry.LoadedAsset;
+        if (!asset) {
+          throw new InvalidOperationException($"Expected asset to be loaded: {assetEntry.Guid}");
         }
 
-        var state = entry.State.Value;
+        var state = assetEntry.State.Value;
         if (state < EntryState.LoadedInvokingCallbacks) {
-          throw new InvalidOperationException($"Expected asset to be loaded: {entry.Guid}, but it's in state {state}");
+          throw new InvalidOperationException($"Expected asset to be loaded: {assetEntry.Guid}, but it's in state {state}");
         }
 
         return asset;
@@ -613,7 +711,7 @@ namespace Quantum {
       Assert.Check(entry.State.Value == EntryState.UnloadingInvokingCallbacks, "Expected asset {0} ({1}) to be in UnloadingInvokingCallbacks state: {2}", entry.Guid, entry.Path, entry.State.Value);
       try {
         var loadedAsset = entry.LoadedAsset;
-        if (loadedAsset != null) {
+        if (loadedAsset) {
           loadedAsset.Disposed(this, _allocator);
         }
       } catch (Exception ex) {
@@ -709,17 +807,35 @@ namespace Quantum {
       UnloadingInvokingCallbacks,
     }
   
+    /// <summary>
+    /// Internal representation of an asset in the DB. Serialized data remains immutable, while the runtime data is mutable.
+    /// </summary>
     [Serializable]
     public sealed class Entry {
+      /// <summary>
+      /// Path of the asset. Optional or unique among all the assets.
+      /// </summary>
       public string    Path;
+      /// <summary>
+      /// Guid of the asset. Unique among all the assets.
+      /// </summary>
       public AssetGuid Guid;
 
+      /// <summary>
+      /// Loaded asset instance.
+      /// </summary>
       [NonSerialized]
       public volatile AssetObject LoadedAsset;
 
+      /// <summary>
+      /// Asset source.
+      /// </summary>
       [SerializeReference]
       public IQuantumAssetObjectSource Source;
 
+      /// <summary>
+      /// State of the asset.
+      /// </summary>
       [NonSerialized]
       internal AtomicEnum<EntryState> State;
     }

@@ -15,6 +15,7 @@ namespace Quantum {
   
   [UnityEngine.DisallowMultipleComponent()]
   public unsafe partial class QPrototypeShrinkingCircle : QuantumUnityComponentPrototype<Quantum.Prototypes.ShrinkingCirclePrototype>, IQuantumUnityPrototypeWrapperForComponent<Quantum.ShrinkingCircle> {
+    partial void CreatePrototypeUser(Quantum.QuantumEntityPrototypeConverter converter, ref Quantum.Prototypes.ShrinkingCirclePrototype prototype);
     [DrawInline()]
     [ReadOnly(InEditMode = false)]
     public Quantum.Prototypes.ShrinkingCirclePrototype Prototype;
@@ -24,6 +25,7 @@ namespace Quantum {
       }
     }
     public override ComponentPrototype CreatePrototype(Quantum.QuantumEntityPrototypeConverter converter) {
+      CreatePrototypeUser(converter, ref Prototype);
       return Prototype;
     }
   }

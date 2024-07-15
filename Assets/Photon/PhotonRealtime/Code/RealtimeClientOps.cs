@@ -417,14 +417,14 @@ namespace Photon.Realtime
                 opParameters[ParameterCode.Data] = joinRandomRoomArgs.SqlLobbyFilter;
             }
 
-            if (joinRandomRoomArgs.Ticket != null)
-            {
-                opParameters[ParameterCode.Ticket] = joinRandomRoomArgs.Ticket;
-            }
-
             if (joinRandomRoomArgs.ExpectedUsers != null && joinRandomRoomArgs.ExpectedUsers.Length > 0)
             {
                 opParameters[ParameterCode.Add] = joinRandomRoomArgs.ExpectedUsers;
+            }
+
+            if (joinRandomRoomArgs.Ticket != null)
+            {
+                opParameters[ParameterCode.Ticket] = joinRandomRoomArgs.Ticket;
             }
 
             opParameters[ParameterCode.AllowRepeats] = true; // enables temporary queueing for low ccu matchmaking situations
@@ -442,6 +442,10 @@ namespace Photon.Realtime
                 this.enterRoomArgumentsCache = new EnterRoomArgs();
                 this.enterRoomArgumentsCache.Lobby = this.CurrentLobby != null && !this.CurrentLobby.IsDefault && joinRandomRoomArgs.Lobby == null ? this.CurrentLobby : joinRandomRoomArgs.Lobby;
                 this.enterRoomArgumentsCache.ExpectedUsers = joinRandomRoomArgs.ExpectedUsers;
+                if (joinRandomRoomArgs.Ticket != null)
+                {
+                    this.enterRoomArgumentsCache.Ticket = joinRandomRoomArgs.Ticket;
+                }
             }
 
             return sending;
@@ -458,6 +462,9 @@ namespace Photon.Realtime
         /// by the very next client, looking for similar rooms.
         ///
         /// There are separate parameters for joining and creating a room.
+        ///
+        /// Tickets: Both parameter types have a Ticket value. It is enough to set the joinRandomRoomArgs.Ticket.
+        /// The createRoomArgs.Ticket will not be used.
         ///
         /// This method can only be called while connected to a Master Server.
         /// This client's State is set to ClientState.Joining immediately.
@@ -539,14 +546,14 @@ namespace Photon.Realtime
                 opParameters[ParameterCode.Data] = joinRandomRoomArgs.SqlLobbyFilter;
             }
 
-            if (joinRandomRoomArgs.Ticket != null)
-            {
-                opParameters[ParameterCode.Ticket] = joinRandomRoomArgs.Ticket;
-            }
-
             if (joinRandomRoomArgs.ExpectedUsers != null && joinRandomRoomArgs.ExpectedUsers.Length > 0)
             {
                 opParameters[ParameterCode.Add] = joinRandomRoomArgs.ExpectedUsers;
+            }
+
+            if (joinRandomRoomArgs.Ticket != null)
+            {
+                opParameters[ParameterCode.Ticket] = joinRandomRoomArgs.Ticket;
             }
 
 
@@ -575,6 +582,10 @@ namespace Photon.Realtime
                 this.enterRoomArgumentsCache = EnterRoomArgs.ShallowCopyToNewArgs(createRoomArgs);
                 this.enterRoomArgumentsCache.Lobby = this.CurrentLobby != null && !this.CurrentLobby.IsDefault && joinRandomRoomArgs.Lobby == null ? this.CurrentLobby : joinRandomRoomArgs.Lobby;
                 this.enterRoomArgumentsCache.ExpectedUsers = joinRandomRoomArgs.ExpectedUsers;
+                if (joinRandomRoomArgs.Ticket != null)
+                {
+                    this.enterRoomArgumentsCache.Ticket = joinRandomRoomArgs.Ticket;
+                }
             }
             return sending;
         }
@@ -700,6 +711,10 @@ namespace Photon.Realtime
                 Log.Info($"OpJoinOrCreateRoom({enterRoomArgs.RoomName}) {this.GetMatchmakingHash(enterRoomArgs.Lobby)}", this.LogLevel, this.LogPrefix);
                 this.enterRoomArgumentsCache = enterRoomArgs;
                 this.enterRoomArgumentsCache.Lobby = this.CurrentLobby != null && !this.CurrentLobby.IsDefault && enterRoomArgs.Lobby == null ? this.CurrentLobby : enterRoomArgs.Lobby;
+                if (enterRoomArgs.Ticket != null)
+                {
+                    this.enterRoomArgumentsCache.Ticket = enterRoomArgs.Ticket;
+                }
             }
 
             bool sending = this.OpJoinRoomIntern(enterRoomArgs);
@@ -838,6 +853,10 @@ namespace Photon.Realtime
             {
                 opParameters[ParameterCode.Add] = opArgs.ExpectedUsers;
             }
+            if (opArgs.Ticket != null)
+            {
+                opParameters[ParameterCode.Ticket] = opArgs.Ticket;
+            }
 
 
             if (opArgs.OnGameServer)
@@ -851,7 +870,7 @@ namespace Photon.Realtime
                         {
                             this.LocalPlayer.CustomProperties = new PhotonHashtable();
                         }
-                        this.LocalPlayer.CustomProperties[ActorProperties.PlayerName] = this.LocalPlayer.NickName;
+                        this.LocalPlayer.CustomProperties[ActorProperties.NickName] = this.LocalPlayer.NickName;
                     }
 
                     if (this.LocalPlayer.CustomProperties != null && this.LocalPlayer.CustomProperties.Count > 0)
@@ -922,6 +941,10 @@ namespace Photon.Realtime
             {
                 opParameters[ParameterCode.Add] = opArgs.ExpectedUsers;
             }
+            if (opArgs.Ticket != null)
+            {
+                opParameters[ParameterCode.Ticket] = opArgs.Ticket;
+            }
 
             if (opArgs.OnGameServer)
             {
@@ -934,7 +957,7 @@ namespace Photon.Realtime
                         {
                             this.LocalPlayer.CustomProperties = new PhotonHashtable();
                         }
-                        this.LocalPlayer.CustomProperties[ActorProperties.PlayerName] = this.LocalPlayer.NickName;
+                        this.LocalPlayer.CustomProperties[ActorProperties.NickName] = this.LocalPlayer.NickName;
                     }
 
                     if (this.LocalPlayer.CustomProperties != null && this.LocalPlayer.CustomProperties.Count > 0)
@@ -1014,8 +1037,12 @@ namespace Photon.Realtime
         ///
         /// Rejoining room will not send any player properties. Instead client will receive up-to-date ones from server.
         /// If you want to set new player properties, do it once rejoined.
+        ///
+        /// Tickets: If the server requires use of Tickets or if the room was entered with a Ticket initially,
+        /// you will have to provide a fitting ticket. Ticket have an internal expiry date time, so they
+        /// may become unusable for a rejoin.
         /// </remarks>
-        public bool OpRejoinRoom(string roomName)
+        public bool OpRejoinRoom(string roomName, object ticket = null)
         {
             if (!this.CheckIfOpCanBeSent(OperationCode.JoinGame, this.Server, "RejoinRoom"))
             {
@@ -1028,10 +1055,11 @@ namespace Photon.Realtime
             bool onGameServer = this.Server == ServerConnection.GameServer;
 
             EnterRoomArgs opArgs = new EnterRoomArgs();
-            this.enterRoomArgumentsCache = opArgs;
             opArgs.RoomName = roomName;
             opArgs.OnGameServer = onGameServer;
             opArgs.JoinMode = JoinMode.RejoinOnly;
+            opArgs.Ticket = ticket;
+            this.enterRoomArgumentsCache = opArgs;
 
             bool sending = this.OpJoinRoomIntern(opArgs);
             if (sending)
@@ -1085,8 +1113,8 @@ namespace Photon.Realtime
         /// <param name="propertiesToSet">PhotonHashtable of Custom Properties that changes.</param>
         /// <param name="expectedProperties">Provide some keys/values to use as condition for setting the new values. Client must be in room.</param>
         /// <returns>
-        /// False if propertiesToSet is null or empty or have zero string keys.
-        /// If not in a room, returns true if local player and expectedProperties and webFlags are null.
+        /// False if propertiesToSet is null or empty or have no keys (of allowed types).
+        /// If not in a room, returns true if local player and expectedProperties are null.
         /// False if actorNr is lower than or equal to zero.
         /// Otherwise, returns if the operation could be sent to the server.
         /// </returns>

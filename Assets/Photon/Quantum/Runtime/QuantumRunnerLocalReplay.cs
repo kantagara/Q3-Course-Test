@@ -1,6 +1,5 @@
 namespace Quantum {
   using Photon.Deterministic;
-  using System.IO;
   using UnityEditor;
   using UnityEngine;
 #if QUANTUM_ENABLE_NEWTONSOFT
@@ -27,15 +26,11 @@ namespace Quantum {
     /// </summary>
     public TextAsset DatabaseFile;
     /// <summary>
-    /// List of checksums to verify against (optional).
-    /// </summary>
-    public TextAsset ChecksumFile;
-    /// <summary>
     /// Simulation speed multiplier to playback the replay in a different speed.
     /// </summary>
     public float SimulationSpeedMultiplier = 1.0f;
     /// <summary>
-    /// Toggle the replay gui lable on/off.
+    /// Toggle the replay gui label on/off.
     /// </summary>
     public bool ShowReplayLabel;
     /// <summary>
@@ -43,8 +38,8 @@ namespace Quantum {
     /// </summary>
     public InstantReplaySettings InstantReplayConfig = InstantReplaySettings.Default;
     /// <summary>
-    /// Force Unity json deserialization of the deplay file even when Newtonsoft is available.
-    /// Newtonsoft is very low when compiled with IL2CPP. But Unity Json deserialization expects the byte arrays to be int array instead on base64 strings.
+    /// Force Unity json deserialization of the replay file even when Newtonsoft is available.
+    /// Newtonsoft is very slow when compiled with IL2CPP. But Unity Json deserialization expects the byte arrays to be int array instead on base64 strings.
     /// </summary>
     public bool ForceUsingUnityJson;
 
@@ -53,7 +48,10 @@ namespace Quantum {
     Native.Allocator _resourceAllocator;
     IDeterministicReplayProvider _replayInputProvider;
 
-    void Start() {
+    /// <summary>
+    /// Unity start event, will start the Quantum runner and simulation after deserializing the replay file.
+    /// </summary>
+    public void Start() {
       if (_runner != null)
         return;
 
@@ -63,65 +61,57 @@ namespace Quantum {
       }
 
       var serializer = new QuantumUnityJsonSerializer();
-      var replayFile = JsonUtility.FromJson<ReplayFile>(ReplayFile.text);
+      var replayFile = JsonUtility.FromJson<QuantumReplayFile>(ReplayFile.text);
       
       if (replayFile == null) {
         Debug.LogError("Failed to read replay file or file is empty.");
         return;
       }
 
-      if ((replayFile.InputHistory == null || replayFile.InputHistory.Length == 0) && (replayFile.InputHistoryRaw == null || replayFile.InputHistoryRaw.Length == 0)) {
-        Debug.LogError("Failed to read input history.");
-        return;
-      }
-
       Debug.Log("### Starting quantum in local replay mode ###");
 
       // Create a new input provider from the replay file
-      if (replayFile.InputHistory != null && replayFile.InputHistory.Length > 0) {
-        _replayInputProvider = new InputProvider(replayFile.InputHistory);
-      } else {
-        var inputStream = new Photon.Deterministic.BitStream(replayFile.InputHistoryRaw);
-        _replayInputProvider = new BitStreamReplayInputProvider(inputStream, replayFile.LastTick);
-      }
-
-      // Runtime Config can be binary or JSON
-      var runtimeConfig = replayFile.RuntimeConfig;
-      if (replayFile.RuntimeConfigBinary != null && replayFile.RuntimeConfigBinary.Length > 0) {
-        runtimeConfig = serializer.ConfigFromByteArray<RuntimeConfig>(replayFile.RuntimeConfigBinary, compressed: true);
+      _replayInputProvider = replayFile.CreateInputProvider();
+      if (_replayInputProvider == null) {
+        Debug.LogError("Failed to load input history.");
+        return;
       }
 
       var arguments = new SessionRunner.Arguments {
         RunnerFactory = QuantumRunnerUnityFactory.DefaultFactory,
-        RuntimeConfig = runtimeConfig,
+        RuntimeConfig = serializer.ConfigFromByteArray<RuntimeConfig>(replayFile.RuntimeConfigData.Decode(), compressed: true),
         SessionConfig = replayFile.DeterministicConfig,
         ReplayProvider = _replayInputProvider,
         GameMode = DeterministicGameMode.Replay,
         RunnerId = "LOCALREPLAY",
         PlayerCount = replayFile.DeterministicConfig.PlayerCount,
         InstantReplaySettings = InstantReplayConfig,
-        InitialFrame = replayFile.InitialFrame,
+        InitialTick = replayFile.InitialTick,
         FrameData = replayFile.InitialFrameData,
         DeltaTimeType = DeltaTypeType,
       };
 
+      var assets = replayFile.AssetDatabaseData?.Decode();
       if (DatabaseFile != null) {
-        // This is potentially breaking, as it introduces UnityDB-ResourceManager duality 
-        var assets = serializer.AssetsFromByteArray(DatabaseFile.bytes);
+        assets = DatabaseFile.bytes;
+      }
+
+      if (assets?.Length > 0) {
         _resourceAllocator = new QuantumUnityNativeAllocator();
-        _resourceManager = new ResourceManagerStatic(assets, new QuantumUnityNativeAllocator());
+        _resourceManager = new ResourceManagerStatic(serializer.AssetsFromByteArray(assets), new QuantumUnityNativeAllocator());
         arguments.ResourceManager = _resourceManager;
       }
 
       _runner = QuantumRunner.StartGame(arguments);
 
-      if (ChecksumFile != null) {
-        var checksumFile = JsonUtility.FromJson<ChecksumFile>(ChecksumFile.text);
-        Assert.Check(checksumFile);
-        _runner.Game.StartVerifyingChecksums(checksumFile);
+      if (replayFile.Checksums?.Checksums != null) {
+        _runner.Game.StartVerifyingChecksums(replayFile.Checksums);
       }
     }
 
+    /// <summary>
+    /// Unity Update event will update the simulation if a custom <see cref="SimulationSpeedMultiplier"/> was set.
+    /// </summary>
     public void Update() {
       if (QuantumRunner.Default != null && QuantumRunner.Default.Session != null) {
         // Set the session ticking to manual to inject custom delta time.
@@ -130,11 +120,11 @@ namespace Quantum {
           switch (QuantumRunner.Default.DeltaTimeType) {
             case SimulationUpdateTime.Default:
             case SimulationUpdateTime.EngineUnscaledDeltaTime:
-              QuantumRunner.Default.Session.Update(Time.unscaledDeltaTime * SimulationSpeedMultiplier);
+              QuantumRunner.Default.Service(Time.unscaledDeltaTime * SimulationSpeedMultiplier);
               QuantumUnityDB.UpdateGlobal();
               break;
             case SimulationUpdateTime.EngineDeltaTime:
-              QuantumRunner.Default.Session.Update(Time.deltaTime);
+              QuantumRunner.Default.Service(Time.deltaTime * SimulationSpeedMultiplier);
               QuantumUnityDB.UpdateGlobal();
               break;
           }

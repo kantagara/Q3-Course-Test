@@ -15,6 +15,7 @@ namespace Quantum {
   
   [UnityEngine.DisallowMultipleComponent()]
   public unsafe partial class QPrototypePickupItem : QuantumUnityComponentPrototype<Quantum.Prototypes.PickupItemPrototype>, IQuantumUnityPrototypeWrapperForComponent<Quantum.PickupItem> {
+    partial void CreatePrototypeUser(Quantum.QuantumEntityPrototypeConverter converter, ref Quantum.Prototypes.PickupItemPrototype prototype);
     [DrawInline()]
     [ReadOnly(InEditMode = false)]
     public Quantum.Prototypes.Unity.PickupItemPrototype Prototype;
@@ -26,6 +27,7 @@ namespace Quantum {
     public override ComponentPrototype CreatePrototype(Quantum.QuantumEntityPrototypeConverter converter) {
       Quantum.Prototypes.PickupItemPrototype result;
       converter.Convert(Prototype, out result);
+      CreatePrototypeUser(converter, ref result);
       return result;
     }
   }

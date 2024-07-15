@@ -2,11 +2,10 @@
 // <copyright file="CustomTypesUnity.cs" company="Exit Games GmbH">
 // Photon Realtime API - Copyright (C) 2022 Exit Games GmbH
 // </copyright>
-// <summary>
-// Sets up support for Unity-specific types.
-// </summary>
+// <summary>Sets up support for Unity-specific types.</summary>
 // <author>developer@exitgames.com</author>
 // ----------------------------------------------------------------------------
+
 
 #if UNITY_2017_4_OR_NEWER
 #define SUPPORTED_UNITY

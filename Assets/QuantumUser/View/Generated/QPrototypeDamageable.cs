@@ -15,6 +15,7 @@ namespace Quantum {
   
   [UnityEngine.DisallowMultipleComponent()]
   public unsafe partial class QPrototypeDamageable : QuantumUnityComponentPrototype<Quantum.Prototypes.DamageablePrototype>, IQuantumUnityPrototypeWrapperForComponent<Quantum.Damageable> {
+    partial void CreatePrototypeUser(Quantum.QuantumEntityPrototypeConverter converter, ref Quantum.Prototypes.DamageablePrototype prototype);
     [DrawInline()]
     [ReadOnly(InEditMode = false)]
     public Quantum.Prototypes.DamageablePrototype Prototype;
@@ -24,6 +25,7 @@ namespace Quantum {
       }
     }
     public override ComponentPrototype CreatePrototype(Quantum.QuantumEntityPrototypeConverter converter) {
+      CreatePrototypeUser(converter, ref Prototype);
       return Prototype;
     }
   }

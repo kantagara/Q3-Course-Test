@@ -1,4 +1,10 @@
-using System;
+// -----------------------------------------------------------------------------
+// <copyright company="Exit Games GmbH">
+// Photon Realtime API - Copyright (C) 2022 Exit Games GmbH
+// </copyright>
+// <summary>Argument for Op RaiseEvent.</summary>
+// <author>developer@photonengine.com</author>
+// -----------------------------------------------------------------------------
 
 
 namespace Photon.Realtime

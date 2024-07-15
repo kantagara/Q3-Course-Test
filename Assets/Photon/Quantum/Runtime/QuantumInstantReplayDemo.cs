@@ -2,37 +2,71 @@ namespace Quantum {
   using UnityEngine;
   using static QuantumUnityExtensions;
 
+  /// <summary>
+  /// A script to demonstrate the instant replay feature of Quantum.
+  /// Add this script to a GameObject in your scene to enable the instant replays.
+  /// Press the "Start" button during runtime to start a replay.
+  /// Uses the <see cref="QuantumInstantReplay"/> class. 
+  /// </summary>
   public class QuantumInstantReplayDemo : QuantumMonoBehaviour {
-    public float PlaybackSpeed = 0.5f;
-
-    [ReadOnly]
-    public bool IsReplayRunning;
-    public bool Button_StartInstantReplay;
-    public bool  Button_StopInstantReplay;
-    public float ReplayLengthSec  = 2.0f;
-    public bool  ShowReplayLabel  = true;
-    public bool  ShowFadingEffect = true;
-
-    [Space]
+    /// <summary>
+    /// The playback speed of the replay. Default is 1.0f.
+    /// </summary>
+    public float PlaybackSpeed = 1.0f;
+    /// <summary>
+    /// The length of the replay in seconds. Default is 2.0f.
+    /// </summary>
+    public float ReplayLengthSec = 2.0f;
+    /// <summary>
+    /// If set to true, displays a replay label on the screen during the replay.
+    /// </summary>
+    public bool ShowReplayLabel = true;
+    /// <summary>
+    /// If set to true, displays a fading effect when starting and stopping the replay.
+    /// </summary>
+    public bool ShowFadingEffect = true;
+    /// <summary>
+    /// Read-only flag to indicate if the replay is running.
+    /// </summary>
+    [ReadOnly] public bool IsReplayRunning;
+    /// <summary>
+    /// Read-only flag to indicate the start button can be pressed.
+    /// </summary>
+    [ReadOnly] public bool Button_StartInstantReplay;
+    /// <summary>
+    /// Read-only flag to indicate the stop button can be pressed.
+    /// </summary>
+    [ReadOnly] public bool Button_StopInstantReplay;
+    /// <summary>
+    /// Set the rewind mode to loop the replay or seek to a desired frame.
+    /// </summary>
     public QuantumInstantReplaySeekMode RewindMode = QuantumInstantReplaySeekMode.Disabled;
-
-    [Header("These only work if RewindMode is set")]
+    /// <summary>
+    /// Loops the replay. Only available when <see cref="RewindMode"/> is not disabled.
+    /// </summary>
+    [DrawIf(nameof(RewindMode), Mode = DrawIfMode.Hide)] 
     public bool EnableLoop = false;
-
+    /// <summary>
+    /// The replay normalized time. This value is between 0 and 1.
+    /// Use the slider to jump to a desired time in the replay.
+    /// </summary>
     [Range(0, 1)]
     public float NormalizedTime;
 
     private float previousNormalizedTime;
 
     QuantumInstantReplay _instantReplay;
-    bool                 _isFading;
-    float                _fadingAlpha = 1.0f;
-    Texture2D            _fadingTexture;
-    float                _fadingTime;
+    bool _isFading;
+    float _fadingAlpha = 1.0f;
+    Texture2D _fadingTexture;
+    float _fadingTime;
 
     #region Unity Callbacks
 
-    private void Awake() {
+    /// <summary>
+    /// Unity Awake event, subscribe to the game destroyed event and clean up stopped replays.
+    /// </summary>
+    public void Awake() {
       QuantumCallback.Subscribe(this, (CallbackGameDestroyed c) => {
         if (_instantReplay == null)
           return;
@@ -48,6 +82,10 @@ namespace Quantum {
       });
     }
 
+    /// <summary>
+    /// Unity Update event. Toggle recording snapshots and update the replay.
+    /// Update the debug buttons and trigger seeking the replay.
+    /// </summary>
     public void Update() {
       if (QuantumRunner.Default != null) {
         // Tell the game to start capturing snapshots. This can be called at any point in the game.
@@ -69,8 +107,8 @@ namespace Quantum {
       }
 
       Button_StartInstantReplay = _instantReplay == null && QuantumRunner.Default != null;
-      Button_StopInstantReplay  = _instantReplay != null;
-      IsReplayRunning           = _instantReplay != null;
+      Button_StopInstantReplay = _instantReplay != null;
+      IsReplayRunning = _instantReplay != null;
     }
 
     private void CleanUpReplay() {
@@ -82,6 +120,9 @@ namespace Quantum {
       OnReplayStopped();
     }
 
+    /// <summary>
+    /// Unity OnDisabled event, disposes the instant replay data structures.
+    /// </summary>
     public void OnDisable() {
       if (_instantReplay != null && QuantumRunner.Default != null) {
         _instantReplay.Dispose();
@@ -89,13 +130,19 @@ namespace Quantum {
       }
     }
 
-    void OnDestroy() {
+    /// <summary>
+    /// Unity OnDestroy event, destroys the fading texture.
+    /// </summary>
+    public void OnDestroy() {
       if (_fadingTexture != null)
         Destroy(_fadingTexture);
       _fadingTexture = null;
     }
 
-    void OnGUI() {
+    /// <summary>
+    /// Unity OnGUI event, displays the replay label and the replay slider.
+    /// </summary>
+    public void OnGUI() {
       if (ShowReplayLabel && _instantReplay != null) {
         GUI.contentColor = Color.red;
         GUI.Label(new Rect(10, 10, 200, 100), "INSTANT REPLAY");
@@ -103,7 +150,7 @@ namespace Quantum {
         bool guiEnabled = GUI.enabled;
         try {
           GUI.enabled = _instantReplay.CanSeek;
-          var frameNumber     = _instantReplay.ReplayGame.Frames.Verified.Number;
+          var frameNumber = _instantReplay.ReplayGame.Frames.Verified.Number;
           var seekFrameNumber = (int)GUI.HorizontalSlider(new Rect(10, 40, 150, 100), frameNumber, _instantReplay.StartFrame, _instantReplay.EndFrame);
           if (_instantReplay.CanSeek && frameNumber != seekFrameNumber) {
             _instantReplay.SeekFrame(seekFrameNumber);
@@ -114,8 +161,8 @@ namespace Quantum {
       }
 
       if (_isFading) {
-        _fadingTime  += Time.deltaTime;
-        _fadingAlpha =  Mathf.Lerp(1.0f, 0.0f, _fadingTime);
+        _fadingTime += Time.deltaTime;
+        _fadingAlpha = Mathf.Lerp(1.0f, 0.0f, _fadingTime);
 
         if (_fadingTexture == null)
           _fadingTexture = new Texture2D(1, 1);
@@ -147,8 +194,8 @@ namespace Quantum {
     }
 
     void OnReplayStopped() {
-      Debug.LogFormat("### Stopping quantum instant replay and resuming the live game ###");
-      
+      Debug.LogFormat("### Stopping Quantum instant replay and resuming the live game ###");
+
       var entityViewUpdater = FindFirstObjectByType<QuantumEntityViewUpdater>();
       if (entityViewUpdater != null) {
         entityViewUpdater.SetCurrentGame(QuantumRunner.Default.Game);
@@ -160,9 +207,9 @@ namespace Quantum {
 
     void StartFading() {
       if (ShowFadingEffect) {
-        _isFading    = true;
+        _isFading = true;
         _fadingAlpha = 1.0f;
-        _fadingTime  = 0.0f;
+        _fadingTime = 0.0f;
       }
     }
 
@@ -170,6 +217,9 @@ namespace Quantum {
 
     #region Editor Button
 
+    /// <summary>
+    /// Is called from the inspector to start the instant replay.
+    /// </summary>
     public void Editor_StartInstantReplay() {
       if (_instantReplay == null && QuantumRunner.Default) {
         _instantReplay = new QuantumInstantReplay(QuantumRunner.Default.Game, ReplayLengthSec, RewindMode, EnableLoop);
@@ -177,6 +227,9 @@ namespace Quantum {
       }
     }
 
+    /// <summary>
+    /// Is called from the inspector to stop the instant replay.
+    /// </summary>
     public void Editor_StopInstantReplay() {
       if (_instantReplay != null) {
         CleanUpReplay();

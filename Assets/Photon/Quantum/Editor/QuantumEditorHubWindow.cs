@@ -5,50 +5,136 @@ namespace Quantum.Editor {
   using System.Diagnostics;
   using System.Reflection;
   using System.Text.RegularExpressions;
+  using System.Linq;
   using UnityEngine;
   using UnityEditor;
+  using UnityEditor.SceneManagement;
   using Photon.Deterministic;
   using Debug = UnityEngine.Debug;
   using EditorUtility = UnityEditor.EditorUtility;
-  using System.Linq;
 
-  class QuantumEditorHubWindowAssetPostprocessor : AssetPostprocessor {
-    private static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths) {
-      // Unity handling for post asset processing callback. Checks existence of settings assets every time assets change.
-      QuantumEditorHubWindow.EnsureUserFilesExists();
-    }
-  }
-
+  /// <summary>
+  /// The main class to manage the Quantum Hub window.
+  /// The Hub for example completes the installation of a user project by creating vital config files that are not overwritten by upgrades.
+  /// It can also installs samples and addons that are packaged with the Quantum SDK.
+  /// </summary>
   [InitializeOnLoad]
   public partial class QuantumEditorHubWindow : EditorWindow {
     const int NavWidth = 256 + 2;
+    const int NavButtonHeight = 56;
+    const int NavButtonWidth = 260;
     const int IconSize = 32;
+    const int IconMargin = 14;
     const string UrlDoc = "https://doc.photonengine.com/quantum/v3";
     const string UrlSDK = UrlDoc + "/getting-started/initial-setup";
+    const string UrlChangelog = UrlDoc + "/getting-started/release-notes";
+    const string Url100Tutorial = UrlDoc + "/quantum-100/overview";
     const string UrlPublicDiscord = "https://dashboard.photonengine.com/discord/joinphotonengine";
     const string UrlDashboard = "https://dashboard.photonengine.com/";
-    const string Url100Tutorial = UrlDoc + "/quantum-100/overview";
     const string UrlDocApi = "https://doc-api.photonengine.com/en/quantum/v3/index.html";
+    const string UrlCircle = "https://www.photonengine.com/gaming";
+    const string UrlRealtime = "https://doc.photonengine.com/realtime";
     const string WindowTitle = "Photon Quantum Hub";
-    const string TexSupport = "Contact the Photon Team by using the Discord link below and browse the online documentation.";
-    const string TextWelcome =
-@"Once you have installed the Quantum user files and set up your Quantum App Id, explore the sections on the left to get started.";
+    const string TextSection_Welcome =
+      "Welcome to the Quantum 3 Game Engine.";
+    const string TextSection_Support =
+      "Take a look at the wide selection of support options and channels.";
+    const string TextSection_SamplesAsteroid =
+      @"Install the grey-boxing asteroids game sample programmed in Quantum to test local and online mode and make sure to check out the <b>Quantum 100 tutorial</b>, it explains step-by-step how the asteroids sample was created.";
+    const string TextSection_SamplesMenu =
+      @"Install the <b>menu package</b> to have a fully functional online game menu and it works well together with the asteroids game sample. Create Unity builds to play the asteroids sample <b>online</b> after installing the two packages and creating an online AppId.";
+    const string TextSection_SamplesConnectionScene = "Create and set up a Unity scene that demonstrates how to connect and start a Quantum online session";
+    const string TextSection_Samples100Doc = "Follow the step-by-step guide to get up and running with the Quantum SDK in Unity.";
+    const string TextSection_Setup =
+      "This sections shows individual Quantum 3 SDK installation steps. Uncompleted steps are shown on the welcome screen.";
+    const string TextSection_Changelog =
+      "The Quantum release notes can be found inside the SDK and on our website.";
+    const string TextSection_ChangelogRealtime =
+      "Photon Realtime is our network base layer and it solves problems like authentication, matchmaking and fast communication with a scalable approach.";
     const string TextInstallationInstructions =
-@"<b>Quantum requires an installation step to create local user scripts and asset files that won't be overwritten by upgrades:</b>"; 
+      "Quantum requires an installation step to create local user scripts and asset files that won't be overwritten by upgrades:";
     const string TextAppIdInstructions =
-@"<b>A Quantum App Id is required to start online connections:</b>
-
-  - Open the Photon Dashboard (Log-in as required).
-  - Select an existing Quantum 3 App Id, 
-     create a new one or migrate an existing Quantum 2 AppId.
-  - Copy the App Id and paste into the field below (or into the PhotonServerSettings.asset).";
+      @"<b>A Quantum 3 AppId is required to connect to the Quantum public cloud:</b>
+  - Open the Photon Dashboard link log in or register an account.
+  - Select an existing Quantum 3 AppId or create a new one.
+  - Copy the App Id and paste into the field below.";
+    const string TextWelcome_InstallQuantum = "<size=20>Step 1</size>   Complete the installation the Quantum Unity SDK";
+    const string TextWelcome_InstallAsteroids = "<size=20>Step 2</size>   Install the asteroids Quantum game sample and press play see the game running in local mode.";
+    const string TextWelcome_CreateAppId = "<size=20>Step 3</size>   Register to a Photon account on our website and create an AppId to run online games.";
+    const string TextWelcome_InstallMenu = "<size=20>Step 4</size>   Install the menu package and make Unity builds to see the asteroids sample in online mode.";
+    const string TextWelcome_Final = "Further readings:";
     const string TitleVersionReformat = "<size=22><color=white>{0}</color></size>";
     const string SectionReformat = "<i><color=lightblue>{0}</color></i>";
     const string Header1Reformat = "<size=22><color=white>{0}</color></size>";
     const string Header2Reformat = "<size=18><color=white>{0}</color></size>";
     const string Header3Reformat = "<b><color=#ffffaaff>{0}</color></b>";
     const string ClassReformat = "<color=#FFDDBB>{0}</color>";
-    static Vector2 StatusIconWidth = new Vector2(24, 24);
+
+    static Vector2 StatusIconWidthDefault = new Vector2(24, 24);
+    static Vector2 StatusIconWidthLarge = new Vector2(32, 32);
+    static string[] PlayerPrefKeys = new string[] {
+      "Quantum.Hub.SkipStep2",
+      "Quantum.Hub.SkipStep3",
+      "Quantum.Hub.SkipStep4"
+    };
+
+    ButtonInfo Button_InstallAsteroidSample = new ButtonInfo(Icon.Samples,
+      "Install Quantum Asteroids Sample Game",
+      "Imports the asteroids game sample programmed with Quantum. Parts of the sample are covered by the Quantum 100 online documentation.");
+    ButtonInfo Button_InstallAsteroidSample2 = new ButtonInfo(Icon.Samples,
+      "Reimport Quantum Asteroids Sample Game",
+      "Reimports the asteroids game sample programmed with Quantum.");
+    ButtonInfo Button_InstallMenu = new ButtonInfo(Icon.Samples,
+      "Install Quantum Menu",
+      "Fully-fledged prototyping online game menu");
+    ButtonInfo Button_InstallMenu2 = new ButtonInfo(Icon.Samples,
+      "Reimport Quantum Menu",
+      "Reimport the Quantum menu after Unity version upgrades for example.");
+    ButtonInfo Button_InstallSimpleConnectionScene = new ButtonInfo(Icon.Samples,
+      "Install Simple Connection Sample Scene",
+      "Creates a scene that showcases the Quantum online connection sequence.");
+    ButtonInfo Button_InstallSimpleConnectionScene2 = new ButtonInfo(Icon.Samples,
+      "Reinstall Simple Connection Sample Scene",
+      "Recreates the simple connection sample scene.");
+    ButtonInfo Button_Docs100Tutorial = new ButtonInfo(Icon.Link,
+      "Quantum 100 Tutorial (Opens Web Browser)",
+      "Open Online Documentation About Quantum Fundamentals");
+    ButtonInfo Button_CommunityDiscord = new ButtonInfo(Icon.Link,
+      "Photon Discord Server (Opens Web Browser)", 
+      "Join our Photon Discord Server.");
+    ButtonInfo Button_DocsOnlineLink = new ButtonInfo(Icon.Link,
+      "Quantum 3 Online Documentation (Opens Web Browser)",
+      "Open the Quantum 3 online documentation to discover tons of material including tutorials, manuals, concepts, samples and addons");
+    ButtonInfo Button_DocsSdkDownloadLink = new ButtonInfo(Icon.Link,
+      "Quantum 3 SDK and Release Notes (Opens Web Browser)", 
+      "Open the Quantum 3 SDK online download tables and release notes.");
+    ButtonInfo Button_DocsApiLink = new ButtonInfo(Icon.Link,
+      "Quantum 3 API Reference (Opens Web Browser)",
+      "Open the online Quantum 3 API reference documentation.");
+    ButtonInfo Button_DocCircleLink = new ButtonInfo(Icon.PhotonCloud,
+      "Photon Gaming Circle (Opens Web Browser)",
+      "Get premium development support from our engineers, access exclusive samples and features equipping you with essential resources.");
+    ButtonInfo Button_DocReleaseNotes = new ButtonInfo(Icon.Link,
+      "Quantum Release Notes (Opens Web Browser)",
+      "Opens the online release notes web site.");
+    ButtonInfo Button_FileChangelog = new ButtonInfo(Icon.Text,
+      "Release Notes Text Asset",
+      "Select the Changelog text asset file in the Unity project.");
+    ButtonInfo Button_FileBuildInfo = new ButtonInfo(Icon.Text,
+      "Build Info Text Asset",
+      "Select the build_info.txt file in the Unity project.");
+    ButtonInfo Button_InstallQuantum = new ButtonInfo(Icon.Installation,
+      "Install",
+      "Install Quantum user files.");
+    ButtonInfo Button_DashboardLink = new ButtonInfo(Icon.Link,
+      "Photon Dashboard (Opens Web Browser)",
+      "Register a Photon account and create free AppIds");
+    ButtonInfo Button_SelectPhotonServerAsset = new ButtonInfo(Icon.BuildIn_ScriptableObjectIcon,
+        "Select Photon Server Settings Asset",
+        "Select the Photon network transport configuration asset that the AppId is stored in.");
+    ButtonInfo Button_ToolsClearPlayerPrefs = new ButtonInfo(Icon.BuildIn_RefreshIcon, 
+      "Clear Quantum PlayerPrefs",
+      "Delete all PlayerPrefs created by Quantum.");
 
 #if QUANTUM_UPM
     static string BuildInfoFilepath => $"Packages/com.photonengine.quantum/build_info.txt";
@@ -60,8 +146,13 @@ namespace Quantum.Editor {
     static string ReleaseHistoryRealtimeFilepath => BuildPath(Application.dataPath, "Photon", "PhotonRealtime", "Code", "changes-realtime.txt");
     static string QuantumMenuUnitypackagePath => BuildPath(Application.dataPath, "Photon", "QuantumMenu", "Quantum-Menu.unitypackage");
     static string QuantumMenuScenePath => BuildPath(Application.dataPath, "Photon", "QuantumMenu", "QuantumSampleMenu.unity");
+    static string QuantumMenuConfigPath => BuildPath(Application.dataPath, "Photon", "QuantumMenu", "QuantumMenuConfig.asset");
+    static string QuantumAsteroidsUnitypackagePath => BuildPath(Application.dataPath, "Photon", "QuantumAsteroids", "Quantum-Asteroids.unitypackage");
+    static string QuantumAsteroidsScenePath => BuildPath(Application.dataPath, "Photon", "QuantumAsteroids", "Scenes", "AsteroidsGameplay.unity");
+    static string QuantumAsteroidsThumbnailPath => BuildPath(Application.dataPath, "Photon", "QuantumAsteroids", "Scenes", "AsteroidsMenuThumbnail.png");
 #endif
-    static string _releaseHistoryHeader; // TODO: add realtime release notes
+
+    static string _releaseHistoryHeader;
     static List<string> _releaseHistoryTextAdded;
     static List<string> _releaseHistoryTextChanged;
     static List<string> _releaseHistoryTextFixed;
@@ -74,32 +165,74 @@ namespace Quantum.Editor {
     static GUIStyle _releaseNotesStyle;
     static GUIStyle _headerTextStyle;
     static GUIStyle _buttonActiveStyle;
-    static bool? _ready; // true after InitContent(), reset onDestroy, onEnable, etc.
-    static bool _showInstallationInWelcome;
-    static bool _showAppIdInWelcome;
-    static Vector2 _windowSize;
+    static bool? _isOpen; // true after InitContent(), reset onDestroy, onEnable, etc.
+    static bool _statusInstallationComplete;
+    static bool _statusAppIdSetup;
+    static bool _statusAsteroidsInstalled;
+    static bool _statusMenuInstalled;
+    static Vector2 _windowSize = new Vector2(850, 600);
     static Vector2 _windowPosition = new Vector2(100, 100);
 
+    /// <summary>
+    /// The Quantum Hub Unity skin.
+    /// </summary>
     public GUISkin QuantumHubSkin;
+    /// <summary>
+    /// The setup icon.
+    /// </summary>
     public Texture2D SetupIcon;
+    /// <summary>
+    /// The documentation icon.
+    /// </summary>
     public Texture2D DocumentationIcon;
+    /// <summary>
+    /// The icon shown for link buttons
+    /// </summary>
+    public Texture2D LinkIcon;
+    /// <summary>
+    /// The samples icon.
+    /// </summary>
     public Texture2D SamplesIcon;
+    /// <summary>
+    /// The community icon.
+    /// </summary>
     public Texture2D CommunityIcon;
+    /// <summary>
+    /// The product logo.
+    /// </summary>
     public Texture2D ProductLogo;
+    /// <summary>
+    /// The Photon cloud icon.
+    /// </summary>
     public Texture2D PhotonCloudIcon;
-    public Texture2D QuantumIcon;
+    /// <summary>
+    /// The Installation icon.
+    /// </summary>
+    public Texture2D InstallationIcon;
+    /// <summary>
+    /// The correct icon marking completed installation steps.
+    /// </summary>
     public Texture2D CorrectIcon;
+    /// <summary>
+    /// The icon marking missing installation steps.
+    /// </summary>
+    public Texture2D MissingIcon;
+    /// <summary>
+    /// The icon marking missing installation steps.
+    /// </summary>
+    public Texture2D TextIcon;
 
-    Section[] _sections;
+    SectionInfo[] _sections;
     int _currentSection;
     double _nextForceRepaint;
     Vector2 _scrollRect;
     List<Texture2D> _buildInIcons;
-    double _welcomeSceenConditionsTimestamp;
+    double _welcomeScreenConditionsTimestamp;
+
+    GUIStyle GetBoxStyle => QuantumHubSkin.GetStyle("SteelBox");
 
     enum Icon {
       BuildIn_ScriptableObjectIcon,
-      BuildIn_TextAssetIcon,
       BuildIn_RefreshIcon,
       Setup,
       Documentation,
@@ -107,7 +240,9 @@ namespace Quantum.Editor {
       Community,
       ProductLogo,
       PhotonCloud,
-      QuantumIcon,
+      Installation,
+      Link,
+      Text
     }
 
     static bool IsAppIdValid {
@@ -122,7 +257,7 @@ namespace Quantum.Editor {
       }
     }
 
-    static bool AreImportatUserFilesInstalled {
+    static bool AreImportantUserFilesInstalled {
       get {
         return PhotonServerSettings.TryGetGlobal(out _) &&
           QuantumDeterministicSessionConfigAsset.TryGetGlobal(out _) &&
@@ -130,6 +265,15 @@ namespace Quantum.Editor {
       }
     }
 
+    [InitializeOnLoadMethod]
+    static void InitializedPackageImportCallbacks() {
+      // Package import callbacks are removed during domain reload, here we globally set one.
+      AssetDatabase.importPackageCompleted += OnImportPackageCompleted;
+    }
+
+    /// <summary>
+    /// Open the Quantum Hub window.
+    /// </summary>
     [MenuItem("Window/Quantum/Quantum Hub")]
     [MenuItem("Tools/Quantum/Quantum Hub %H", false, (int)QuantumEditorMenuPriority.TOP)]
     [MenuItem("Tools/Quantum/Window/Quantum Hub", false, (int)QuantumEditorMenuPriority.Window + 0)]
@@ -140,13 +284,13 @@ namespace Quantum.Editor {
 
       var window = GetWindow<QuantumEditorHubWindow>(true, WindowTitle, true);
       window.position = new Rect(_windowPosition, _windowSize);
-      _showInstallationInWelcome = !AreImportatUserFilesInstalled;
-      _showAppIdInWelcome = !IsAppIdValid;
+      _statusInstallationComplete = AreImportantUserFilesInstalled;
+      _statusAppIdSetup = IsAppIdValid;
       window.Show();
     }
 
     static void ReOpen() {
-      if (_ready.HasValue && _ready.Value == false) {
+      if (_isOpen.HasValue && _isOpen.Value == false) {
         Open();
       }
 
@@ -156,14 +300,13 @@ namespace Quantum.Editor {
     private void Awake() {
       _buildInIcons = new List<Texture2D> {
         (Texture2D)EditorGUIUtility.IconContent("ScriptableObject Icon").image,
-        (Texture2D)EditorGUIUtility.IconContent("TextAsset Icon").image,
         (Texture2D)EditorGUIUtility.IconContent("Refresh@2x").image,
       };
     }
 
     void OnEnable() {
-      _ready = false;
-      _windowSize = new Vector2(850, 600);
+      _isOpen = false;
+
       minSize = _windowSize;
 
       // Pre-load Release History
@@ -172,7 +315,7 @@ namespace Quantum.Editor {
     }
 
     void OnDestroy() {
-      _ready = false;
+      _isOpen = false;
     }
 
     void OnGUI() {
@@ -180,7 +323,7 @@ namespace Quantum.Editor {
       GUI.skin = QuantumHubSkin;
 
       try {
-        RefreshWelcomeSceenConditions();
+        RefreshWelcomeScreenConditions();
 
         InitContent();
 
@@ -203,10 +346,9 @@ namespace Quantum.Editor {
 
         DrawFooter();
 
-      } catch (ExitGUIException) { 
+      } catch (ExitGUIException) {
         // hide gui exception
-      }
-      catch (Exception e) {
+      } catch (Exception e) {
         QuantumEditorLog.Error($"Exception when drawing the Hub Window: {e.Message}");
       }
 
@@ -224,9 +366,16 @@ namespace Quantum.Editor {
       EnsureUserFilesExists();
     }
 
+    /// <summary>
+    /// Is used to check if important user files are installed and opens the Hub otherwise.
+    /// </summary>
     public static void EnsureUserFilesExists() {
+      if (EditorApplication.isPlayingOrWillChangePlaymode) {
+        return;
+      }
+      
       // Check for important user files
-      if (AreImportatUserFilesInstalled) { 
+      if (AreImportantUserFilesInstalled) {
         return;
       }
 
@@ -251,74 +400,274 @@ namespace Quantum.Editor {
       }
     }
 
-    void DrawWelcomeSection() {
+    void DrawSectionWelcome() {
 
       // Top Welcome content box
-      GUILayout.Label(TextWelcome);
-      GUILayout.Space(16);
+      GUILayout.Label(TextSection_Welcome);
+      GUILayout.Space(8);
 
-      if (_showInstallationInWelcome) {
-        DrawInstallationBox();
+      // Step 1
+      {
+        var stepComplete = _statusInstallationComplete;
+
+        using (new EditorGUILayout.HorizontalScope()) {
+          GUILayout.Label(GetStatusIcon(stepComplete), GUILayout.Width(StatusIconWidthLarge.x), GUILayout.Height(StatusIconWidthLarge.y));
+          GUILayout.Label(TextWelcome_InstallQuantum);
+        }
+
+        if (stepComplete == false) {
+          DrawInstallationBox();
+        }
       }
 
-      if (_showAppIdInWelcome) {
-        DrawSetupAppIdBox();
-      }
-    }
+      // Step 2
+      {
+        var stepComplete = _statusAsteroidsInstalled || PlayerPrefs.GetInt(PlayerPrefKeys[0], 0) == 1;
 
-    void DrawSetupSection() {
+        using (new EditorGUILayout.HorizontalScope()) {
+          GUILayout.Label(GetStatusIcon(stepComplete), GUILayout.Width(StatusIconWidthLarge.x), GUILayout.Height(StatusIconWidthLarge.y));
+          GUILayout.Label(TextWelcome_InstallAsteroids);
+        }
+
+        if (stepComplete == false) {
+          DrawButtonAction(Button_InstallAsteroidSample, callback: () => {
+            AssetDatabase.ImportPackage(QuantumAsteroidsUnitypackagePath, false);
+          });
+
+          if (GUILayout.Button("<i>Skip this step</i>", _textLabelStyle)) {
+            PlayerPrefs.SetInt(PlayerPrefKeys[0], 1);
+          }
+        }
+      }
+
+      // Step 3
+      {
+        var stepComplete = _statusAppIdSetup || PlayerPrefs.GetInt(PlayerPrefKeys[1], 0) == 1;
+
+        using (new EditorGUILayout.HorizontalScope()) {
+          GUILayout.Label(GetStatusIcon(stepComplete), GUILayout.Width(StatusIconWidthLarge.x), GUILayout.Height(StatusIconWidthLarge.y));
+          GUILayout.Label(TextWelcome_CreateAppId);
+        }
+
+        if (stepComplete == false) {
+          DrawSetupAppIdBox();
+
+          if (GUILayout.Button("<i>Skip this step</i>", _textLabelStyle)) {
+            PlayerPrefs.SetInt(PlayerPrefKeys[1], 1);
+          }
+        }
+      }
+
+      // Step 4
+      {
+        var stepComplete = _statusMenuInstalled || PlayerPrefs.GetInt(PlayerPrefKeys[2], 0) == 1; ;
+
+        using (new EditorGUILayout.HorizontalScope()) {
+          GUILayout.Label(GetStatusIcon(stepComplete), GUILayout.Width(StatusIconWidthLarge.x), GUILayout.Height(StatusIconWidthLarge.y));
+          GUILayout.Label(TextWelcome_InstallMenu);
+        }
+
+        if (stepComplete == false) {
+          DrawButtonAction(Button_InstallMenu, callback: () => {
+            AssetDatabase.ImportPackage(QuantumMenuUnitypackagePath, false);
+          });
+
+          if (GUILayout.Button("<i>Skip this step</i>", _textLabelStyle)) {
+            PlayerPrefs.SetInt(PlayerPrefKeys[2], 1);
+          }
+        }
+      }
+
+      // Further readings
+      GUILayout.Label(TextWelcome_Final);
+      DrawButtonAction(Button_DocsOnlineLink, callback: OpenURL(UrlDoc));
+    }    
+
+    void DrawSectionInstallation() {
+      GUILayout.Label(TextSection_Setup);
+      GUILayout.Space(8);
+
       DrawInstallationBox();
       DrawSetupAppIdBox();
 
-      using (new EditorGUILayout.VerticalScope(QuantumHubSkin.GetStyle("SteelBox"))) {
-        DrawButtonAction(Icon.BuildIn_RefreshIcon, "Clear Quantum PlayerPrefs", "Delete all PlayerPrefs created by Quantum.",
-          callback: () => { 
-            ClearQuantumPlayerPrefs();
-            ClearQuantumMenuPlayerPrefs();
-          });
+      using (new EditorGUILayout.VerticalScope(GetBoxStyle)) {
+        DrawButtonAction(Button_SelectPhotonServerAsset, callback: () => {
+          EditorGUIUtility.PingObject(PhotonServerSettings.Global); Selection.activeObject = PhotonServerSettings.Global;
+        });
+      }
+
+      using (new EditorGUILayout.VerticalScope(GetBoxStyle)) {
+        DrawButtonAction(Button_ToolsClearPlayerPrefs, callback: () => {
+          for (int i = 0; i < PlayerPrefKeys.Length; i++) {
+            PlayerPrefs.DeleteKey(PlayerPrefKeys[i]);
+          }
+          ClearQuantumPlayerPrefs();
+          ClearQuantumMenuPlayerPrefs();
+        });
       }
     }
 
-    void ClearQuantumPlayerPrefs() {
+    static void ClearQuantumPlayerPrefs() {
       PlayerPrefs.DeleteKey(PhotonServerSettings.Global.BestRegionSummaryKey);
       PlayerPrefs.DeleteKey("Quantum.ReconnectInformation");
     }
 
-    void ClearQuantumMenuPlayerPrefs() {
+    static void ClearQuantumMenuPlayerPrefs() {
       PlayerPrefs.DeleteKey("Photon.Menu.Username");
       PlayerPrefs.DeleteKey("Photon.Menu.Region");
       PlayerPrefs.DeleteKey("Photon.Menu.AppVersion");
-      PlayerPrefs.DeleteKey("Photon.Menu.MaxPlayerCount");
+      UnityEngine.PlayerPrefs.DeleteKey("Photon.Menu.MaxPlayerCount");
       PlayerPrefs.DeleteKey("Photon.Menu.Scene");
-      PlayerPrefs.DeleteKey("Photon.Menu.Framerate");
+      UnityEngine.PlayerPrefs.DeleteKey("Photon.Menu.Framerate");
       PlayerPrefs.DeleteKey("Photon.Menu.Fullscreen");
       PlayerPrefs.DeleteKey("Photon.Menu.Resolution");
-      PlayerPrefs.DeleteKey("Photon.Menu.VSync");
+      UnityEngine.PlayerPrefs.DeleteKey("Photon.Menu.VSync");
       PlayerPrefs.DeleteKey("Photon.Menu.QualityLevel");
     }
 
-    void DrawSamplesSection() {
-      GUILayout.Label("Install Samples", _headerLabelStyle);
+    void DrawSectionSample() {
+      if (AreImportantUserFilesInstalled) {
 
-      DrawButtonAction(Icon.Samples, "Install Quantum Menu", "Fully-fledged prototyping online game menu",
-        callback: () => {
-          AssetDatabase.ImportPackage(QuantumMenuUnitypackagePath, false);
-          QuantumEditorMenuCreateScene.AddScenePathToBuildSettings(QuantumMenuScenePath, true);
-          ClearQuantumMenuPlayerPrefs();
-        });
+        GUILayout.Label(TextSection_SamplesAsteroid);
 
-      DrawButtonAction(Icon.Samples, "Install Simple Connection Sample Scene", "Creates a scene that showcases the Quantum online connection sequence.",
-        callback: () => {
-          QuantumEditorMenuCreateScene.CreateSimpleConnectionScene($"{QuantumEditorUserScriptGeneration.FolderPath}/Scenes/QuantumSimpleConnectionScene.unity");
+        DrawButtonAction(_statusAsteroidsInstalled ? Button_InstallAsteroidSample2 : Button_InstallAsteroidSample, 
+          statusIcon: GetStatusIcon(_statusAsteroidsInstalled),
+          callback: () => { AssetDatabase.ImportPackage(QuantumAsteroidsUnitypackagePath, false); });
+
+        GUILayout.Label(TextSection_SamplesMenu);
+
+        DrawButtonAction(_statusMenuInstalled ? Button_InstallMenu2 : Button_InstallMenu,
+          statusIcon: GetStatusIcon(_statusMenuInstalled),
+          callback: () => { AssetDatabase.ImportPackage(QuantumMenuUnitypackagePath, false); });
+
+        GUILayout.Label(TextSection_SamplesConnectionScene);
+
+        var sceneFilepath = $"{QuantumEditorUserScriptGeneration.FolderPath}/Scenes/QuantumSimpleConnectionScene.unity";
+        var sceneFileExists = File.Exists(sceneFilepath);
+        DrawButtonAction(sceneFileExists ? Button_InstallSimpleConnectionScene2 : Button_InstallSimpleConnectionScene,
+          statusIcon: GetStatusIcon(sceneFileExists),
+          callback: () => {
+          QuantumEditorMenuCreateScene.CreateSimpleConnectionScene(sceneFilepath);
           GUIUtility.ExitGUI();
         });
+      }
+      else {
+        GUILayout.Label("Complete the Quantum 3 SDK installation first.");
+      }
 
-      GUILayout.Label("Tutorials", _headerLabelStyle);
+      GUILayout.Label(TextSection_Samples100Doc);
 
-      DrawButtonAction(Icon.Documentation, "Quantum 100 Tutorial", "Quantum Fundamentals Tutorial", callback: OpenURL(Url100Tutorial));
+      DrawButtonAction(Button_Docs100Tutorial, callback: OpenURL(Url100Tutorial));
+    }
+
+    /// <summary>
+    /// The QPrototypes have to be reloaded to properly work.
+    /// Reimporting assets only works after the package import.
+    /// </summary>
+    static void OnImportPackageCompleted(string packageName) {
+      // Quantum-Menu
+      if (string.Equals(packageName, Path.GetFileNameWithoutExtension(QuantumMenuUnitypackagePath), StringComparison.Ordinal)) {
+        QuantumEditorMenuCreateScene.AddScenePathToBuildSettings(QuantumMenuScenePath, addToTop: true);
+        ClearQuantumMenuPlayerPrefs();
+        TryAddAsteroidSceneToMenuConfig();
+        
+        // Try to add the default map to the menu config by loading the default map location
+        try {
+          var quantumDefaultMapAsset = AssetDatabase.LoadAssetAtPath<Quantum.Map>(AssetDatabase.AssetPathToGUID($"{QuantumEditorSettings.Global.DefaultNewAssetsLocation}/QuantumMap.asset"));
+          AddToQuantumMenuConfig($"{QuantumEditorUserScriptGeneration.FolderPath}/Scenes/QuantumGameScene.unity", null, new Dictionary<string, AssetRef>() {
+              { "Map", new AssetRef(quantumDefaultMapAsset.Guid) } });
+        } catch { }
+        if (EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) {
+          EditorSceneManager.OpenScene(QuantumMenuScenePath);
+        }
+      }
+
+      // Quantum-Asteroids
+      else if (string.Equals(packageName, Path.GetFileNameWithoutExtension(QuantumAsteroidsUnitypackagePath), StringComparison.Ordinal)) {
+        QuantumEditorMenuCreateScene.AddScenePathToBuildSettings(QuantumAsteroidsScenePath, addToTop: false);
+        AssetDatabase.ImportAsset($"{Path.GetDirectoryName(QuantumAsteroidsUnitypackagePath)}/Resources", ImportAssetOptions.ImportRecursive);
+        TryAddAsteroidSceneToMenuConfig();
+        if (EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) {
+          EditorSceneManager.OpenScene(QuantumAsteroidsScenePath);
+        }
+      }
+    }
+
+    static void TryAddAsteroidSceneToMenuConfig() {
+      AddToQuantumMenuConfig(
+        QuantumAsteroidsScenePath,
+        QuantumAsteroidsThumbnailPath,
+        new Dictionary<string, AssetRef>() {
+              { "Map", new AssetRef(new AssetGuid(477700799046405574)) },
+              { "SystemsConfig", new AssetRef(new AssetGuid(285306802963724605)) },
+              { "SimulationConfig", new AssetRef(new AssetGuid(442089458455835007)) },
+              { "GameConfig", new AssetRef(new AssetGuid(316527076537738773)) },
+              { "DefaultPlayerAvatar", new AssetRef(new AssetGuid(1365103958109072725)) }});
+    }
+
+    /// <summary>
+    /// Try to add the game scene to the Quantum menu config without using the actual menu dependencies.
+    /// </summary>
+    static void AddToQuantumMenuConfig(string scenePath, string previewPath, Dictionary<string, AssetRef> runtimeConfigSettings) {
+      try {
+        // TODO: fix for upm
+        if (AssetDatabase.FindAssets($"{Path.GetFileNameWithoutExtension(scenePath)} t:scene")?.Length == 0) {
+          return;
+        }
+
+        var menuConfig = AssetDatabase.LoadMainAssetAtPath(QuantumMenuConfigPath);
+        if (menuConfig == null) {
+          return;
+        }
+
+        var obj = new SerializedObject(menuConfig);
+        var scenes = obj.FindProperty("_availableScenes");
+
+        // Find already installed menu entry
+        var menuConfigEntry = default(SerializedProperty);
+        for (int i = 0; i < scenes.arraySize; i++) {
+          var entry = scenes.GetArrayElementAtIndex(i);
+          var path = entry.FindPropertyRelative("ScenePath");
+          if (string.Equals(PathUtils.Normalize(path.stringValue), scenePath, StringComparison.Ordinal)) {
+            menuConfigEntry = entry;
+            break;
+          }
+        }
+
+        // Create new menu entry
+        if (menuConfigEntry == null) { 
+          scenes.InsertArrayElementAtIndex(scenes.arraySize);
+          menuConfigEntry = scenes.GetArrayElementAtIndex(scenes.arraySize - 1);
+        }
+
+        // Set or overwrite properties
+        menuConfigEntry.FindPropertyRelative("Name").stringValue = Path.GetFileNameWithoutExtension(scenePath);
+        menuConfigEntry.FindPropertyRelative("ScenePath").stringValue = scenePath;
+        if (string.IsNullOrEmpty(previewPath)) {
+          menuConfigEntry.FindPropertyRelative("Preview").objectReferenceValue = null;
+        } else {
+          menuConfigEntry.FindPropertyRelative("Preview").objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>(previewPath);
+        }
+        if (runtimeConfigSettings != null) {
+          foreach (var setting in runtimeConfigSettings) {
+            menuConfigEntry.FindPropertyRelative($"RuntimeConfig.{setting.Key}.Id.Value").longValue = setting.Value.Id.Value;
+          }
+        }
+
+        obj.ApplyModifiedProperties();
+      } catch (Exception e) {
+        Log.Warn($"Failed to add the scene '{scenePath}' to the menu config: {e.Message}");
+      }
     }
     
-    void DrawRealtimeReleaseSection() {
+    void DrawReleaseHistoryRealtimeSection() {
+      GUILayout.Label(TextSection_ChangelogRealtime);
+      GUILayout.Space(8);
+
+      var textAsset = (TextAsset)AssetDatabase.LoadAssetAtPath(ReleaseHistoryRealtimeFilepath, typeof(TextAsset));
+      DrawButtonAction(Button_FileChangelog,
+        callback: () => { EditorGUIUtility.PingObject(textAsset); Selection.activeObject = textAsset; });
+
       GUILayout.BeginVertical();
       {
         GUILayout.Label(string.Format(TitleVersionReformat, _releaseHistoryHeader));
@@ -332,7 +681,16 @@ namespace Quantum.Editor {
       GUILayout.EndVertical();
     }
 
-    void DrawReleaseSection() {
+    void DrawSectionReleaseHistory() {
+      GUILayout.Label(TextSection_Changelog);
+      GUILayout.Space(8);
+
+      var textAsset = (TextAsset)AssetDatabase.LoadAssetAtPath(ReleaseHistoryFilepath, typeof(TextAsset));
+      DrawButtonAction(Button_FileChangelog,
+        callback: () => { EditorGUIUtility.PingObject(textAsset); Selection.activeObject = textAsset; });
+
+      DrawButtonAction(Button_DocReleaseNotes, callback: OpenURL(UrlChangelog));
+
       GUILayout.Label(_releaseHistory, _releaseNotesStyle);
     }
 
@@ -352,25 +710,22 @@ namespace Quantum.Editor {
       }
     }
 
-    void DrawSupportSection() {
+    void DrawSectionSupport() {
+      GUILayout.Label(TextSection_Support, _textLabelStyle);
+      GUILayout.Space(8);
 
-      GUILayout.BeginVertical();
-      GUILayout.Space(5);
-      GUILayout.Label(TexSupport, _textLabelStyle);
-      GUILayout.EndVertical();
-
-      GUILayout.Space(15);
-
-      DrawButtonAction(Icon.Community, "Community", "Join the Photon Discord Server.", callback: OpenURL(UrlPublicDiscord));
-      DrawButtonAction(Icon.Documentation, "Online Documentation", "Open the online documentation.", callback: OpenURL(UrlDoc));
-      DrawButtonAction(Icon.Documentation, "SDK and Release Notes", "Latest SDK downloads.", callback: OpenURL(UrlSDK));
-      DrawButtonAction(Icon.Documentation, "API Reference", "The API library reference documentation.", callback: OpenURL(UrlDocApi));
+      DrawButtonAction(Button_DocCircleLink, callback: OpenURL(UrlCircle));
+      DrawButtonAction(Button_CommunityDiscord, callback: OpenURL(UrlPublicDiscord));
+      DrawButtonAction(Button_DocsOnlineLink, callback: OpenURL(UrlDoc));
+      DrawButtonAction(Button_DocsSdkDownloadLink, callback: OpenURL(UrlSDK));
+      DrawButtonAction(Button_DocsApiLink, callback: OpenURL(UrlDocApi));
     }
 
-    void DrawVersionSection() {
+    void DrawSectionAbout() {
       var textAsset = (TextAsset)AssetDatabase.LoadAssetAtPath(BuildInfoFilepath, typeof(TextAsset));
-      var text = textAsset.text;
+      DrawButtonAction(Button_FileBuildInfo, callback: () => { EditorGUIUtility.PingObject(textAsset); Selection.activeObject = textAsset; });
 
+      var text = textAsset.text;
       GUILayout.BeginVertical();
       GUILayout.Space(5);
       text = Regex.Replace(text, @"(build):", string.Format(ClassReformat, "$1"));
@@ -378,9 +733,6 @@ namespace Quantum.Editor {
       text = Regex.Replace(text, @"(git):", string.Format(ClassReformat, "$1"));
       GUILayout.Label(text, _textLabelStyle);
       GUILayout.EndVertical();
-
-      DrawButtonAction(Icon.BuildIn_TextAssetIcon, "Build Info", "Build Information File",
-        callback: () => { EditorGUIUtility.PingObject(textAsset); Selection.activeObject = textAsset; });
 
       try {
         var codeBase = Assembly.GetAssembly(typeof(FP)).CodeBase;
@@ -413,60 +765,76 @@ namespace Quantum.Editor {
           }
         }
 
-        GUILayout.Label(GetStatusIcon(hasDefaultInstance), GUILayout.Width(StatusIconWidth.x), GUILayout.Height(StatusIconWidth.y));
+        GUILayout.Label(GetStatusIcon(hasDefaultInstance), GUILayout.Width(StatusIconWidthDefault.x), GUILayout.Height(StatusIconWidthDefault.y));
       }
     }
  
+    void DrawCompletedStepBox() {
+      using (new EditorGUILayout.VerticalScope(GetBoxStyle)) {
+        GUILayout.Label(GetStatusIcon(true), GUILayout.Width(StatusIconWidthDefault.x), GUILayout.Height(StatusIconWidthDefault.y));
+      }
+    }
+
     void DrawInstallationBox() {
-      using (new EditorGUILayout.VerticalScope(QuantumHubSkin.GetStyle("SteelBox"))) {
+      using (new EditorGUILayout.VerticalScope(GetBoxStyle)) {
         GUILayout.Label(TextInstallationInstructions);
 
-        DrawButtonAction(Icon.QuantumIcon, "Install", "Install Quantum user files.",
+        DrawButtonAction(Button_InstallQuantum,
+          statusIcon: GetStatusIcon(_statusInstallationComplete),
           callback: () => {
             InstallAllUserFiles();
           });
 
-        DrawGlobalObjectStatus<PhotonServerSettings>();
-        DrawGlobalObjectStatus<QuantumDeterministicSessionConfigAsset>();
-        DrawGlobalObjectStatus<QuantumUnityDB>();
-        DrawGlobalObjectStatus<QuantumEditorSettings>();
-        DrawGlobalObjectStatus<QuantumGameGizmosSettingsScriptableObject>();
-        DrawGlobalObjectStatus<QuantumDefaultConfigs>();
-        DrawGlobalObjectStatus<QuantumDotnetBuildSettings>();
-        DrawGlobalObjectStatus<QuantumDotnetProjectSettings>();
+        
+        QuantumGlobalScriptableObjectUtils.CreateFindDefaultAssetPathCache();
+        try {
+          DrawGlobalObjectStatus<PhotonServerSettings>();
+          DrawGlobalObjectStatus<QuantumDeterministicSessionConfigAsset>();
+          DrawGlobalObjectStatus<QuantumUnityDB>();
+          DrawGlobalObjectStatus<QuantumEditorSettings>();
+          DrawGlobalObjectStatus<QuantumGameGizmosSettingsScriptableObject>();
+          DrawGlobalObjectStatus<QuantumDefaultConfigs>();
+          DrawGlobalObjectStatus<QuantumDotnetBuildSettings>();
+          DrawGlobalObjectStatus<QuantumDotnetProjectSettings>();
+        } finally {
+          QuantumGlobalScriptableObjectUtils.ClearFindDefaultAssetPathCache();
+        }
 
         using (new EditorGUILayout.HorizontalScope()) {
           if (GUILayout.Button(QuantumEditorUserScriptGeneration.FolderPath.Replace("Assets/", "") + " User Workspace", QuantumHubSkin.label)) {
             EditorGUIUtility.PingObject(AssetDatabase.LoadAssetAtPath(QuantumEditorUserScriptGeneration.PingWorkspaceFile, typeof(UnityEngine.Object)));
           }
-          GUILayout.Label(GetStatusIcon(QuantumEditorUserScriptGeneration.WorkspaceFilesExist), GUILayout.Width(StatusIconWidth.x), GUILayout.Height(StatusIconWidth.y));
+          GUILayout.Label(GetStatusIcon(QuantumEditorUserScriptGeneration.WorkspaceFilesExist), GUILayout.Width(StatusIconWidthDefault.x), GUILayout.Height(StatusIconWidthDefault.y));
         }
 
         using (new EditorGUILayout.HorizontalScope()) {
           if (GUILayout.Button(QuantumEditorUserScriptGeneration.FolderPath.Replace("Assets/", "") + " Partial Classes (*.cs.User)", QuantumHubSkin.label)) {
             EditorGUIUtility.PingObject(AssetDatabase.LoadAssetAtPath(QuantumEditorUserScriptGeneration.PingUserFile, typeof(UnityEngine.Object)));
           }
-          GUILayout.Label(GetStatusIcon(QuantumEditorUserScriptGeneration.UserFilesExist), GUILayout.Width(StatusIconWidth.x), GUILayout.Height(StatusIconWidth.y));
+          GUILayout.Label(GetStatusIcon(QuantumEditorUserScriptGeneration.UserFilesExist), GUILayout.Width(StatusIconWidthDefault.x), GUILayout.Height(StatusIconWidthDefault.y));
         }
 
         using (new EditorGUILayout.HorizontalScope()) {
           GUILayout.Label("QuantumUser Scenes");
           var foundAnySceneInUserFolder = Directory.Exists(QuantumEditorUserScriptGeneration.FolderPath) && AssetDatabase.FindAssets("t:Scene", new[] { QuantumEditorUserScriptGeneration.FolderPath }).Length > 0;
-          GUILayout.Label(GetStatusIcon(foundAnySceneInUserFolder), GUILayout.Width(StatusIconWidth.x), GUILayout.Height(StatusIconWidth.y));
+          GUILayout.Label(GetStatusIcon(foundAnySceneInUserFolder), GUILayout.Width(StatusIconWidthDefault.x), GUILayout.Height(StatusIconWidthDefault.y));
         }
 
         using (new EditorGUILayout.HorizontalScope()) {
           GUILayout.Label("Quantum Qtn CodeGen");
-          GUILayout.Label(GetStatusIcon(Quantum.Input.MaxCount > 0), GUILayout.Width(StatusIconWidth.x), GUILayout.Height(StatusIconWidth.y));
+          GUILayout.Label(GetStatusIcon(Quantum.Input.MaxCount > 0), GUILayout.Width(StatusIconWidthDefault.x), GUILayout.Height(StatusIconWidthDefault.y));
         }
 
         using (new EditorGUILayout.HorizontalScope()) {
           GUILayout.Label("EditorSettings.ProjectGenerationUserExtensions Include Qtn Files");
-          GUILayout.Label(GetStatusIcon(EditorSettings.projectGenerationUserExtensions.Contains("qtn")), GUILayout.Width(StatusIconWidth.x), GUILayout.Height(StatusIconWidth.y));
+          GUILayout.Label(GetStatusIcon(EditorSettings.projectGenerationUserExtensions.Contains("qtn")), GUILayout.Width(StatusIconWidthDefault.x), GUILayout.Height(StatusIconWidthDefault.y));
         }
       }
     }
 
+    /// <summary>
+    /// This methods installs all user files and generates the workspace files.
+    /// </summary>
     public static void InstallAllUserFiles() {
       QuantumGlobalScriptableObjectUtils.EnsureAssetExists<PhotonServerSettings>();
       QuantumGlobalScriptableObjectUtils.EnsureAssetExists<QuantumEditorSettings>();
@@ -500,7 +868,7 @@ namespace Quantum.Editor {
           true);
 
         if (Application.isBatchMode == false) {
-          // Don't call the gui ecxception when coming from CI
+          // Don't call the gui exception when coming from CI
           GUIUtility.ExitGUI();
         }
       }
@@ -512,15 +880,17 @@ namespace Quantum.Editor {
       var appId = photonServerSettings?.AppSettings.AppIdQuantum;
 
       // Setting up AppId content box.
-      using (new EditorGUILayout.VerticalScope(QuantumHubSkin.GetStyle("SteelBox"))) {
+      using (new EditorGUILayout.VerticalScope(GetBoxStyle)) {
         GUILayout.Label(TextAppIdInstructions);
 
-        using (new EditorGUILayout.HorizontalScope(QuantumHubSkin.GetStyle("SteelBox"))) {
+        DrawButtonAction(Button_DashboardLink, callback: OpenURL(UrlDashboard));
+
+        using (new EditorGUILayout.HorizontalScope(GetBoxStyle)) {
           GUILayout.Label("<b>App Id:</b>", GUILayout.Width(80));
           using (new EditorGUI.DisabledScope(photonServerSettings == null)) {
             using (new EditorGUILayout.HorizontalScope()) {
               EditorGUI.BeginChangeCheck();
-              var editedAppId = EditorGUILayout.TextField("", appId, QuantumHubSkin.textField, GUILayout.Height(StatusIconWidth.y));
+              var editedAppId = EditorGUILayout.TextField("", appId, QuantumHubSkin.textField, GUILayout.Height(StatusIconWidthDefault.y));
               if (EditorGUI.EndChangeCheck()) {
                 photonServerSettings.AppSettings.AppIdQuantum = editedAppId;
                 EditorUtility.SetDirty(photonServerSettings);
@@ -528,14 +898,8 @@ namespace Quantum.Editor {
               }
             }
           }
-          GUILayout.Label(GetStatusIcon(IsAppIdValid), GUILayout.Width(StatusIconWidth.x), GUILayout.Height(StatusIconWidth.y));
+          GUILayout.Label(GetStatusIcon(IsAppIdValid), GUILayout.Width(StatusIconWidthDefault.x), GUILayout.Height(StatusIconWidthDefault.y));
         }
-
-        DrawButtonAction(Icon.PhotonCloud, "Open The Photon Dashboard Url", callback: OpenURL(UrlDashboard));
-        EditorGUILayout.Space(4);
-
-        DrawButtonAction(Icon.BuildIn_ScriptableObjectIcon, "Select Photon Server Settings Asset", "Select the Photon network transport configuration asset.",
-          callback: () => { EditorGUIUtility.PingObject(PhotonServerSettings.Global); Selection.activeObject = PhotonServerSettings.Global; });
       }
     }
 
@@ -548,14 +912,18 @@ namespace Quantum.Editor {
       }
     }
 
-    void RefreshWelcomeSceenConditions() {
-      if (EditorApplication.timeSinceStartup < _welcomeSceenConditionsTimestamp + 1.5f) {
+    void RefreshWelcomeScreenConditions() {
+      if (EditorApplication.timeSinceStartup < _welcomeScreenConditionsTimestamp + 1.5f) {
         return;
       }
 
-      _welcomeSceenConditionsTimestamp = EditorApplication.timeSinceStartup;
-      _showInstallationInWelcome = !AreImportatUserFilesInstalled;
-      _showAppIdInWelcome = !IsAppIdValid;
+      _welcomeScreenConditionsTimestamp = EditorApplication.timeSinceStartup;
+      _statusInstallationComplete = AreImportantUserFilesInstalled;
+      _statusAppIdSetup = IsAppIdValid;
+      
+      // use types to narrow things down
+      _statusAsteroidsInstalled = FindType<AssetObject>("AsteroidsGameConfig") != null;
+      _statusMenuInstalled = FindType<QuantumScriptableObject>("QuantumMenuConfig") != null;
     }
 
     void DrawHeader() {
@@ -564,47 +932,64 @@ namespace Quantum.Editor {
 
     void DrawFooter() {
       GUILayout.BeginHorizontal(QuantumHubSkin.window);
-      {
-        GUILayout.Label("\u00A9 2024, Exit Games GmbH. All rights reserved.");
-      }
+      GUILayout.Label("\u00A9 2024, Exit Games GmbH. All rights reserved.");
       GUILayout.EndHorizontal();
     }
 
-    bool DrawNavButton(Section section, bool currentSection) {
+    bool DrawNavButton(SectionInfo section, bool currentSection) {
       var content = new GUIContent() {
         text  = "  " + section.Title,
         image = GetIcon(section.Icon),
       };
 
       var renderStyle = currentSection ? _buttonActiveStyle : GUI.skin.button;
-      return GUILayout.Button(content, renderStyle);
+      return GUILayout.Button(content, renderStyle, GUILayout.Height(NavButtonHeight), GUILayout.Width(NavButtonWidth));
     }
 
-    void DrawButtonAction(Icon icon, string header, string description = null, bool? active = null, Action callback = null, int? width = null) {
-      DrawButtonAction(GetIcon(icon), header, description, active, callback, width);
+    void DrawButtonAction(ButtonInfo info, bool enabled = true, Action callback = null, int? width = null, Texture2D statusIcon = null) {
+      DrawButtonAction(GetIcon(info.Icon), info.Header, info.Description, enabled, callback, width, statusIcon);
     }
 
-    static void DrawButtonAction(Texture2D icon, string header, string description = null, bool? active = null, Action callback = null, int? width = null) {
+    void DrawButtonAction(Icon icon, string header, string description = null, bool enabled = true, Action callback = null, int? width = null, Texture2D statusIcon = null) {
+      DrawButtonAction(GetIcon(icon), header, description, enabled, callback, width, statusIcon);
+    }
+
+    static void DrawButtonAction(Texture2D icon, string header, string description = null, bool enabled = true, Action callback = null, int? width = null, Texture2D statusIcon = null) {
       var padding = GUI.skin.button.padding.top + GUI.skin.button.padding.bottom;
       var height = IconSize + padding;
 
-      var renderStyle = active.HasValue && active.Value == true ? _buttonActiveStyle : GUI.skin.button;
-      // Draw text separately (not part of button guiconent) to have control over the space between the icon and the text.
+      // Draw text separately (not part of button guicontent) to have control over the space between the icon and the text.
       var rect = EditorGUILayout.GetControlRect(false, height, width.HasValue ? GUILayout.Width(width.Value) : GUILayout.ExpandWidth(true));
-      bool clicked = GUI.Button(rect, icon, renderStyle);
-      GUI.Label(new Rect(rect) { xMin = rect.xMin + IconSize + 20 }, description == null ? "<b>" + header +"</b>" : string.Format("<b>{0}</b>\n{1}", header, "<color=#aaaaaa>" + description + "</color>"));
+
+      var wasEnabled = GUI.enabled;
+      GUI.enabled = enabled;
+      bool clicked = GUI.Button(rect, icon, GUI.skin.button);
+      GUI.enabled = wasEnabled;
+      GUI.Label(new Rect(rect) { 
+        xMin = rect.xMin + IconSize + IconMargin * 2,
+        xMax = rect.xMax - (statusIcon != null ? (IconSize + 20) : 0),
+      }, description == null ? "<b>" + header +"</b>" : string.Format("<b>{0}</b>\n{1}", header, "<color=#aaaaaa>" + description + "</color>"));
       if (clicked && callback != null) {
         callback.Invoke();
       }
+
+      if (statusIcon) {
+        GUI.DrawTexture(new Rect(rect) {
+          yMin = rect.yMin + (rect.height - StatusIconWidthDefault.y) / 2,
+          xMin = rect.xMax - (StatusIconWidthDefault.x + IconMargin),
+          width = StatusIconWidthDefault.y,
+          height = StatusIconWidthDefault.x,
+        }, statusIcon);
+      } 
     }
 
-    class Section {
+    class SectionInfo {
       public string Title;
       public string Description;
       public Action DrawMethod;
       public Icon Icon;
 
-      public Section(string title, string description, Action drawMethod, Icon icon) {
+      public SectionInfo(string title, string description, Action drawMethod, Icon icon) {
         Title = title;
         Description = description;
         DrawMethod = drawMethod;
@@ -612,15 +997,29 @@ namespace Quantum.Editor {
       }
     }
 
+    class ButtonInfo {
+      public Icon Icon;
+      public string Header;
+      public string Description;
+
+      public ButtonInfo(Icon icon, string header, string description) {
+        Icon = icon;
+        Header = header;
+        Description = description;
+      }
+    }
+
     Texture2D GetIcon(Icon icon) {
       switch (icon) {
         case Icon.Setup: return SetupIcon;
         case Icon.Documentation: return DocumentationIcon;
+        case Icon.Link: return LinkIcon;
+        case Icon.Text: return TextIcon;
         case Icon.Samples: return SamplesIcon;
         case Icon.Community: return CommunityIcon;
         case Icon.ProductLogo: return ProductLogo;
         case Icon.PhotonCloud: return PhotonCloudIcon;
-        case Icon.QuantumIcon: return QuantumIcon;
+        case Icon.Installation: return InstallationIcon;
         default: 
           if (icon < Icon.Setup && _buildInIcons != null && _buildInIcons.Count >= (int)icon) {
             return _buildInIcons[(int)icon];
@@ -630,25 +1029,25 @@ namespace Quantum.Editor {
     }
 
     void InitContent() {
-      if (_ready.HasValue && _ready.Value) {
+      if (_isOpen.HasValue && _isOpen.Value) {
         return;
       }
 
       _sections = new[] {
-        new Section("Welcome", "Welcome to Photon Quantum 3", DrawWelcomeSection, Icon.Setup),
-        new Section("Quantum Setup", "Install Quantum User Files And Setup Photon AppId", DrawSetupSection, Icon.PhotonCloud),
-        new Section("Documentation & Support", "Support, Community Snd Documentation Links", DrawSupportSection, Icon.Community),
-        new Section("Tutorials & Samples", "Tutorials and Samples", DrawSamplesSection, Icon.Samples),
-        new Section("Quantum Release Notes", "Quantum Release Notes", DrawReleaseSection, Icon.Documentation),
-        new Section("Realtime Release Notes", "Realtime Release Notes", DrawRealtimeReleaseSection, Icon.Documentation),
-        new Section("Build Info", "Quantum Build Info", DrawVersionSection, Icon.QuantumIcon),
+        new SectionInfo("Welcome", "Welcome to Photon Quantum 3", DrawSectionWelcome, Icon.Setup),
+        new SectionInfo("Samples", "Samples And Tutorials", DrawSectionSample, Icon.Samples),
+        new SectionInfo("Support", "Support, Community And Documentation", DrawSectionSupport, Icon.Community),
+        new SectionInfo("Installation", "Quantum 3 SDK Installation", DrawSectionInstallation, Icon.Installation),
+        new SectionInfo("Quantum Release Notes", "Photon Quantum Release Notes", DrawSectionReleaseHistory, Icon.Text),
+        new SectionInfo("Realtime Release Notes", "Photon Realtime Release Notes", DrawReleaseHistoryRealtimeSection, Icon.Text),
+        new SectionInfo("About", "Quantum SDK Build Information", DrawSectionAbout, Icon.Text),
       };
 
       Color commonTextColor = Color.white;
 
       var _guiSkin = QuantumHubSkin;
 
-      _navbarHeaderGraphicStyle = new GUIStyle(_guiSkin.button) { alignment = TextAnchor.MiddleCenter };
+      _navbarHeaderGraphicStyle = new GUIStyle(GetBoxStyle) { alignment = TextAnchor.MiddleCenter };
 
       _headerTextStyle = new GUIStyle(_guiSkin.label) {
         fontSize = 18,
@@ -677,7 +1076,7 @@ namespace Quantum.Editor {
         richText = true,
       };
 
-      _ready = true;
+      _isOpen = true;
     }
 
     static Action OpenURL(string url, params object[] args) {
@@ -784,15 +1183,32 @@ namespace Quantum.Editor {
     }
 
     Texture2D GetStatusIcon(bool isValid) {
-      return isValid ? CorrectIcon : EditorGUIUtility.FindTexture("console.erroricon.sml");
+      return isValid ? CorrectIcon : MissingIcon;
     }
 
-    static bool IsValidGuid(string appdId) {
+    static bool IsValidGuid(string appId) {
       try {
-        return new Guid(appdId) != null;
+        return new Guid(appId) != null;
       } catch {
         return false;
       }
+    }
+
+    static Type FindType<T>(string name) {
+      foreach (var t in TypeCache.GetTypesDerivedFrom<T>()) {
+        if (string.Equals(t.Name, name, StringComparison.Ordinal)) {
+          return t;
+        }
+      }
+
+      return null;
+    }
+  }
+
+  class QuantumEditorHubWindowAssetPostprocessor : AssetPostprocessor {
+    private static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths) {
+      // Unity handling for post asset processing callback. Checks existence of settings assets every time assets change.
+      QuantumEditorHubWindow.EnsureUserFilesExists();
     }
   }
 }

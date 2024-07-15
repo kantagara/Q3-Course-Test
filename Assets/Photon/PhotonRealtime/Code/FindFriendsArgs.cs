@@ -1,8 +1,16 @@
-using System;
+// -----------------------------------------------------------------------------
+// <copyright company="Exit Games GmbH">
+// Photon Realtime API - Copyright (C) 2022 Exit Games GmbH
+// </copyright>
+// <summary>Arguments for FindFriends.</summary>
+// <author>developer@photonengine.com</author>
+// -----------------------------------------------------------------------------
 
 
 namespace Photon.Realtime
 {
+    using System;
+
     /// <summary>
     /// Options for OpFindFriends can be combined to filter which rooms of friends are returned.
     /// </summary>

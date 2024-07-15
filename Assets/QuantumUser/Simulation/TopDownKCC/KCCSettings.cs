@@ -19,7 +19,7 @@ namespace Quantum
 		public FP MaxPenetration;
 	}
 
-	unsafe partial class KCCSettings
+	public unsafe partial class KCCSettings : AssetObject
 	{
 		// This is the KCC actual radius (non penetrable)
 		public FP Radius = FP._0_50;

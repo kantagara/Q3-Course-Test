@@ -13,16 +13,25 @@ namespace Quantum {
     /// </summary>
     public QuantumRunner Runner;
 
+    /// <summary>
+    /// Unity OnEnable event is required to register to global camera callbacks for gizmos rendering.  
+    /// </summary>
     public void OnEnable() {
       Camera.onPostRender += OnPostRenderInternal;
       RenderPipelineManager.endCameraRendering += OnPostRenderInternal;
     }
 
+    /// <summary>
+    /// Unity OnDisable event is used to unsubscribe the global camera callbacks.
+    /// </summary>
     public void OnDisable() {
       Camera.onPostRender -= OnPostRenderInternal;
       RenderPipelineManager.endCameraRendering -= OnPostRenderInternal;
     }
 
+    /// <summary>
+    /// Unity Update event triggers the runner updates and ticks the Quantum simulation.
+    /// </summary>
     public void Update() {
       Runner?.Update();
     }

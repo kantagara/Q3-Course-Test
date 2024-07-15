@@ -640,10 +640,13 @@ namespace Photon.Realtime
             this.Done = true;
             this.ping.Dispose();
 
-            int bestRtt = this.rttResults.Min();
-            int worstRtt = this.rttResults.Max();
-            int weighedRttSum = rttSum - worstRtt + bestRtt;
-            this.region.Ping = (int)(weighedRttSum / replyCount);   // now, we can create a weighted ping value
+            if (this.rttResults.Count > 1 && replyCount > 0)
+            {
+                int bestRtt = this.rttResults.Min();
+                int worstRtt = this.rttResults.Max();
+                int weighedRttSum = rttSum - worstRtt + bestRtt;
+                this.region.Ping = (int)(weighedRttSum / replyCount); // now, we can create a weighted ping value
+            }
 
             this.onDoneCall(this.region);
             return false;
@@ -720,10 +723,15 @@ namespace Photon.Realtime
             //Debug.Log("Done: "+ this.region.Code);
             this.Done = true;
             this.ping.Dispose();
-            int bestRtt = this.rttResults.Min();
-            int worstRtt = this.rttResults.Max();
-            int weighedRttSum = rttSum - worstRtt + bestRtt;
-            this.region.Ping = (int)(weighedRttSum / replyCount); // now, we can create a weighted ping value
+
+            if (this.rttResults.Count > 1 && replyCount > 0)
+            {
+                int bestRtt = this.rttResults.Min();
+                int worstRtt = this.rttResults.Max();
+                int weighedRttSum = rttSum - worstRtt + bestRtt;
+                this.region.Ping = (int)(weighedRttSum / replyCount); // now, we can create a weighted ping value
+            }
+
             this.onDoneCall(this.region);
             yield return null;
         }

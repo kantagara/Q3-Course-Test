@@ -2,12 +2,11 @@ namespace Quantum.Editor {
 #if UNITY_EDITOR
   using System;
   using System.Linq;
-  using CodeGen;
   using UnityEditor;
   using UnityEditor.AssetImporters;
   using UnityEngine;
 
-  [ScriptedImporter(Quantum.CodeGen.CodeGenerator.Version, Extension)]
+  [ScriptedImporter(Quantum.CodeGen.Generator.Version, Extension)]
   public class QuantumQtnAssetImporter : ScriptedImporter {
     public const string Extension        = "qtn";
     public const string ExtensionWithDot = "." + Extension;

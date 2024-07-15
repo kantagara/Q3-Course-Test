@@ -14,6 +14,9 @@ namespace Quantum {
   [CreateAssetMenu(menuName = "Quantum/Configurations/PhotonServerSettings", order = EditorDefines.AssetMenuPriorityConfigurations + 1)]
   [QuantumGlobalScriptableObject(DefaultPath)]
   public class PhotonServerSettings : QuantumGlobalScriptableObject<PhotonServerSettings> {
+    /// <summary>
+    /// The default asset path to search or create a default server settings asset.
+    /// </summary>
     public const string DefaultPath = "Assets/QuantumUser/Resources/PhotonServerSettings.asset";
 
     /// <summary>
@@ -57,6 +60,9 @@ namespace Quantum {
       AppSettings = new AppSettings();
     }
 
+    /// <summary>
+    /// Obsolete: use new AppSettings(appsSettings)
+    /// </summary>
     [Obsolete("Use new AppSettings(appsSettings) instead")]
     public static AppSettings CloneAppSettings(AppSettings appSettings) {
       return new AppSettings(appSettings);

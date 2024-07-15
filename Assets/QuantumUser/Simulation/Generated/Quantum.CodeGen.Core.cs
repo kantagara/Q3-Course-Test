@@ -524,7 +524,7 @@ namespace Quantum {
   }
   [StructLayout(LayoutKind.Explicit)]
   public unsafe partial struct _globals_ {
-    public const Int32 SIZE = 824;
+    public const Int32 SIZE = 840;
     public const Int32 ALIGNMENT = 8;
     [FieldOffset(0)]
     public AssetRef<Map> Map;
@@ -544,10 +544,12 @@ namespace Quantum {
     public BitSet1024 Systems;
     [FieldOffset(248)]
     public PhysicsSceneSettings PhysicsSettings;
-    [FieldOffset(528)]
+    [FieldOffset(536)]
+    public Int32 PlayerConnectedCount;
+    [FieldOffset(544)]
     [FramePrinter.FixedArrayAttribute(typeof(Input), 6)]
     private fixed Byte _input_[288];
-    [FieldOffset(816)]
+    [FieldOffset(832)]
     public BitSet6 PlayerLastConnectionState;
     public FixedArray<Input> input {
       get {
@@ -566,6 +568,7 @@ namespace Quantum {
         hash = hash * 31 + FrameMetaData.GetHashCode();
         hash = hash * 31 + Systems.GetHashCode();
         hash = hash * 31 + PhysicsSettings.GetHashCode();
+        hash = hash * 31 + PlayerConnectedCount.GetHashCode();
         hash = hash * 31 + HashCodeUtils.GetArrayHashCode(input);
         hash = hash * 31 + PlayerLastConnectionState.GetHashCode();
         return hash;
@@ -582,6 +585,7 @@ namespace Quantum {
         FrameMetaData.Serialize(&p->FrameMetaData, serializer);
         Quantum.BitSet1024.Serialize(&p->Systems, serializer);
         PhysicsSceneSettings.Serialize(&p->PhysicsSettings, serializer);
+        serializer.Stream.Serialize(&p->PlayerConnectedCount);
         FixedArray.Serialize(p->input, serializer, Statics.SerializeInput);
         Quantum.BitSet6.Serialize(&p->PlayerLastConnectionState, serializer);
     }
@@ -1083,7 +1087,7 @@ namespace Quantum {
       Native.Utils.Copy(_globals, frame._globals, sizeof(_globals_));
     }
     partial void InitGen() {
-      Initialize(this, this.SimulationConfig.Entities);
+      Initialize(this, this.SimulationConfig.Entities, 256);
       _ISignalPlayerKilledSystems = BuildSignalsArray<ISignalPlayerKilled>();
       _ISignalBeforePlayerKilledSystems = BuildSignalsArray<ISignalBeforePlayerKilled>();
       _ISignalCreateBulletSystems = BuildSignalsArray<ISignalCreateBullet>();
@@ -1171,7 +1175,9 @@ namespace Quantum {
       bitSet = new(_globals->PlayerLastConnectionState.Bits, _globals->PlayerLastConnectionState.Length);
     }
     partial void ResetPhysicsCodeGen() {
+      if (Context.Physics2D != null && Physics2D.Map != null && Physics2D.Map.Guid.IsDynamic) Physics2D.ResetMap();
       Physics2D.Init(_globals->PhysicsState2D.MapStaticCollidersState.TrackedMap);
+      if (Context.Physics3D != null && Physics3D.Map != null && Physics3D.Map.Guid.IsDynamic) Physics3D.ResetMap();
       Physics3D.Init(_globals->PhysicsState3D.MapStaticCollidersState.TrackedMap);
     }
     public unsafe partial struct FrameSignals {
@@ -1245,6 +1251,7 @@ namespace Quantum {
       typeRegistry.Register(typeof(FPVector2), FPVector2.SIZE);
       typeRegistry.Register(typeof(FPVector3), FPVector3.SIZE);
       typeRegistry.Register(typeof(FrameMetaData), FrameMetaData.SIZE);
+      typeRegistry.Register(typeof(FrameTimer), FrameTimer.SIZE);
       typeRegistry.Register(typeof(Quantum.GameManager), Quantum.GameManager.SIZE);
       typeRegistry.Register(typeof(Quantum.GameState), 4);
       typeRegistry.Register(typeof(Quantum.Grass), Quantum.Grass.SIZE);

@@ -1,4 +1,13 @@
-﻿#if UNITY_2017_4_OR_NEWER
+﻿// -----------------------------------------------------------------------------
+// <copyright company="Exit Games GmbH">
+// Photon Realtime API - Copyright (C) 2022 Exit Games GmbH
+// </copyright>
+// <summary>Extension methods to make async use of RealtimeClient.</summary>
+// <author>developer@photonengine.com</author>
+// -----------------------------------------------------------------------------
+
+
+#if UNITY_2017_4_OR_NEWER
 #define SUPPORTED_UNITY
 #endif
 
@@ -30,6 +39,7 @@ namespace Photon.Realtime
             return CancellationTokenSource.CreateLinkedTokenSource(GlobalCancellationSource.Token, token);
         }
 
+        /// <summary>Initialization within Unity. Setting CancellationToken and some more.</summary>
         [RuntimeInitializeOnLoadMethod]
         public static void Startup()
         {
@@ -63,6 +73,10 @@ namespace Photon.Realtime
     using System.Threading.Tasks;
     using Photon.Client;
 
+    /// <summary>
+    /// Extensions methods to wrap Photon Realtime API calls into <see cref="System.Threading.Tasks"/>.
+    /// 
+    /// </summary>
     public static class AsyncExtensions
     {
         internal static AsyncConfig Resolve(this AsyncConfig config)
@@ -73,16 +87,16 @@ namespace Photon.Realtime
         /// <summary>
         /// Connect to master server.
         /// </summary>
-        /// <param name="client">Client</param>
-        /// <param name="appSettings">App settings</param>
-        /// <param name="config">Optional AsyncConfig, otherwise AsyncConfig.Global is used</param>
+        /// <param name="client">Client.</param>
+        /// <param name="appSettings">App settings.</param>
+        /// <param name="config">Optional AsyncConfig, otherwise AsyncConfig.Global is used.</param>
         /// <returns>When connected to master server callback was called.</returns>
-        /// <exception cref="DisconnectException">Is thrown when the connection terminated</exception>
-        /// <exception cref="AuthenticationFailedException">Is thrown when the authentication failed</exception>
-        /// <exception cref="OperationStartException">Is thrown when the operation could not be started</exception>
-        /// <exception cref="OperationException">Is thrown when the operation completed unsuccesfully</exception>
-        /// <exception cref="OperationTimeoutException">Is thrown when the operation timed out</exception>
-        /// <exception cref="OperationCanceledException">Is thrown when the operation have been canceled (AsyncConfig.CancellationSource)</exception>
+        /// <exception cref="DisconnectException">Is thrown when the connection is terminated.</exception>
+        /// <exception cref="AuthenticationFailedException">Is thrown when the authentication failed.</exception>
+        /// <exception cref="OperationStartException">Is thrown when the operation could not be started.</exception>
+        /// <exception cref="OperationException">Is thrown when the operation completed unsuccessfully.</exception>
+        /// <exception cref="OperationTimeoutException">Is thrown when the operation timed out.</exception>
+        /// <exception cref="OperationCanceledException">Is thrown when the operation have been canceled (AsyncConfig.CancellationSource).</exception>
         public static Task ConnectUsingSettingsAsync(this RealtimeClient client, AppSettings appSettings, AsyncConfig config = null)
         {
             return config.Resolve().TaskFactory.StartNew(() =>
@@ -101,8 +115,9 @@ namespace Photon.Realtime
 #if DEBUG
                 handler.Name = "ConnectUsingSettings";
 #endif
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnDisconnectedMsg>(m => handler.SetException(new DisconnectException(m.cause))));
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnConnectedToMasterMsg>(m => handler.SetResult(ErrorCode.Ok)));
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnDisconnectedMsg>(m => handler.SetException(new DisconnectException(m.cause))));
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnCustomAuthenticationFailedMsg>(m => handler.SetException(new AuthenticationFailedException(m.debugMessage))));
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnConnectedToMasterMsg>(m => handler.SetResult(ErrorCode.Ok)));
                 return handler.Task;
             }).Unwrap();
         }
@@ -110,15 +125,15 @@ namespace Photon.Realtime
         /// <summary>
         /// Runs reconnect and rejoin.
         /// </summary>
-        /// <param name="client">Client object should be in Disconnected state</param>
-        /// <param name="throwOnError">Set ErrorCode as result on RoomJoinFailed</param>
-        /// <param name="config">Optional AsyncConfig, otherwise AsyncConfig.Global is used</param>
+        /// <param name="client">Client object should be in Disconnected state.</param>
+        /// <param name="throwOnError">Set ErrorCode as result on RoomJoinFailed.</param>
+        /// <param name="config">Optional AsyncConfig, otherwise AsyncConfig.Global is used.</param>
         /// <returns>Returns when inside the room or error</returns>
-        /// <exception cref="DisconnectException">Is thrown when the connection terminated</exception>
-        /// <exception cref="OperationStartException">Is thrown when the operation could not be started</exception>
-        /// <exception cref="OperationException">Is thrown when the operation completed unsuccesfully</exception>
-        /// <exception cref="OperationTimeoutException">Is thrown when the operation timed out</exception>
-        /// <exception cref="OperationCanceledException">Is thrown when the operation have been canceled (AsyncConfig.CancellationSource)</exception>
+        /// <exception cref="DisconnectException">Is thrown when the connection terminated.</exception>
+        /// <exception cref="OperationStartException">Is thrown when the operation could not be started.</exception>
+        /// <exception cref="OperationException">Is thrown when the operation completed unsuccessfully.</exception>
+        /// <exception cref="OperationTimeoutException">Is thrown when the operation timed out.</exception>
+        /// <exception cref="OperationCanceledException">Is thrown when the operation have been canceled (AsyncConfig.CancellationSource).</exception>
         public static Task<short> ReconnectAndRejoinAsync(this RealtimeClient client, bool throwOnError = true, AsyncConfig config = null)
         {
             return config.Resolve().TaskFactory.StartNew(() =>
@@ -137,14 +152,13 @@ namespace Photon.Realtime
 #if DEBUG
                 handler.Name = "ReconnectAndRejoin";
 #endif
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnDisconnectedMsg>(m => handler.SetException(new DisconnectException(m.cause))));
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnJoinedRoomMsg>(m => handler.SetResult(ErrorCode.Ok)));
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnJoinRandomFailedMsg>(m => {
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnDisconnectedMsg>(m => handler.SetException(new DisconnectException(m.cause))));
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnJoinedRoomMsg>(m => handler.SetResult(ErrorCode.Ok)));
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnJoinRandomFailedMsg>(m => {
                     if (throwOnError) {
                         handler.SetException(new OperationException(m.returnCode, m.message));
                     }
                     else {
-                        Log.Error(m.message);
                         handler.SetResult(m.returnCode);
                     }}));
                 return handler.Task;
@@ -154,14 +168,14 @@ namespace Photon.Realtime
         /// <summary>
         /// Reconnect to master server.
         /// </summary>
-        /// <param name="client">Client object should be in Disconnected state</param>
-        /// <param name="config">Optional AsyncConfig, otherwise AsyncConfig.Global is used</param>
+        /// <param name="client">Client object should be in Disconnected state.</param>
+        /// <param name="config">Optional AsyncConfig, otherwise AsyncConfig.Global is used.</param>
         /// <returns></returns>
-        /// <exception cref="DisconnectException">Is thrown when the connection terminated</exception>
-        /// <exception cref="OperationStartException">Is thrown when the operation could not be started</exception>
-        /// <exception cref="OperationException">Is thrown when the operation completed unsuccesfully</exception>
-        /// <exception cref="OperationTimeoutException">Is thrown when the operation timed out</exception>
-        /// <exception cref="OperationCanceledException">Is thrown when the operation have been canceled (AsyncConfig.CancellationSource)</exception>
+        /// <exception cref="DisconnectException">Is thrown when the connection terminated.</exception>
+        /// <exception cref="OperationStartException">Is thrown when the operation could not be started.</exception>
+        /// <exception cref="OperationException">Is thrown when the operation completed unsuccessfully.</exception>
+        /// <exception cref="OperationTimeoutException">Is thrown when the operation timed out.</exception>
+        /// <exception cref="OperationCanceledException">Is thrown when the operation have been canceled (AsyncConfig.CancellationSource).</exception>
         public static Task ReconnectToMasterAsync(this RealtimeClient client, AsyncConfig config = null)
         {
             return config.Resolve().TaskFactory.StartNew(() =>
@@ -180,8 +194,8 @@ namespace Photon.Realtime
 #if DEBUG
                 handler.Name = "ReconnectToMaster";
 #endif
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnDisconnectedMsg>(m => handler.SetException(new DisconnectException(m.cause))));
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnConnectedToMasterMsg>(m => handler.SetResult(ErrorCode.Ok)));
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnDisconnectedMsg>(m => handler.SetException(new DisconnectException(m.cause))));
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnConnectedToMasterMsg>(m => handler.SetResult(ErrorCode.Ok)));
                 return handler.Task;
             }).Unwrap();
         }
@@ -190,13 +204,13 @@ namespace Photon.Realtime
         /// Disconnects the client.
         /// </summary>
         /// <param name="client">Client.</param>
-        /// <param name="config">Optional AsyncConfig, otherwise AsyncConfig.Global is used</param>
+        /// <param name="config">Optional AsyncConfig, otherwise AsyncConfig.Global is used.</param>
         /// <returns>Returns when the client has successfully disconnected</returns>
-        /// <exception cref="DisconnectException">Is thrown when the connection terminated</exception>
-        /// <exception cref="OperationStartException">Is thrown when the operation could not be started</exception>
-        /// <exception cref="OperationException">Is thrown when the operation completed unsuccesfully</exception>
-        /// <exception cref="OperationTimeoutException">Is thrown when the operation timed out</exception>
-        /// <exception cref="OperationCanceledException">Is thrown when the operation have been canceled (AsyncConfig.CancellationSource)</exception>
+        /// <exception cref="DisconnectException">Is thrown when the connection terminated.</exception>
+        /// <exception cref="OperationStartException">Is thrown when the operation could not be started.</exception>
+        /// <exception cref="OperationException">Is thrown when the operation completed unsuccessfully.</exception>
+        /// <exception cref="OperationTimeoutException">Is thrown when the operation timed out.</exception>
+        /// <exception cref="OperationCanceledException">Is thrown when the operation have been canceled (AsyncConfig.CancellationSource).</exception>
         public static Task DisconnectAsync(this RealtimeClient client, AsyncConfig config = null)
         {
             return config.Resolve().TaskFactory.StartNew(() =>
@@ -206,7 +220,7 @@ namespace Photon.Realtime
                     return Task.CompletedTask;
                 }
 
-                if (client.State == ClientState.Disconnected || client.State == ClientState.PeerCreated)
+                if (client.State == ClientState.Disconnected || client.State == ClientState.Disconnecting || client.State == ClientState.PeerCreated)
                 {
                     return Task.CompletedTask;
                 }
@@ -217,7 +231,7 @@ namespace Photon.Realtime
 #endif
                 var logLevel = client.LogLevel;
 
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnDisconnectedMsg>(m => {
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnDisconnectedMsg>(m => {
                     if (logLevel >= LogLevel.Info)
                     {
                         Log.Info($"Disconnected: {m.cause}");
@@ -240,15 +254,15 @@ namespace Photon.Realtime
         /// Will fail when connected to another server type.
         /// The client connection will be disconnected AFTER returning the result. It's not supposed to be useable.
         /// </summary>
-        /// <param name="client">Client object</param>
-        /// <param name="appSettings">Photon AppSettings, only uses AppId</param>
-        /// <param name="config">Async config</param>
+        /// <param name="client">Client object.</param>
+        /// <param name="appSettings">Photon AppSettings, only uses AppId.</param>
+        /// <param name="config">Async config.</param>
         /// <returns>RegionHandler with filled out EnabledRegions</returns>
-        /// <exception cref="DisconnectException">Is thrown when the connection terminated</exception>
-        /// <exception cref="OperationStartException">Is thrown when the operation could not be started</exception>
-        /// <exception cref="OperationException">Is thrown when the operation completed unsuccesfully</exception>
-        /// <exception cref="OperationTimeoutException">Is thrown when the operation timed out</exception>
-        /// <exception cref="OperationCanceledException">Is thrown when the operation have been canceled (AsyncConfig.CancellationSource)</exception>
+        /// <exception cref="DisconnectException">Is thrown when the connection terminated.</exception>
+        /// <exception cref="OperationStartException">Is thrown when the operation could not be started.</exception>
+        /// <exception cref="OperationException">Is thrown when the operation completed unsuccessfully.</exception>
+        /// <exception cref="OperationTimeoutException">Is thrown when the operation timed out.</exception>
+        /// <exception cref="OperationCanceledException">Is thrown when the operation have been canceled (AsyncConfig.CancellationSource).</exception>
         public static Task<RegionHandler> ConnectToNameserverAndWaitForRegionsAsync(this RealtimeClient client, AppSettings appSettings, AsyncConfig config = null)
         {
             return config.Resolve().TaskFactory.StartNew(() =>
@@ -268,13 +282,13 @@ namespace Photon.Realtime
                     // TODO: Implement FetchRegions() instead
                     if (client.ConnectUsingSettings(appSettingsCopy) == false)
                     {
-                        return Task.FromException<RegionHandler>(new OperationStartException("Failed to start conection to nameserver"));
+                        return Task.FromException<RegionHandler>(new OperationStartException("Failed to start connection to nameserver"));
                     }
                 }
                 // everything else
                 else
                 {
-                    return Task.FromException<RegionHandler>(new OperationStartException($"Client state ({client.State}) unsuable for name server connection."));
+                    return Task.FromException<RegionHandler>(new OperationStartException($"Client state ({client.State}) unuseable for name server connection."));
                 }
 
                 if (client.RegionHandler?.EnabledRegions == null || client.RegionHandler?.EnabledRegions.Count <= 0)
@@ -296,16 +310,16 @@ namespace Photon.Realtime
         /// <summary>
         /// Create and join a room.
         /// </summary>
-        /// <param name="client">Client object</param>
-        /// <param name="enterRoomArgs">Enter room params</param>
-        /// <param name="throwOnError">Set ErrorCode as result on RoomCreateFailed or RoomJoinFailed</param>
-        /// <param name="config">Optional AsyncConfig, otherwise AsyncConfig.Global is used</param>
+        /// <param name="client">Client object.</param>
+        /// <param name="enterRoomArgs">Enter room params.</param>
+        /// <param name="throwOnError">Set ErrorCode as result on RoomCreateFailed or RoomJoinFailed.</param>
+        /// <param name="config">Optional AsyncConfig, otherwise AsyncConfig.Global is used.</param>
         /// <returns>When the room has been entered</returns>
-        /// <exception cref="DisconnectException">Is thrown when the connection terminated</exception>
-        /// <exception cref="OperationStartException">Is thrown when the operation could not be started</exception>
-        /// <exception cref="OperationException">Is thrown when the operation completed unsuccesfully</exception>
-        /// <exception cref="OperationTimeoutException">Is thrown when the operation timed out</exception>
-        /// <exception cref="OperationCanceledException">Is thrown when the operation have been canceled (AsyncConfig.CancellationSource)</exception>
+        /// <exception cref="DisconnectException">Is thrown when the connection terminated.</exception>
+        /// <exception cref="OperationStartException">Is thrown when the operation could not be started.</exception>
+        /// <exception cref="OperationException">Is thrown when the operation completed unsuccessfully.</exception>
+        /// <exception cref="OperationTimeoutException">Is thrown when the operation timed out.</exception>
+        /// <exception cref="OperationCanceledException">Is thrown when the operation have been canceled (AsyncConfig.CancellationSource).</exception>
         public static Task<short> CreateAndJoinRoomAsync(this RealtimeClient client, EnterRoomArgs enterRoomArgs, bool throwOnError = true, AsyncConfig config = null)
         {
             return config.Resolve().TaskFactory.StartNew(() =>
@@ -319,27 +333,25 @@ namespace Photon.Realtime
 #if DEBUG
                 handler.Name = "CreateAndJoinRoom";
 #endif
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnDisconnectedMsg>(m => handler.SetException(new DisconnectException(m.cause))));
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnJoinedRoomMsg>(m => handler.SetResult(ErrorCode.Ok)));
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnCreateRoomFailedMsg>(m => {
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnDisconnectedMsg>(m => handler.SetException(new DisconnectException(m.cause))));
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnJoinedRoomMsg>(m => handler.SetResult(ErrorCode.Ok)));
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnCreateRoomFailedMsg>(m => {
                     if (throwOnError)
                     {
                         handler.SetException(new OperationException(m.returnCode, m.message));
                     }
                     else
                     {
-                        Log.Error(m.message);
                         handler.SetResult(m.returnCode);
                     }
                 }));
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnJoinRoomFailedMsg>(m => {
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnJoinRoomFailedMsg>(m => {
                     if (throwOnError)
                     {
                         handler.SetException(new OperationException(m.returnCode, m.message));
                     }
                     else
                     {
-                        Log.Error(m.message);
                         handler.SetResult(m.returnCode);
                     }
                 }));
@@ -350,16 +362,16 @@ namespace Photon.Realtime
         /// <summary>
         /// Join room.
         /// </summary>
-        /// <param name="client">Client object</param>
-        /// <param name="enterRoomArgs">Enter room params</param>
-        /// <param name="throwOnError">Set ErrorCode as result when JoinRoomFailed</param>
-        /// <param name="config">Optional AsyncConfig, otherwise AsyncConfig.Global is used</param>
+        /// <param name="client">Client object.</param>
+        /// <param name="enterRoomArgs">Enter room params.</param>
+        /// <param name="throwOnError">Set ErrorCode as result when JoinRoomFailed.</param>
+        /// <param name="config">Optional AsyncConfig, otherwise AsyncConfig.Global is used.</param>
         /// <returns>When room has been entered</returns>
-        /// <exception cref="DisconnectException">Is thrown when the connection terminated</exception>
-        /// <exception cref="OperationStartException">Is thrown when the operation could not be started</exception>
-        /// <exception cref="OperationException">Is thrown when the operation completed unsuccesfully</exception>
-        /// <exception cref="OperationTimeoutException">Is thrown when the operation timed out</exception>
-        /// <exception cref="OperationCanceledException">Is thrown when the operation have been canceled (AsyncConfig.CancellationSource)</exception>
+        /// <exception cref="DisconnectException">Is thrown when the connection terminated.</exception>
+        /// <exception cref="OperationStartException">Is thrown when the operation could not be started.</exception>
+        /// <exception cref="OperationException">Is thrown when the operation completed unsuccessfully.</exception>
+        /// <exception cref="OperationTimeoutException">Is thrown when the operation timed out.</exception>
+        /// <exception cref="OperationCanceledException">Is thrown when the operation have been canceled (AsyncConfig.CancellationSource).</exception>
         public static Task<short> JoinRoomAsync(this RealtimeClient client, EnterRoomArgs enterRoomArgs, bool throwOnError = true, AsyncConfig config = null)
         {
             return config.Resolve().TaskFactory.StartNew(() =>
@@ -373,16 +385,15 @@ namespace Photon.Realtime
 #if DEBUG
                 handler.Name = "JoinRoom";
 #endif
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnDisconnectedMsg>(m => handler.SetException(new DisconnectException(m.cause))));
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnJoinedRoomMsg>(m => handler.SetResult(ErrorCode.Ok)));
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnJoinRoomFailedMsg>(m => {
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnDisconnectedMsg>(m => handler.SetException(new DisconnectException(m.cause))));
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnJoinedRoomMsg>(m => handler.SetResult(ErrorCode.Ok)));
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnJoinRoomFailedMsg>(m => {
                     if (throwOnError)
                     {
                         handler.SetException(new OperationException(m.returnCode, m.message));
                     }
                     else
                     {
-                        Log.Error(m.message);
                         handler.SetResult(m.returnCode);
                     }
                 }));
@@ -393,17 +404,18 @@ namespace Photon.Realtime
         /// <summary>
         /// Rejoin room.
         /// </summary>
-        /// <param name="client">Client object</param>
-        /// <param name="roomName">Room name to rejoin</param>
-        /// <param name="throwOnError">Set ErrorCode as result when JoinRoomFailed</param>
-        /// <param name="config">Optional AsyncConfig, otherwise AsyncConfig.Global is used</param>
+        /// <param name="client">Client object.</param>
+        /// <param name="roomName">Room name to rejoin.</param>
+        /// <param name="ticket">Matchmaking Ticket for this user and room. Can be null if not used.</param>
+        /// <param name="throwOnError">Set ErrorCode as result when JoinRoomFailed.</param>
+        /// <param name="config">Optional AsyncConfig, otherwise AsyncConfig.Global is used.</param>
         /// <returns>When room has been entered</returns>
-        /// <exception cref="DisconnectException">Is thrown when the connection terminated</exception>
-        /// <exception cref="OperationStartException">Is thrown when the operation could not be started</exception>
-        /// <exception cref="OperationException">Is thrown when the operation completed unsuccesfully</exception>
-        /// <exception cref="OperationTimeoutException">Is thrown when the operation timed out</exception>
-        /// <exception cref="OperationCanceledException">Is thrown when the operation have been canceled (AsyncConfig.CancellationSource)</exception>
-        public static Task<short> RejoinRoomAsync(this RealtimeClient client, string roomName, bool throwOnError = true, AsyncConfig config = null)
+        /// <exception cref="DisconnectException">Is thrown when the connection terminated.</exception>
+        /// <exception cref="OperationStartException">Is thrown when the operation could not be started.</exception>
+        /// <exception cref="OperationException">Is thrown when the operation completed unsuccessfully.</exception>
+        /// <exception cref="OperationTimeoutException">Is thrown when the operation timed out.</exception>
+        /// <exception cref="OperationCanceledException">Is thrown when the operation have been canceled (AsyncConfig.CancellationSource).</exception>
+        public static Task<short> RejoinRoomAsync(this RealtimeClient client, string roomName, object ticket = null, bool throwOnError = true, AsyncConfig config = null)
         {
             return config.Resolve().TaskFactory.StartNew(() =>
             {
@@ -422,16 +434,15 @@ namespace Photon.Realtime
 #if DEBUG
                 handler.Name = "RejoinRoom";
 #endif
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnDisconnectedMsg>(m => handler.SetException(new DisconnectException(m.cause))));
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnJoinedRoomMsg>(m => handler.SetResult(ErrorCode.Ok)));
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnJoinRoomFailedMsg>(m => {
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnDisconnectedMsg>(m => handler.SetException(new DisconnectException(m.cause))));
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnJoinedRoomMsg>(m => handler.SetResult(ErrorCode.Ok)));
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnJoinRoomFailedMsg>(m => {
                     if (throwOnError)
                     {
                         handler.SetException(new OperationException(m.returnCode, m.message));
                     }
                     else
                     {
-                        Log.Error(m.message);
                         handler.SetResult(m.returnCode);
                     }
                 }));
@@ -442,16 +453,16 @@ namespace Photon.Realtime
         /// <summary>
         /// Join or create room.
         /// </summary>
-        /// <param name="client">Client object</param>
-        /// <param name="enterRoomArgs">Enter room params</param>
-        /// <param name="throwOnError">Set ErrorCode as result when JoinRoomFailed</param>
-        /// <param name="config">Optional AsyncConfig, otherwise AsyncConfig.Global is used</param>
+        /// <param name="client">Client object.</param>
+        /// <param name="enterRoomArgs">Enter room params.</param>
+        /// <param name="throwOnError">Set ErrorCode as result when JoinRoomFailed.</param>
+        /// <param name="config">Optional AsyncConfig, otherwise AsyncConfig.Global is used.</param>
         /// <returns>When room has been entered</returns>
-        /// <exception cref="DisconnectException">Is thrown when the connection terminated</exception>
-        /// <exception cref="OperationStartException">Is thrown when the operation could not be started</exception>
-        /// <exception cref="OperationException">Is thrown when the operation completed unsuccesfully</exception>
-        /// <exception cref="OperationTimeoutException">Is thrown when the operation timed out</exception>
-        /// <exception cref="OperationCanceledException">Is thrown when the operation have been canceled (AsyncConfig.CancellationSource)</exception>
+        /// <exception cref="DisconnectException">Is thrown when the connection terminated.</exception>
+        /// <exception cref="OperationStartException">Is thrown when the operation could not be started.</exception>
+        /// <exception cref="OperationException">Is thrown when the operation completed unsuccessfully.</exception>
+        /// <exception cref="OperationTimeoutException">Is thrown when the operation timed out.</exception>
+        /// <exception cref="OperationCanceledException">Is thrown when the operation have been canceled (AsyncConfig.CancellationSource).</exception>
         public static Task<short> JoinOrCreateRoomAsync(this RealtimeClient client, EnterRoomArgs enterRoomArgs, bool throwOnError = true, AsyncConfig config = null)
         {
             return config.Resolve().TaskFactory.StartNew(() =>
@@ -465,27 +476,25 @@ namespace Photon.Realtime
 #if DEBUG
                 handler.Name = "JoinOrCreateRoom";
 #endif
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnDisconnectedMsg>(m => handler.SetException(new DisconnectException(m.cause))));
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnJoinedRoomMsg>(m => handler.SetResult(ErrorCode.Ok)));
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnCreateRoomFailedMsg>(m => {
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnDisconnectedMsg>(m => handler.SetException(new DisconnectException(m.cause))));
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnJoinedRoomMsg>(m => handler.SetResult(ErrorCode.Ok)));
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnCreateRoomFailedMsg>(m => {
                     if (throwOnError)
                     {
                         handler.SetException(new OperationException(m.returnCode, m.message));
                     }
                     else
                     {
-                        Log.Error(m.message);
                         handler.SetResult(m.returnCode);
                     }
                 }));
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnJoinRoomFailedMsg>(m => {
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnJoinRoomFailedMsg>(m => {
                     if (throwOnError)
                     {
                         handler.SetException(new OperationException(m.returnCode, m.message));
                     }
                     else
                     {
-                        Log.Error(m.message);
                         handler.SetResult(m.returnCode);
                     }
                 }));
@@ -496,17 +505,17 @@ namespace Photon.Realtime
         /// <summary>
         /// Join random or create room
         /// </summary>
-        /// <param name="client">Client object</param>
-        /// <param name="joinRandomRoomParams">Join random room params</param>
-        /// <param name="enterRoomArgs">Enter room params</param>
-        /// <param name="throwOnError">Set ErrorCode as result when operation fails with ErrorCode</param>
-        /// <param name="config">Optional AsyncConfig, otherwise AsyncConfig.Global is used</param>
+        /// <param name="client">Client object.</param>
+        /// <param name="joinRandomRoomParams">Join random room params.</param>
+        /// <param name="enterRoomArgs">Enter room params.</param>
+        /// <param name="throwOnError">Set ErrorCode as result when operation fails with ErrorCode.</param>
+        /// <param name="config">Optional AsyncConfig, otherwise AsyncConfig.Global is used.</param>
         /// <returns>When inside a room</returns>
-        /// <exception cref="DisconnectException">Is thrown when the connection terminated</exception>
-        /// <exception cref="OperationStartException">Is thrown when the operation could not be started</exception>
-        /// <exception cref="OperationException">Is thrown when the operation completed unsuccesfully</exception>
-        /// <exception cref="OperationTimeoutException">Is thrown when the operation timed out</exception>
-        /// <exception cref="OperationCanceledException">Is thrown when the operation have been canceled (AsyncConfig.CancellationSource)</exception>
+        /// <exception cref="DisconnectException">Is thrown when the connection terminated.</exception>
+        /// <exception cref="OperationStartException">Is thrown when the operation could not be started.</exception>
+        /// <exception cref="OperationException">Is thrown when the operation completed unsuccessfully.</exception>
+        /// <exception cref="OperationTimeoutException">Is thrown when the operation timed out.</exception>
+        /// <exception cref="OperationCanceledException">Is thrown when the operation have been canceled (AsyncConfig.CancellationSource).</exception>
         public static Task<short> JoinRandomOrCreateRoomAsync(this RealtimeClient client, JoinRandomRoomArgs joinRandomRoomParams = null, EnterRoomArgs enterRoomArgs = null, bool throwOnError = true, AsyncConfig config = null)
         {
             return config.Resolve().TaskFactory.StartNew(() =>
@@ -519,38 +528,35 @@ namespace Photon.Realtime
 #if DEBUG
                 handler.Name = "JoinRandomOrCreateRoom";
 #endif
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnDisconnectedMsg>(m => handler.SetException(new DisconnectException(m.cause))));
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnJoinedRoomMsg>(m => handler.SetResult(ErrorCode.Ok)));
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnCreateRoomFailedMsg>(m => {
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnDisconnectedMsg>(m => handler.SetException(new DisconnectException(m.cause))));
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnJoinedRoomMsg>(m => handler.SetResult(ErrorCode.Ok)));
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnCreateRoomFailedMsg>(m => {
                     if (throwOnError)
                     {
                         handler.SetException(new OperationException(m.returnCode, m.message));
                     }
                     else
                     {
-                        Log.Error(m.message);
                         handler.SetResult(m.returnCode);
                     }
                 }));
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnJoinRandomFailedMsg>(m => {
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnJoinRandomFailedMsg>(m => {
                     if (throwOnError)
                     {
                         handler.SetException(new OperationException(m.returnCode, m.message));
                     }
                     else
                     {
-                        Log.Error(m.message);
                         handler.SetResult(m.returnCode);
                     }
                 }));
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnJoinRoomFailedMsg>(m => {
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnJoinRoomFailedMsg>(m => {
                     if (throwOnError)
                     {
                         handler.SetException(new OperationException(m.returnCode, m.message));
                     }
                     else
                     {
-                        Log.Error(m.message);
                         handler.SetResult(m.returnCode);
                     }
                 }));
@@ -561,17 +567,17 @@ namespace Photon.Realtime
         /// <summary>
         /// Join random room
         /// </summary>
-        /// <param name="client">Client object</param>
-        /// <param name="joinRandomRoomParams">Join random room params</param>
-        /// <param name="throwOnError">Set ErrorCode as result when operation fails with ErrorCode</param>
-        /// <param name="config">Optional AsyncConfig, otherwise AsyncConfig.Global is used</param>
+        /// <param name="client">Client object.</param>
+        /// <param name="joinRandomRoomParams">Join random room params.</param>
+        /// <param name="throwOnError">Set ErrorCode as result when operation fails with ErrorCode.</param>
+        /// <param name="config">Optional AsyncConfig, otherwise AsyncConfig.Global is used.</param>
         /// <returns>When inside a room</returns>
-        /// <exception cref="DisconnectException">Is thrown when the connection terminated</exception>
-        /// <exception cref="OperationStartException">Is thrown when the operation could not be started</exception>
-        /// <exception cref="OperationException">Is thrown when the operation completed unsuccesfully</exception>
-        /// <exception cref="OperationTimeoutException">Is thrown when the operation timed out</exception>
-        /// <exception cref="OperationCanceledException">Is thrown when the operation have been canceled (AsyncConfig.CancellationSource)</exception>
-        public static Task<short> JoinRandomRoomAsync(this RealtimeClient client, JoinRandomRoomArgs joinRandomRoomParams, bool throwOnError = true, AsyncConfig config = null)
+        /// <exception cref="DisconnectException">Is thrown when the connection terminated.</exception>
+        /// <exception cref="OperationStartException">Is thrown when the operation could not be started.</exception>
+        /// <exception cref="OperationException">Is thrown when the operation completed unsuccessfully.</exception>
+        /// <exception cref="OperationTimeoutException">Is thrown when the operation timed out.</exception>
+        /// <exception cref="OperationCanceledException">Is thrown when the operation have been canceled (AsyncConfig.CancellationSource).</exception>
+        public static Task<short> JoinRandomRoomAsync(this RealtimeClient client, JoinRandomRoomArgs joinRandomRoomParams = null, bool throwOnError = true, AsyncConfig config = null)
         {
             return config.Resolve().TaskFactory.StartNew(() =>
             {
@@ -584,16 +590,15 @@ namespace Photon.Realtime
 #if DEBUG
                 handler.Name = "JoinRandomRoom";
 #endif
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnDisconnectedMsg>(m => handler.SetException(new DisconnectException(m.cause))));
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnJoinedRoomMsg>(m => handler.SetResult(ErrorCode.Ok)));
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnJoinRandomFailedMsg>(m => {
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnDisconnectedMsg>(m => handler.SetException(new DisconnectException(m.cause))));
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnJoinedRoomMsg>(m => handler.SetResult(ErrorCode.Ok)));
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnJoinRandomFailedMsg>(m => {
                     if (throwOnError)
                     {
                         handler.SetException(new OperationException(m.returnCode, m.message));
                     }
                     else
                     {
-                        Log.Error(m.message);
                         handler.SetResult(m.returnCode);
                     }
                 }));
@@ -604,16 +609,16 @@ namespace Photon.Realtime
         /// <summary>
         /// Leave room
         /// </summary>
-        /// <param name="client">Client object</param>
+        /// <param name="client">Client object.</param>
         /// <param name="becomeInactive">If true, this player becomes inactive in the game and can return later (if PlayerTTL of the room is != 0).</param>
-        /// <param name="throwOnError">Set ErrorCode as result when operation fails with ErrorCode</param>
-        /// <param name="config">Optional AsyncConfig, otherwise AsyncConfig.Global is used</param>
+        /// <param name="throwOnError">Set ErrorCode as result when operation fails with ErrorCode.</param>
+        /// <param name="config">Optional AsyncConfig, otherwise AsyncConfig.Global is used.</param>
         /// <returns>When the room has been left and the connection to the master server was resumed.</returns>
-        /// <exception cref="DisconnectException">Is thrown when the connection terminated</exception>
-        /// <exception cref="OperationStartException">Is thrown when the operation could not be started</exception>
-        /// <exception cref="OperationException">Is thrown when the operation completed unsuccesfully</exception>
-        /// <exception cref="OperationTimeoutException">Is thrown when the operation timed out</exception>
-        /// <exception cref="OperationCanceledException">Is thrown when the operation have been canceled (AsyncConfig.CancellationSource)</exception>
+        /// <exception cref="DisconnectException">Is thrown when the connection terminated.</exception>
+        /// <exception cref="OperationStartException">Is thrown when the operation could not be started.</exception>
+        /// <exception cref="OperationException">Is thrown when the operation completed unsuccessfully.</exception>
+        /// <exception cref="OperationTimeoutException">Is thrown when the operation timed out.</exception>
+        /// <exception cref="OperationCanceledException">Is thrown when the operation have been canceled (AsyncConfig.CancellationSource).</exception>
         public static Task LeaveRoomAsync(this RealtimeClient client, bool becomeInactive = false, bool throwOnError = true, AsyncConfig config = null)
         {
             return config.Resolve().TaskFactory.StartNew(() =>
@@ -632,8 +637,8 @@ namespace Photon.Realtime
 #if DEBUG
                 handler.Name = "LeaveRoom";
 #endif
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnDisconnectedMsg>(m => handler.SetException(new DisconnectException(m.cause))));
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnConnectedToMasterMsg>(m => handler.SetResult(ErrorCode.Ok)));
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnDisconnectedMsg>(m => handler.SetException(new DisconnectException(m.cause))));
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnConnectedToMasterMsg>(m => handler.SetResult(ErrorCode.Ok)));
                 return handler.Task;
             }).Unwrap();
         }
@@ -641,10 +646,10 @@ namespace Photon.Realtime
         /// <summary>
         /// Join a Lobby
         /// </summary>
-        /// <param name="client">Client object</param>
-        /// <param name="lobby">Lobby to Join</param>
-        /// <param name="throwOnError">Set ErrorCode as result when operation fails with ErrorCode</param>
-        /// <param name="config">Optional AsyncConfig, otherwise AsyncConfig.Global is used</param>
+        /// <param name="client">Client object.</param>
+        /// <param name="lobby">Lobby to Join.</param>
+        /// <param name="throwOnError">Set ErrorCode as result when operation fails with ErrorCode.</param>
+        /// <param name="config">Optional AsyncConfig, otherwise AsyncConfig.Global is used.</param>
         /// <returns>When inside a Lobby</returns>
         public static Task<short> JoinLobbyAsync(this RealtimeClient client, TypedLobby lobby = null, bool throwOnError = true, AsyncConfig config = null)
         {
@@ -659,8 +664,8 @@ namespace Photon.Realtime
 #if DEBUG
                 handler.Name = "JoinLobby";
 #endif
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnDisconnectedMsg>(m => handler.SetException(new DisconnectException(m.cause))));
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnJoinedLobbyMsg>(m => handler.SetResult(ErrorCode.Ok)));
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnDisconnectedMsg>(m => handler.SetException(new DisconnectException(m.cause))));
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnJoinedLobbyMsg>(m => handler.SetResult(ErrorCode.Ok)));
                 return handler.Task;
             }).Unwrap();
         }
@@ -668,9 +673,9 @@ namespace Photon.Realtime
         /// <summary>
         /// Leave a Lobby
         /// </summary>
-        /// <param name="client">Client object</param>
-        /// <param name="throwOnError">Set ErrorCode as result when operation fails with ErrorCode</param>
-        /// <param name="config">Optional AsyncConfig, otherwise AsyncConfig.Global is used</param>
+        /// <param name="client">Client object.</param>
+        /// <param name="throwOnError">Set ErrorCode as result when operation fails with ErrorCode.</param>
+        /// <param name="config">Optional AsyncConfig, otherwise AsyncConfig.Global is used.</param>
         /// <returns>When inside a Lobby</returns>
         public static Task<short> LeaveLobbyAsync(this RealtimeClient client, bool throwOnError = true, AsyncConfig config = null)
         {
@@ -694,8 +699,8 @@ namespace Photon.Realtime
 #if DEBUG
                 handler.Name = "LeaveLobby";
 #endif
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnDisconnectedMsg>(m => handler.SetException(new DisconnectException(m.cause))));
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnLeftLobbyMsg>(m => handler.SetResult(ErrorCode.Ok)));
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnDisconnectedMsg>(m => handler.SetException(new DisconnectException(m.cause))));
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnLeftLobbyMsg>(m => handler.SetResult(ErrorCode.Ok)));
                 return handler.Task;
             }).Unwrap();
         }
@@ -705,9 +710,9 @@ namespace Photon.Realtime
         /// The handler will monitor the Photon callbacks and complete, fault accordingly.
         /// <see cref="AsyncOperationHandler.Task"/> can complete with ErrorCode.Ok, exception on errors and a timeout <see cref="OperationTimeoutException"/>.
         /// </summary>
-        /// <param name="client">Client</param>
-        /// <param name="throwOnErrors">The default implementation will throw an exception on every unexpected result, set this to false to return a result ErrorCode instead</param>
-        /// <param name="config">Optional AsyncConfig, otherwise AsyncConfig.Global is used</param>
+        /// <param name="client">Client.</param>
+        /// <param name="throwOnErrors">The default implementation will throw an exception on every unexpected result, set this to false to return a result ErrorCode instead.</param>
+        /// <param name="config">Optional AsyncConfig, otherwise AsyncConfig.Global is used.</param>
         /// <returns>Phtoon Connection Handler object</returns>
         public static AsyncOperationHandler CreateConnectionHandler(this RealtimeClient client, bool throwOnErrors = true, AsyncConfig config = null)
         {
@@ -725,15 +730,15 @@ namespace Photon.Realtime
         }
 
         /// <summary>
-        /// Starts a task that calls <see cref="RealtimeClient.Service()"/> every updateIntervalMs miliseconds.
+        /// Starts a task that calls <see cref="RealtimeClient.Service()"/> every updateIntervalMs milliseconds.
         /// The task is stopped by the cancellation token from <see cref="AsyncOperationHandler.Token"/>.
         /// It will set an exception on the <see cref="AsyncOperationHandler"/> TaskCompletionSource if after the timeout it is still not completed.
         /// </summary>
-        /// <param name="client">Client</param>
-        /// <param name="token">Cancellation token to stop the update loop</param>
-        /// <param name="completionSource">Completion source is notified on an exception in Service()</param>
-        /// <param name="disposable">OperationHandler requires disposing</param>
-        /// <param name="config">Optional AsyncConfig, otherwise AsyncConfig.Global is used</param>
+        /// <param name="client">Client.</param>
+        /// <param name="token">Cancellation token to stop the update loop.</param>
+        /// <param name="completionSource">Completion source is notified on an exception in Service().</param>
+        /// <param name="disposable">OperationHandler requires disposing.</param>
+        /// <param name="config">Optional AsyncConfig, otherwise AsyncConfig.Global is used.</param>
         public static void CreateServiceTask(this RealtimeClient client, CancellationToken token, TaskCompletionSource<short> completionSource = null, IDisposable disposable = null, AsyncConfig config = null)
         {
             var startTime = DateTime.Now;
@@ -798,7 +803,7 @@ namespace Photon.Realtime
                     await completionSource.Task;
                 }
 
-                // if the (handler) token did not signal, and the tast is still running, mark it as cancelled
+                // if the (handler) token did not signal, and the task is still running, mark it as cancelled
                 if (token.IsCancellationRequested == false)
                 {
                     switch (completionSource.Task.Status)
@@ -821,10 +826,10 @@ namespace Photon.Realtime
         /// Returns a task that is completed when the connection disconnects.
         /// This does not create a service handler not does the task timeout.
         /// </summary>
-        /// <param name="client">Client object</param>
-        /// <param name="config">Async config</param>
+        /// <param name="client">Client object.</param>
+        /// <param name="config">Async config.</param>
         /// <returns>Task that completes upon disconnect</returns>
-        /// <exception cref="OperationCanceledException">Is thrown when the operation have been canceled (AsyncConfig.CancellationSource)</exception>
+        /// <exception cref="OperationCanceledException">Is thrown when the operation have been canceled (AsyncConfig.CancellationSource).</exception>
         public static Task WaitForDisconnect(this RealtimeClient client, AsyncConfig config = null)
         {
             return config.Resolve().TaskFactory.StartNew(() =>
@@ -840,7 +845,7 @@ namespace Photon.Realtime
                 }
 
                 var handler = new AsyncOperationHandler();
-                handler.Disposables.Add(client.CallbackMessage.ListenManual<OnDisconnectedMsg>(m => handler.SetResult(ErrorCode.Ok)));
+                handler.Disposables.Enqueue(client.CallbackMessage.ListenManual<OnDisconnectedMsg>(m => handler.SetResult(ErrorCode.Ok)));
                 return handler.Task;
             }).Unwrap();
         }
@@ -850,36 +855,69 @@ namespace Photon.Realtime
 namespace Photon.Realtime
 {
     using System;
-    using System.Collections.Generic;
+    using System.Collections.Concurrent;
     using System.Threading;
     using System.Threading.Tasks;
 
+    /// <summary>
+    /// The operation handler is used to monitor the Photon Realtime operation callbacks for an async task.
+    /// </summary>
     public class AsyncOperationHandler : IDisposable
     {
         private TaskCompletionSource<short> _result;
         private CancellationTokenSource _cancellation;
 
+        /// <summary>
+        /// Returns the task to complete.
+        /// </summary>
         public Task<short> Task => _result.Task;
+        /// <summary>
+        /// The completion source to trigger by operation callbacks.
+        /// </summary>
         public TaskCompletionSource<short> CompletionSource => _result;
+        /// <summary>
+        /// The cancellation token for the operation timeout, will return CancellationToken.None if no timeout is set.
+        /// </summary>
         public CancellationToken Token => _cancellation == null ? CancellationToken.None : _cancellation.Token;
+        /// <summary>
+        /// Returns if cancellation has been requested.
+        /// </summary>
         public bool IsCancellationRequested => _cancellation == null ? false : _cancellation.IsCancellationRequested;
-        public List<IDisposable> Disposables { get; private set; }
+        /// <summary>
+        /// A collection of additional objects or callbacks that need to be disposed once the operation handler is done.
+        /// For example subscriptions to <see cref="RealtimeClient.CallbackMessage"/>.
+        /// </summary>
+        public ConcurrentQueue<IDisposable> Disposables { get; private set; }
+        /// <summary>
+        /// The name of the operation handler, only set in DEBUG build configuration.
+        /// </summary>
         public string Name { get; set; }
 
+        /// <summary>
+        /// Create a new operation handler with a timeout.
+        /// </summary>
+        /// <param name="operationTimeoutSec">Operation timeout in seconds.</param>
         public AsyncOperationHandler(float operationTimeoutSec)
         {
             _result = new TaskCompletionSource<short>();
             _cancellation = new CancellationTokenSource(TimeSpan.FromSeconds(operationTimeoutSec));
             _cancellation.Token.Register(() => SetException(new OperationTimeoutException($"Operation timed out {Name}")));
-            Disposables = new List<IDisposable>();
+            Disposables = new ConcurrentQueue<IDisposable>();
         }
 
+        /// <summary>
+        /// Create a new operation handler without a timeout.
+        /// </summary>
         public AsyncOperationHandler()
         {
             _result = new TaskCompletionSource<short>();
-            Disposables = new List<IDisposable>();
+            Disposables = new ConcurrentQueue<IDisposable>();
         }
 
+        /// <summary>
+        /// Set the result and complete the operation handler.
+        /// </summary>
+        /// <param name="result">Result.</param>
         public void SetResult(short result)
         {
             if (_result.TrySetResult(result))
@@ -894,6 +932,10 @@ namespace Photon.Realtime
             }
         }
 
+        /// <summary>
+        /// Set an exception as result and complete the operation handler.
+        /// </summary>
+        /// <param name="e">Exception to raise.</param>
         public void SetException(Exception e)
         {
             if (_result.TrySetException(e))
@@ -908,17 +950,18 @@ namespace Photon.Realtime
             }
         }
 
+        /// <summary>
+        /// Dispose the handler and dispose all its <see cref="Disposables"/>.
+        /// </summary>
         public void Dispose()
         {
             _cancellation?.Dispose();
             _cancellation = null;
 
-            foreach (var disposable in Disposables)
+            while (Disposables.TryDequeue(out IDisposable di))
             {
-                disposable.Dispose();
+                di.Dispose();
             }
-
-            Disposables.Clear();
         }
     }
 }
@@ -928,8 +971,14 @@ namespace Photon.Realtime
     using System.Threading;
     using System.Threading.Tasks;
 
+    /// <summary>
+    /// The Photon Realtime async extension configuration is used in all async calls and will use the <see cref="Global"/> if not explicitly set.
+    /// </summary>
     public class AsyncConfig
     {
+        /// <summary>
+        /// The global async config used by all async calls if no explicit config is passed.
+        /// </summary>
         public static AsyncConfig Global = new AsyncConfig();
 
         /// <summary>
@@ -943,7 +992,7 @@ namespace Photon.Realtime
         public int ServiceIntervalMs { get; set; } = 10;
 
         /// <summary>
-        /// Timeout for oprations will cause a OperationCanceled exception.
+        /// Timeout for operations will cause a OperationCanceled exception.
         /// </summary>
         public float OperationTimeoutSec { get; set; } = 15.0f;
 
@@ -1023,7 +1072,7 @@ namespace Photon.Realtime
         private CancellationTokenSource cancellationTokenSource;
 
         /// <summary>
-        /// Creates a service task that calls <see cref="RealtimeClient.Service()"/> regularily.
+        /// Creates a service task that calls <see cref="RealtimeClient.Service()"/> regularly.
         /// </summary>
         /// <param name="client">Client connection object.</param>
         /// <param name="config">Async config.</param>
@@ -1049,40 +1098,83 @@ namespace Photon.Realtime
 {
     using System;
 
+    /// <summary>
+    /// Is used by the <see cref="AsyncExtensions"/> to signal disconnects.
+    /// </summary>
     public class DisconnectException : Exception
     {
+        /// <summary>
+        /// Disconnect cause.
+        /// </summary>
         public DisconnectCause Cause;
+        /// <summary>
+        /// Create disconnect exception with cause.
+        /// </summary>
+        /// <param name="cause">Disconnect cause.</param>
         public DisconnectException(DisconnectCause cause) : base($"DisconnectException: {cause}")
         {
             Cause = cause;
         }
     }
 
+    /// <summary>
+    /// Is used by the <see cref="AsyncExtensions"/> to signal authentication errors during connect.
+    /// </summary>
     public class AuthenticationFailedException : Exception
     {
+        /// <summary>
+        /// Create authentication failed exception.
+        /// </summary>
+        /// <param name="message">Debug message.</param>
         public AuthenticationFailedException(string message) : base(message)
         {
         }
     }
 
+    /// <summary>
+    /// Is used by the <see cref="AsyncExtensions"/> to signal that the requested operation failed.
+    /// </summary>
     public class OperationException : Exception
     {
+        /// <summary>
+        /// Error code specific to the Photon Realtime operation.
+        /// </summary>
         public short ErrorCode;
+        /// <summary>
+        /// Create an operation exception with error code and message.
+        /// </summary>
+        /// <param name="errorCode">Error code.</param>
+        /// <param name="message">Debug message.</param>
         public OperationException(short errorCode, string message) : base($"{message} (ErrorCode: {errorCode})")
         {
             ErrorCode = errorCode;
         }
     }
 
+    /// <summary>
+    /// Is used by the <see cref="AsyncExtensions"/> to signal that the operation could not be started.
+    /// </summary>
     public class OperationStartException : Exception
     {
+        /// <summary>
+        /// Create an operation start exception with message.
+        /// </summary>
+        /// <param name="message">Debug message.</param>
         public OperationStartException(string message) : base(message)
         {
         }
     }
 
+    /// <summary>
+    /// Is used by the <see cref="AsyncExtensions"/> to signal that the operation timed out.
+    /// The operation timeout is controlled by the <see cref="AsyncConfig.OperationTimeoutSec"/>.
+    /// </summary>
     public class OperationTimeoutException : Exception
     {
+        /// <summary>
+        /// Create a operation timeout exception with message.
+        /// </summary>
+        /// <param name="message">Debug message.</param>
         public OperationTimeoutException(string message) : base(message)
         {
         }

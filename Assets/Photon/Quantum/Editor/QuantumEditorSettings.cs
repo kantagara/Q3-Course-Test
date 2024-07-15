@@ -12,18 +12,38 @@ namespace Quantum {
   [CreateAssetMenu(menuName = "Quantum/Configurations/EditorSettings", fileName = "QuantumEditorSettings", order = EditorDefines.AssetMenuPriorityConfigurations + 30)]
   [QuantumGlobalScriptableObject(DefaultPath)]
   public class QuantumEditorSettings : QuantumGlobalScriptableObject<QuantumEditorSettings> {
-
+    /// <summary>
+    /// The default path of the global Quantum editor settings asset.
+    /// </summary>
     public const   string DefaultPath                 = "Assets/QuantumUser/Editor/QuantumEditorSettings.asset";
     internal const string AssetGuidOverrideDependency = "QuantumUnityDBUtilitiesAssetGuidOverrideDependency";
     
+    /// <summary>
+    /// Get the global Quantum editor settings instance and run the provided action and return result of a certain type.
+    /// </summary>
+    /// <typeparam name="T">Type to return</typeparam>
+    /// <param name="check">The func to run on the settings.</param>
+    /// <returns>Returns the result of the func or default T</returns>
     public static T? Get<T>(Func<QuantumEditorSettings, T> check) where T : struct {
       return TryGetGlobal(out var instance) ? check(instance) : default;
     }
-    
+
+    /// <summary>
+    /// Get the global Quantum editor settings instance and run the provided action and return result of a certain type.
+    /// </summary>
+    /// <typeparam name="T">Type to return</typeparam>
+    /// <param name="check">The func to run on the settings.</param>
+    /// <param name="defaultValue">Return this when the settings have not been found.</param>
+    /// <returns>Returns the result of the func</returns>
     public static T Get<T>(Func<QuantumEditorSettings, T> check, T defaultValue) {
       return TryGetGlobal(out var instance) ? check(instance) : defaultValue;
     }
 
+    /// <summary>
+    /// Test if an asset path is in the asset search paths (<see cref="AssetSearchPaths"/>).
+    /// </summary>
+    /// <param name="path">Path to check</param>
+    /// <returns>True if the path is inside the configured search path</returns>
     public static bool IsInAssetSearchPaths(string path) {
       if (TryGetGlobal(out var quantumEditorSettings)) {
         foreach (var searchPath in quantumEditorSettings.AssetSearchPaths) {
@@ -61,7 +81,7 @@ namespace Quantum {
     /// If enabled a scene loading dropdown is displayed next to the play button.
     /// </summary>
     [InlineHelp]
-    public bool UseQuantumToolbarUtilities = true;
+    public bool UseQuantumToolbarUtilities = false;
 
     /// <summary>
     /// Where to display the toolbar. Requires a domain reload after change.
@@ -82,6 +102,9 @@ namespace Quantum {
     [InlineHelp]
     public QuantumEntityComponentInspectorMode EntityComponentInspectorMode = QuantumEntityComponentInspectorMode.InlineInEntityPrototypeAndHideMonoBehaviours;
     
+    /// <summary>
+    /// Obsolete.
+    /// </summary>
     [Obsolete("No longer used"), LastSupportedVersion("3.0-alpha")]
     public int FPDisplayPrecision {
       get => default;
@@ -244,19 +267,40 @@ namespace Quantum {
       }
       
       QuantumEditorLog.TraceImport($"Hash for {nameof(AssetGuidOverrides)}: {hash} (took {sw.Elapsed})");
-      AssetDatabase.RegisterCustomDependency(AssetGuidOverrideDependency, hash);
+      AssetDatabaseUtils.RegisterCustomDependencyWithMppmWorkaround(AssetGuidOverrideDependency, hash);
     }
   }
 
+  /// <summary>
+  /// The toolbar zone to display the Quantum toolbar.
+  /// </summary>
   [Serializable]
   public enum QuantumToolbarZone {
+    /// <summary>
+    /// Show toolbar on the right side of the play button.
+    /// </summary>
     ToolbarZoneRightAlign,
+    /// <summary>
+    /// Show the toolbar on the left side of the play button.
+    /// </summary>
     ToolbarZoneLeftAlign
   }
 
+  /// <summary>
+  /// Entity component inspector mode.
+  /// </summary>
   public enum QuantumEntityComponentInspectorMode {
+    /// <summary>
+    /// Show the mono behaviours.
+    /// </summary>
     ShowMonoBehaviours,
+    /// <summary>
+    /// Inline entity prototype and show mono behaviours as stubs.
+    /// </summary>
     InlineInEntityPrototypeAndShowMonoBehavioursStubs,
+    /// <summary>
+    /// Inline entity prototype and hide mono behaviours.
+    /// </summary>
     InlineInEntityPrototypeAndHideMonoBehaviours,
   }
 }

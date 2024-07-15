@@ -13,20 +13,9 @@ namespace Quantum {
   ///   your player can be visualized in the same Unity instance.
   ///   Minimum settings:
   ///   * Requires a valid AppId and working network settings in Photon Server Settings
-  ///   * Drag the QuantumMultiClientRunner prefab into you Quantum game scene (this works similar to the default Runner
-  ///   except it does not reload the Unity scene)
-  ///   * Add game objects that belong to the regular Quantum scene to DisableOnStart (QuantumDefaultRunner,
-  ///   QuantumEntityViewUpdater, Your Input Script, CustomCallbacks)
-  ///   * The PlayerInputTemplate is instantiated for each client to gather input by fireing the Unity message
-  ///   PollInput(CallbackPollInput c). Implement your input to support this format:
-  ///   public class QuantumMultiClientTestInput : QuantumMonoBehaviour {
-  ///     private void PollInput(CallbackPollInput c) {
-  ///       var i = new Quantum.Input();
-  ///       i.Direction.X = 1;
-  ///       i.Direction.Y = 0;
-  ///       c.SetInput(i, DeterministicInputFlags.Repeatable);
-  ///     }
-  ///   }
+  ///   * Drag the QuantumMultiClientRunner prefab into you Quantum game scene (this works similar to the default Runner except it does not reload the Unity scene)
+  ///   * Add game objects that belong to the regular Quantum scene to DisableOnStart (QuantumDefaultRunner, QuantumEntityViewUpdater, Your Input Script, CustomCallbacks)
+  ///   * The PlayerInputTemplate is instantiated for each client to gather input by firing the Unity message PollInput(CallbackPollInput c). Implement input in the format below.
   ///   * Press "New Client" to add additional online players
   ///   I = toggle input of the player
   ///   V = toggle view of the player
@@ -34,13 +23,22 @@ namespace Quantum {
   ///   X = quit player
   ///   0-9 = Add a local player slot
   ///   SHIFT+0-9 = remove local player slot
-  ///   * If you don't experience ghosting try a different cloud that if farther away from you (Fixed Region 'sa' for
-  ///   example)
-  ///   * Enable AddAsLocalPlayers to add new players as local players instead of each having a seprarate connection.
+  ///   * If you don't experience ghosting try a different cloud that if farther away from you (Fixed Region 'sa' for example)
+  ///   * Enable AddAsLocalPlayers to add new players as local players instead of each having a separate connection.
   /// </summary>
+  /// <example><code>
+  /// public class QuantumMultiClientTestInput : QuantumMonoBehaviour {
+  ///   private void PollInput(CallbackPollInput c) {
+  ///     var i = new Quantum.Input();
+  ///     i.Direction.X = 1;
+  ///     i.Direction.Y = 0;
+  ///     c.SetInput(i, DeterministicInputFlags.Repeatable);
+  ///   }
+  /// }
+  /// </code></example>
   public class QuantumMultiClientRunner : QuantumMonoBehaviour {
     /// <summary>
-    /// Get instanciated for each client and makes connection controls for that client available.
+    /// Get instantiated for each client and makes connection controls for that client available.
     /// </summary>
     public QuantumMultiClientPlayerView PlayerViewTemplate;
     /// <summary>
@@ -141,6 +139,10 @@ namespace Quantum {
 
     private bool IsFirstPlayer => _players.Count == 0;
 
+    /// <summary>
+    /// Unity Start method. 
+    /// Toggles game objects and create initial clients.
+    /// </summary>
     public async void Start() {
       _appGuid = Guid.NewGuid().ToString();
 
@@ -170,6 +172,9 @@ namespace Quantum {
       }
     }
 
+    /// <summary>
+    /// Unity OnEnabled method, subscribes to relevant Quantum callbacks.
+    /// </summary>
     public void OnEnable() {
       CreatePlayerBtn.onClick.AddListener(CreateNewClient);
       QuantumCallback.Subscribe(this, (CallbackPollInput c) => OnCallbackPollInput(c));
@@ -217,10 +222,18 @@ namespace Quantum {
       Debug.LogError($"Failed Removing Player: slot {c.PlayerSlot} '{c.Message}'");
     }
 
+    /// <summary>
+    /// Unity OnDisabled method.
+    /// Removes subscriptions from GUI buttons.
+    /// Quantum subscriptions are automatically removed.
+    /// </summary>
     public void OnDisable() {
       CreatePlayerBtn.onClick.RemoveListener(CreateNewClient);
     }
 
+    /// <summary>
+    /// Create a new client.
+    /// </summary>
     public async void CreateNewClient() {
       await CreateNewConnectedPlayer();
     }
@@ -286,7 +299,7 @@ namespace Quantum {
         SessionConfig = SessionConfig.Config,
         ReplayProvider = null,
         GameMode = DeterministicGameMode.Multiplayer,
-        InitialFrame = 0,
+        InitialTick = 0,
         PlayerCount = client.CurrentRoom.MaxPlayers,
         Communicator = new QuantumNetworkCommunicator(client),
         RunnerId = playerName,

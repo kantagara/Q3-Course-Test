@@ -123,31 +123,41 @@ namespace Photon.Realtime
     }
 
 
+    /// <summary>Callback message for OnConnected callback.</summary>
     public class OnConnectedMsg
     {
     }
 
+    /// <summary>Callback message for OnConnectedToMaster callback.</summary>
     public class OnConnectedToMasterMsg
     {
     }
 
+    /// <summary>Callback message for OnDisconnected callback.</summary>
     public class OnDisconnectedMsg
     {
+        /// <summary>The cause for this disconnect.</summary>
         public DisconnectCause cause;
     }
 
+    /// <summary>Callback message for OnRegionList callback.</summary>
     public class OnRegionListReceivedMsg
     {
+        /// <summary>Current RegionHandler instance, containing the regions list.</summary>
         public RegionHandler regionHandler;
     }
 
+    /// <summary>Callback message for OnCustomAuthenticationResponse callback.</summary>
     public class OnCustomAuthenticationResponseMsg
     {
+        /// <summary>See OnCustomAuthenticationResponse callback.</summary>
         public Dictionary<string, object> data;
     }
 
+    /// <summary>Callback message for OnCustomAuthenticationFailed callback.</summary>
     public class OnCustomAuthenticationFailedMsg
     {
+        /// <summary>Debug message containing hints on why/how the authentication failed.</summary>
         public string debugMessage;
     }
 
@@ -214,30 +224,43 @@ namespace Photon.Realtime
         void OnLobbyStatisticsUpdate(List<TypedLobbyInfo> lobbyStatistics);
     }
 
+
+    /// <summary>Callback message for OnJoinedLobby callback.</summary>
     public class OnJoinedLobbyMsg
     {
     }
+    
+    /// <summary>Callback message for OnLeftLobby callback.</summary>
     public class OnLeftLobbyMsg
     {
     }
+    
+    /// <summary>Callback message for OnRoomListUpdate callback.</summary>
     public class OnRoomListUpdateMsg
     {
+        /// <summary>List of changes for this lobby update.</summary>
         public List<RoomInfo> roomList;
-
-        public OnRoomListUpdateMsg(List<RoomInfo> roomList)
+        
+        /// <summary>Internal constructor.</summary>
+        internal OnRoomListUpdateMsg(List<RoomInfo> roomList)
         {
             this.roomList = roomList;
         }
     }
+    
+    /// <summary>Callback message for OnLobbyStatisticsUpdate callback.</summary>
     public class OnLobbyStatisticsUpdateMsg
     {
+        /// <summary>List of statistics about currently used lobbies.</summary>
         public List<TypedLobbyInfo> lobbyStatistics;
-
-        public OnLobbyStatisticsUpdateMsg(List<TypedLobbyInfo> lobbyStatistics)
+        
+        /// <summary>Internal constructor.</summary>
+        internal OnLobbyStatisticsUpdateMsg(List<TypedLobbyInfo> lobbyStatistics)
         {
             this.lobbyStatistics = lobbyStatistics;
         }
     }
+
 
     /// <summary>
     /// Collection of "organizational" callbacks for the Realtime Api to cover Matchmaking.
@@ -354,59 +377,80 @@ namespace Photon.Realtime
         void OnLeftRoom();
     }
 
-
+    
+    /// <summary>Callback message for OnFriendListUpdate callback.</summary>
     public class OnFriendListUpdateMsg
     {
+        /// <summary>List of friends for this update.</summary>
         public List<FriendInfo> friendList;
 
-        public OnFriendListUpdateMsg(List<FriendInfo> friendList)
+        internal OnFriendListUpdateMsg(List<FriendInfo> friendList)
         {
             this.friendList = friendList;
         }
     }
+    
+    /// <summary>Callback message for OnCreatedRoom callback.</summary>
     public class OnCreatedRoomMsg
     {
     }
+    
+    /// <summary>Callback message for OnCreateRoomFailed callback.</summary>
     public class OnCreateRoomFailedMsg
     {
+        /// <summary>Return code for this callback. See OnCreateRoomFailed.</summary>
         public short returnCode;
+        /// <summary>Message for this callback. See OnCreateRoomFailed.</summary>
         public string message;
 
-        public OnCreateRoomFailedMsg(short returnCode, string message)
+        internal OnCreateRoomFailedMsg(short returnCode, string message)
         {
             this.returnCode = returnCode;
             this.message = message;
         }
 
     }
+
+    /// <summary>Callback message for OnJoinedRoom callback.</summary>
     public class OnJoinedRoomMsg
     {
     }
+    
+    /// <summary>Callback message for OnJoinRoomFailed callback.</summary>
     public class OnJoinRoomFailedMsg
     {
+        /// <summary>Return code for this callback. See OnJoinRoomFailed.</summary>
         public short returnCode;
+        /// <summary>Message for this callback. See OnJoinRoomFailed.</summary>
         public string message;
 
-        public OnJoinRoomFailedMsg(short returnCode, string message)
+        internal OnJoinRoomFailedMsg(short returnCode, string message)
         {
             this.returnCode = returnCode;
             this.message = message;
         }
     }
+    
+    /// <summary>Callback message for OnJoinRandomFailed callback.</summary>
     public class OnJoinRandomFailedMsg
     {
+        /// <summary>Return code for this callback. See OnJoinRandomFailed.</summary>
         public short returnCode;
+        /// <summary>Message for this callback. See OnJoinRandomFailed.</summary>
         public string message;
 
-        public OnJoinRandomFailedMsg(short returnCode, string message)
+        internal OnJoinRandomFailedMsg(short returnCode, string message)
         {
             this.returnCode = returnCode;
             this.message = message;
         }
     }
+    
+    /// <summary>Callback message for OnLeftRoom callback.</summary>
     public class OnLeftRoomMsg
     {
     }
+
 
     /// <summary>
     /// Collection of "in room" callbacks for the Realtime Api to cover: Players entering or leaving, property updates and Master Client switching.
@@ -482,53 +526,65 @@ namespace Photon.Realtime
         void OnMasterClientSwitched(Player newMasterClient);
     }
 
+    
+    /// <summary>Callback message for OnPlayerEnteredRoom callback.</summary>
     public class OnPlayerEnteredRoomMsg
     {
+        /// <summary>Reference of player who joined.</summary>
         public Player newPlayer;
 
-        public OnPlayerEnteredRoomMsg(Player newPlayer)
+        internal OnPlayerEnteredRoomMsg(Player newPlayer)
         {
             this.newPlayer = newPlayer;
         }
     }
-
+    
+    /// <summary>Callback message for OnPlayerLeftRoom callback.</summary>
     public class OnPlayerLeftRoomMsg
     {
+        /// <summary>Reference of player who left.</summary>
         public Player otherPlayer;
 
-        public OnPlayerLeftRoomMsg(Player otherPlayer)
+        internal OnPlayerLeftRoomMsg(Player otherPlayer)
         {
             this.otherPlayer = otherPlayer;
         }
     }
-
+    
+    /// <summary>Callback message for OnRoomPropertiesUpdate callback.</summary>
     public class OnRoomPropertiesUpdateMsg
     {
+        /// <summary>Hashtable of properties that changed.</summary>
         public PhotonHashtable propertiesThatChanged;
 
-        public OnRoomPropertiesUpdateMsg(PhotonHashtable propertiesThatChanged)
+        internal OnRoomPropertiesUpdateMsg(PhotonHashtable propertiesThatChanged)
         {
             this.propertiesThatChanged = propertiesThatChanged;
         }
     }
-
+    
+    /// <summary>Callback message for OnPlayerPropertiesUpdate callback.</summary>
     public class OnPlayerPropertiesUpdateMsg
     {
+        /// <summary>Reference to player whose properties changed.</summary>
         public Player targetPlayer;
+        /// <summary>Hashtable of properties that changed.</summary>
         public PhotonHashtable changedProps;
 
-        public OnPlayerPropertiesUpdateMsg(Player targetPlayer, PhotonHashtable changedProps)
+        internal OnPlayerPropertiesUpdateMsg(Player targetPlayer, PhotonHashtable changedProps)
         {
             this.targetPlayer = targetPlayer;
             this.changedProps = changedProps;
         }
     }
-
+    
+    /// <summary>Callback message for OnMasterClientSwitched callback.</summary>
     public class OnMasterClientSwitchedMsg
     {
+        /// <summary>Reference of player who is now the Master Client.</summary>
         public Player newMasterClient;
 
-        public OnMasterClientSwitchedMsg(Player newMasterClient)
+        internal OnMasterClientSwitchedMsg(Player newMasterClient)
         {
             this.newMasterClient = newMasterClient;
         }
@@ -565,12 +621,14 @@ namespace Photon.Realtime
         /// <param name="errorInfo">Object containing information about the error</param>
         void OnErrorInfo(ErrorInfo errorInfo);
     }
-
+    
+    /// <summary>Callback message for OnErrorInfo callback.</summary>
     public class OnErrorInfoMsg
     {
+        /// <summary>Debug / error message.</summary>
         public ErrorInfo errorInfo;
 
-        public OnErrorInfoMsg(ErrorInfo errorInfo)
+        internal OnErrorInfoMsg(ErrorInfo errorInfo)
         {
             this.errorInfo = errorInfo;
         }
@@ -701,6 +759,11 @@ namespace Photon.Realtime
         /// <summary>Interface implementation.</summary>
         public void OnDisconnected(DisconnectCause cause)
         {
+            if (this.client.Handler != null)
+            {
+                this.client.Handler.RemoveInstance();
+            }
+
             string debugInfo = string.Empty;
             if (cause != DisconnectCause.ApplicationQuit && cause != DisconnectCause.DisconnectByClientLogic)
             {

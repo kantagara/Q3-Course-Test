@@ -12,11 +12,6 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>1591</NoWarn>
     <EnableDefaultItems>false</EnableDefaultItems>
-    <BaseIntermediateOutputPath>Temp/Quantum.Simulation.Dotnet/obj</BaseIntermediateOutputPath>
-    <BaseOutputPath>Temp/Quantum.Simulation.Dotnet/bin</BaseOutputPath>
-    <BaseLibPath>Temp/Quantum.Simulation.Dotnet/lib</BaseLibPath>
-    <GenProjectPath>Quantum.Simulation.Dotnet.csproj.include</GenProjectPath>
-    <UserProjectPath>Quantum.Simulation.Dotnet.csproj.user</UserProjectPath>
     <TargetPlatform Condition="$(TargetPlatform)==''">Windows</TargetPlatform>
     <CopyOutput>false</CopyOutput>
     <CopyOutputDir>false</CopyOutputDir>
@@ -30,39 +25,31 @@
   <PropertyGroup Condition="$(Configuration.Contains('Debug'))">
     <DefineConstants>DEBUG</DefineConstants>
     <DebugSymbols>true</DebugSymbols>
-    <CoriumConfigurationId>.Debug</CoriumConfigurationId>
   </PropertyGroup>
 
   <PropertyGroup Condition="$(Configuration.Contains('Release'))">
     <Optimize>true</Optimize>
     <!--<TreatWarningsAsErrors>true</TreatWarningsAsErrors>-->
-    <CoriumConfigurationId></CoriumConfigurationId>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <CoriumPlatformId Condition="$(TargetPlatform)=='Windows'">Windows.x64</CoriumPlatformId>
-    <CoriumPlatformId Condition="$(TargetPlatform)=='Linux'">Linux.x64</CoriumPlatformId>
   </PropertyGroup>
 
   <ItemGroup>
     <Reference Include="Quantum.Log">
-      <HintPath>$(BaseLibPath)\Release\Quantum.Log.dll</HintPath>
+      <HintPath>../Lib/Release/Quantum.Log.dll</HintPath>
     </Reference>
     <Reference Include="Quantum.Deterministic">
-      <HintPath>$(BaseLibPath)\$(Configuration)\Quantum.Deterministic.dll</HintPath>
+      <HintPath>../Lib/$(Configuration)/Quantum.Deterministic.dll</HintPath>
     </Reference>
     <Reference Include="Quantum.Engine">
-      <HintPath>$(BaseLibPath)\$(Configuration)\Quantum.Engine.dll</HintPath>
+      <HintPath>../Lib/$(Configuration)/Quantum.Engine.dll</HintPath>
     </Reference>
-    <Content Include="Assets\Photon\Quantum\Assemblies\Native\Quantum.Corium.$(CoriumPlatformId)$(CoriumConfigurationId).dll">
+    <Content Include="../Lib/$(Configuration)/Quantum.Json.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <TargetPath>Quantum.Corium.$(CoriumPlatformId)$(CoriumConfigurationId).dll</TargetPath>
     </Content>
   </ItemGroup>
 
-  <Import Condition="Exists('$(GenProjectPath)')" Project="$(GenProjectPath)" />
+  <Import Condition="Exists('Quantum.Simulation.Dotnet.csproj.include')" Project="Quantum.Simulation.Dotnet.csproj.include" />
   
-  <Import Condition="Exists('$(UserProjectPath)')" Project="$(UserProjectPath)" />
+  <Import Condition="Exists('Quantum.Simulation.Dotnet.csproj.user')" Project="Quantum.Simulation.Dotnet.csproj.user" />
 
   <Target Name="CopyOutput" AfterTargets="Build" Condition="'$(TargetFramework)'!='' AND $(CopyOutput) AND '$(CopyOutputDir)'!=''">
     <ItemGroup>

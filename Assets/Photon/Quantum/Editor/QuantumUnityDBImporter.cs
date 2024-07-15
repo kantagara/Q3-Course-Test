@@ -14,7 +14,7 @@ namespace Quantum.Editor {
   using UnityEditor.AddressableAssets.Settings;
 #endif
 
-  [ScriptedImporter(5, Extension, importQueueOffset: 200000)]
+  [ScriptedImporter(6, Extension, importQueueOffset: 200000)]
   internal unsafe partial class QuantumUnityDBImporter : ScriptedImporter {
     public const  string Extension              = "qunitydb";
     public const  string ExtensionWithDot       = ".qunitydb";
@@ -29,7 +29,7 @@ namespace Quantum.Editor {
     [InitializeOnLoadMethod]
     static void RegisterAddressableEventListeners() {
       AssetDatabaseUtils.AddAddressableAssetsWithLabelMonitor(QuantumUnityDBUtilities.AssetLabel, (hash) => {
-        AssetDatabase.RegisterCustomDependency(AddressablesDependency, hash);
+        AssetDatabaseUtils.RegisterCustomDependencyWithMppmWorkaround(AddressablesDependency, hash);
       });
     }
 #endif
@@ -181,7 +181,7 @@ namespace Quantum.Editor {
       }
       
       QuantumEditorLog.TraceImport($"Refreshing {AssetObjectsDependency} dependency hash: {hash} (took: {sw.Elapsed}");
-      AssetDatabase.RegisterCustomDependency(AssetObjectsDependency, hash);
+      AssetDatabaseUtils.RegisterCustomDependencyWithMppmWorkaround(AssetObjectsDependency, hash);
     }
 
   }

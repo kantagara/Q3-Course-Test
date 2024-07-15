@@ -16,6 +16,7 @@
 namespace Photon.Realtime
 {
     using System;
+    using System.Net;
     using System.Text;
     using System.Collections;
     using System.Collections.Generic;
@@ -213,14 +214,22 @@ namespace Photon.Realtime
                 }
                 ClientState previousState = this.state;
                 this.state = value;
-                if (StateChanged != null)
+
+                if (this.StateChanged != null)
                 {
-                    StateChanged(previousState, this.state);
+                    this.StateChanged(previousState, this.state);
                 }
             }
         }
 
-        private ConnectionHandler handler;
+        /// <summary>
+        /// The ConnectionHandler instance, which is used to keep alive the connection if this client's Service() does not get called regularly.
+        /// </summary>
+        public ConnectionHandler Handler
+        {
+            get;
+            private set;
+        }
 
         /// <summary>Returns if this client is currently connected or connecting to some type of server.</summary>
         /// <remarks>This is even true while switching servers. Use IsConnectedAndReady to check only for those states that enable you to send Operations.</remarks>
@@ -376,12 +385,12 @@ namespace Photon.Realtime
         }
 
 
-        /// <summary>An ID for this user. Sent in OpAuthenticate when you connect. If not set, the PlayerName is applied during connect.</summary>
+        /// <summary>Access for AuthValues.UserId. Identifier for the player / user.</summary>
         /// <remarks>
-        /// On connect, if the UserId is null or empty, the client will copy the PlayName to UserId. If PlayerName is not set either
-        /// (before connect), the server applies a temporary ID which stays unknown to this client and other clients.
+        /// In best case unique and authenticated via Authentication Provider.
+        /// If the UserId is not set before connect, the server applies a temporary ID.
         ///
-        /// The UserId is what's used in FindFriends and for fetching data for your account (with WebHooks e.g.).
+        /// The UserId is used in FindFriends and for fetching data for your account (with WebHooks e.g.).
         ///
         /// By convention, set this ID before you connect, not while being connected.
         /// There is no error but the ID won't change while being connected.
@@ -509,7 +518,6 @@ namespace Photon.Realtime
             #if SUPPORTED_UNITY
             CustomTypesUnity.Register();
             ConfigUnitySockets();
-            CheckConnectSetupWebGl();
             #endif
 
             this.State = ClientState.PeerCreated;
@@ -571,7 +579,8 @@ namespace Photon.Realtime
                 return false;
             }
 
-
+            this.GameServerAddress = String.Empty;
+            this.MasterServerAddress = String.Empty;
             this.LogLevel = this.AppSettings.ClientLogging;
             this.RealtimePeer.LogLevel = this.AppSettings.NetworkLogging;
             this.CurrentRegion = null;
@@ -584,6 +593,22 @@ namespace Photon.Realtime
             }
 
             this.CheckConnectSetupWebGl();
+
+            if (IPAddress.TryParse(this.AppSettings.Server, out IPAddress address))
+            {
+                // note: this check must be done after the protocol is assigned and after CheckConnectSetupWebGl()
+                if (this.AppSettings.Protocol == ConnectionProtocol.WebSocket || this.AppSettings.Protocol == ConnectionProtocol.WebSocketSecure)
+                {
+                    Log.Error("AppSettings.Server is an IP address. Can not use WS or WSS protocols with IP addresses.", this.LogLevel, this.LogPrefix);
+                    return false;
+                }
+                if (this.AppSettings.AuthMode == AuthModeOption.AuthOnceWss)
+                {
+                    Log.Warn("AppSettings.Server is an IP address. Changing this client's AuthMode to AuthOnce.", this.LogLevel, this.LogPrefix);
+                    this.AppSettings.AuthMode = AuthModeOption.AuthOnce;
+                }
+            }
+
             if (this.AppSettings.AuthMode == AuthModeOption.AuthOnceWss)
             {
                 this.RealtimePeer.TransportProtocol = ConnectionProtocol.WebSocketSecure;
@@ -594,16 +619,12 @@ namespace Photon.Realtime
             }
 
 
-            if (this.LogLevel >= LogLevel.Debug)
-            {
-                this.RealtimePeer.TrafficStatsEnabled = true;
-            }
 
-            if (handler == null)
+            if (this.Handler == null)
             {
-                handler = ConnectionHandler.BuildInstance(this, this.ClientType.ToString());
+                this.Handler = ConnectionHandler.BuildInstance(this, this.ClientType.ToString());
             }
-            handler.StartFallbackSendAckThread();
+            this.Handler.StartFallbackSendAckThread();
 
 
             if (this.AppSettings.UseNameServer)
@@ -620,7 +641,7 @@ namespace Photon.Realtime
                 }
 
                 this.State = ClientState.ConnectingToNameServer;
-                Log.Info(this.ConnectLog("ConnectUsingSettings()"), LogLevel.Info, this.LogPrefix);
+                Log.Info(this.ConnectLog("ConnectUsingSettings()"),  this.LogLevel, this.LogPrefix);
             }
             else
             {
@@ -634,31 +655,10 @@ namespace Photon.Realtime
                 }
 
                 this.State = ClientState.ConnectingToMasterServer;
-                Log.Info(this.ConnectLog("ConnectUsingSettings()"), LogLevel.Info, this.LogPrefix);
+                Log.Info(this.ConnectLog("ConnectUsingSettings()"),  this.LogLevel, this.LogPrefix);
             }
 
             return true;
-        }
-
-        /// <summary>This is no longer supported. Use ConnectUsingSettings() instead.</summary>
-        [Obsolete("Use ConnectUsingSettings() instead.")]
-        public bool ConnectToMasterServer()
-        {
-            throw new NotImplementedException("ConnectToMasterServer() is obsolete. Use ConnectUsingSettings() instead.");
-        }
-
-        /// <summary>This is no longer supported. Use ConnectUsingSettings() instead.</summary>
-        [Obsolete("Use ConnectUsingSettings() instead.")]
-        public bool ConnectToNameServer()
-        {
-            throw new NotImplementedException("ConnectToNameServer() is obsolete. Use ConnectUsingSettings() instead.");
-        }
-
-        /// <summary>This is no longer supported. Use ConnectUsingSettings() instead.</summary>
-        [Obsolete("Use ConnectUsingSettings() instead.")]
-        public bool ConnectToRegionMaster(string region)
-        {
-            throw new NotImplementedException("ConnectToRegionMaster() is obsolete. Use ConnectUsingSettings() instead.");
         }
 
 
@@ -711,7 +711,7 @@ namespace Photon.Realtime
             #if UNITY_WEBGL
             if (this.RealtimePeer.TransportProtocol != ConnectionProtocol.WebSocket && this.RealtimePeer.TransportProtocol != ConnectionProtocol.WebSocketSecure)
             {
-                this.DebugReturn(LogLevel.Warning, "WebGL requires WebSockets. Switching TransportProtocol to WebSocketSecure.");
+                Log.Warn("WebGL requires WebSockets. Switching TransportProtocol to WebSocketSecure.", this.LogLevel, this.LogPrefix);
                 this.AppSettings.Protocol = ConnectionProtocol.WebSocketSecure;
             }
 
@@ -951,6 +951,11 @@ namespace Photon.Realtime
                 return false;
             }
 
+            if (this.AuthValues != null && !this.AuthValues.AreValid())
+            {
+                Log.Warn($"AuthValues.AuthType is {this.AuthValues.AuthType} but not all mandatory parameters are set. Current GET parameters: {this.AuthValues.AuthGetParameters}", this.LogLevel, this.LogPrefix);
+            }
+
             if (!string.IsNullOrEmpty(this.AppSettings.FixedRegion) && this.Server == ServerConnection.NameServer)
             {
                 this.CurrentRegion = this.AppSettings.FixedRegion;
@@ -1031,7 +1036,7 @@ namespace Photon.Realtime
         /// <summary>Logs vital stats in interval.</summary>
         private void LogStats()
         {
-            if (this.RealtimePeer.TrafficStatsEnabled && this.LogLevel >= LogLevel.Info && this.LogStatsInterval != 0 && this.State != ClientState.Disconnected)
+            if (this.LogLevel >= LogLevel.Info && this.LogStatsInterval != 0 && this.State != ClientState.Disconnected)
             {
                 int delta = this.RealtimePeer.ConnectionTime - this.lastStatsLogTime;
                 if (delta >= this.LogStatsInterval)
@@ -1234,9 +1239,9 @@ namespace Photon.Realtime
                 // in this case, we've got a key-value pair per actor (each
                 // value is a hashtable with the actor's properties then)
                 int actorNr;
-                PhotonHashtable props;
-                string newName;
                 Player target;
+                string targetNick;
+                PhotonHashtable targetProps;
 
                 foreach (object key in actorProperties.Keys)
                 {
@@ -1246,16 +1251,16 @@ namespace Photon.Realtime
                         continue;
                     }
 
-                    props = (PhotonHashtable)actorProperties[key];
-                    newName = (string)props[ActorProperties.PlayerName];
+                    targetProps = (PhotonHashtable)actorProperties[key];
+                    targetNick = (string)targetProps[ActorProperties.NickName];
 
                     target = this.CurrentRoom.GetPlayer(actorNr);
                     if (target == null)
                     {
-                        target = this.CreatePlayer(newName, actorNr, false, props);
+                        target = this.CreatePlayer(targetNick, actorNr, false, targetProps);
                         this.CurrentRoom.StorePlayer(target);
                     }
-                    target.InternalCacheProperties(props);
+                    target.InternalCacheProperties(targetProps);
                 }
             }
         }
@@ -1357,6 +1362,7 @@ namespace Photon.Realtime
             {
                 // ClientState.Joined might be set here or by an Event Join
                 this.State = ClientState.Joined;
+                this.LocalPlayer.UpdateNickNameOnJoined();
 
                 if (this.lastJoinType == JoinType.CreateRoom || (this.lastJoinType == JoinType.JoinOrCreateRoom && this.LocalPlayer.ActorNumber == 1))
                 {
@@ -1391,14 +1397,14 @@ namespace Photon.Realtime
         /// <summary>
         /// Factory method to create a player instance - override to get your own player-type with custom features.
         /// </summary>
-        /// <param name="actorName">The name of the player to be created. </param>
+        /// <param name="nickName">The nickname of the player to be created.</param>
         /// <param name="actorNumber">The player ID (a.k.a. actorNumber) of the player to be created.</param>
         /// <param name="isLocal">Sets the distinction if the player to be created is your player or if its assigned to someone else.</param>
         /// <param name="actorProperties">The custom properties for this new player</param>
         /// <returns>The newly created player</returns>
-        protected internal virtual Player CreatePlayer(string actorName, int actorNumber, bool isLocal, PhotonHashtable actorProperties)
+        protected internal virtual Player CreatePlayer(string nickName, int actorNumber, bool isLocal, PhotonHashtable actorProperties)
         {
-            Player newPlayer = new Player(actorName, actorNumber, isLocal, actorProperties);
+            Player newPlayer = new Player(nickName, actorNumber, isLocal, actorProperties);
             return newPlayer;
         }
 
@@ -1533,27 +1539,30 @@ namespace Photon.Realtime
 
         #region Implementation of IPhotonPeerListener
 
-        /// <summary>Debug output of low level api (and this client).</summary>
-        /// <remarks>This method is not responsible to keep up the state of a RealtimeClient. Calling base.DebugReturn on overrides is optional.</remarks>
+        /// <summary>Debug output handling for the PhotonPeer. Use RealtimePeer.LogLevel if you want to check if a message should get logged.</summary>
+        /// <remarks>The RealtimePeer will internally check its log level before writing any messages, so likely this just logs anything that comes through.</remarks>
         public virtual void DebugReturn(LogLevel level, string message)
         {
-            if (level == LogLevel.Error)
+            switch (level)
             {
-                Log.Error(message, this.LogLevel, this.LogPrefix);
-            }
-            else if (level == LogLevel.Warning)
-            {
-                Log.Warn(message, this.LogLevel, this.LogPrefix);
-            }
-            else if (level == LogLevel.Info)
-            {
-                Log.Info(message, this.LogLevel, this.LogPrefix);
-            }
-            else if (level == LogLevel.Debug)
-            {
-                Log.Debug(message, this.LogLevel, this.LogPrefix);
+                case LogLevel.Off:
+                    break;
+                case LogLevel.Error:
+                    Log.Error(message, this.RealtimePeer.LogLevel, this.LogPrefix);
+                    break;
+                case LogLevel.Warning:
+                    Log.Warn(message, this.RealtimePeer.LogLevel, this.LogPrefix);
+                    break;
+                case LogLevel.Info:
+                    Log.Info(message, this.RealtimePeer.LogLevel, this.LogPrefix);
+                    break;
+                case LogLevel.Debug:
+                default:
+                    Log.Debug(message, this.RealtimePeer.LogLevel, this.LogPrefix);
+                    break;
             }
         }
+
 
         private void CallbackRoomEnterFailed(OperationResponse operationResponse)
         {
@@ -1611,6 +1620,9 @@ namespace Photon.Realtime
 
             switch (operationResponse.OperationCode)
             {
+                //case OperationCode.SetProperties:
+                //    Log.Info($"OnOperationResponse case SetProperties {operationResponse.ToStringFull()}", this.LogLevel, this.LogPrefix);
+                //    break;
                 case OperationCode.Authenticate:
                 case OperationCode.AuthenticateOnce:
                     {
@@ -1905,10 +1917,9 @@ namespace Photon.Realtime
             switch (statusCode)
             {
                 case StatusCode.Connect:
-                    if (this.LogLevel >= LogLevel.Debug && this.RealtimePeer.TrafficStatsEnabled)
+                    if (this.LogLevel >= LogLevel.Debug)
                     {
                         this.lastStatsLogTime = this.RealtimePeer.ConnectionTime;
-                        this.RealtimePeer.TrafficStatsReset();
                     }
 
                     if (this.State == ClientState.ConnectingToNameServer)
@@ -2016,7 +2027,7 @@ namespace Photon.Realtime
                             break;
                         case ClientState.PeerCreated:
                         case ClientState.Disconnecting:
-                            this.handler.StopFallbackSendAckThread();
+                            this.Handler.StopFallbackSendAckThread();
                             this.State = ClientState.Disconnected;
                             this.ConnectionCallbackTargets.OnDisconnected(this.DisconnectedCause);
                             break;
@@ -2042,7 +2053,7 @@ namespace Photon.Realtime
                             #endif
                             Log.Warn(string.Format("Unexpected Disconnect. State: {0}. {1}: {2} Trace: {3}", this.State, this.Server, this.CurrentServerAddress, stacktrace), this.LogLevel, this.LogPrefix);
 
-                            this.handler.StopFallbackSendAckThread();
+                            this.Handler.StopFallbackSendAckThread();
                             this.State = ClientState.Disconnected;
                             this.ConnectionCallbackTargets.OnDisconnected(this.DisconnectedCause);
                             break;
@@ -2170,6 +2181,7 @@ namespace Photon.Realtime
 
                         // ClientState.Joined might be set here or by the operation response for Join or Create room
                         this.State = ClientState.Joined;
+                        this.LocalPlayer.UpdateNickNameOnJoined();
 
                         // joinWithCreateOnDemand can turn an OpJoin into creating the room. Then actorNumber is 1 and callback: OnCreatedRoom()
                         if (this.lastJoinType == JoinType.CreateRoom || (this.lastJoinType == JoinType.JoinOrCreateRoom && this.LocalPlayer.ActorNumber == 1))
@@ -2370,7 +2382,7 @@ namespace Photon.Realtime
                 case EncryptionMode.DatagramEncryptionGCM:
                     {
                         byte[] secret1 = (byte[])encryptionData[EncryptionDataParameters.Secret1];
-                        this.RealtimePeer.InitDatagramEncryption(secret1, null, true, true);
+                        this.RealtimePeer.InitDatagramEncryption(secret1, null);
                     }
                     break;
                 default:

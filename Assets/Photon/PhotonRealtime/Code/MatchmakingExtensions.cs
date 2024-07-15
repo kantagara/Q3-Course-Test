@@ -1,5 +1,15 @@
-﻿namespace Photon.Realtime
+﻿// -----------------------------------------------------------------------------
+// <copyright company="Exit Games GmbH">
+// Photon Realtime API - Copyright (C) 2022 Exit Games GmbH
+// </copyright>
+// <summary>Extension methods for simple, async matchmaking.</summary>
+// <author>developer@photonengine.com</author>
+// -----------------------------------------------------------------------------
+
+
+namespace Photon.Realtime
 {
+    using Photon.Client;
     using System;
     using System.Collections;
     #if UNITY_WEBGL
@@ -7,10 +17,21 @@
     #endif
     using System.Threading.Tasks;
 
+    /// <summary>
+    /// An extension class to wrap some of the most common Photon matchmaking calls.
+    /// </summary>
     public static class MatchmakingExtensions
     {
+        /// <summary>
+        /// Is raised by the matchmaking extension methods operations failed.
+        /// </summary>
         public class Exception : System.Exception
         {
+            /// <summary>
+            /// Create a new exception with a message and error code.
+            /// </summary>
+            /// <param name="message">Debug message.</param>
+            /// <param name="errorCode">Error code.</param>
             public Exception(string message, short errorCode) : base(message)
             {
                 ErrorCode = errorCode;
@@ -28,15 +49,16 @@
         /// This method throws an exception on any errors.
         /// </summary>
         /// <param name="client">Optionally client object to start the matchmaking with. Can be null.</param>
-        /// <param name="arguments">Photon matchmaking arguments</param>
+        /// <param name="arguments">Photon matchmaking arguments.</param>
         /// <returns>Client connection object that is connected to a Photon room</returns>
-        /// <exception cref="ArgumentException">Arguments were incomplete</exception>
-        /// <exception cref="MatchmakingExtensions.Exception">Connection failed</exception>
-        /// <exception cref="DisconnectException">Is thrown when the connection terminated</exception>
-        /// <exception cref="OperationStartException">Is thrown when the operation could not be started</exception>
-        /// <exception cref="OperationException">Is thrown when the operation completed unsuccesfully</exception>
-        /// <exception cref="OperationTimeoutException">Is thrown when the operation timed out</exception>
-        /// <exception cref="OperationCanceledException">Is thrown when the operation have been canceled (AsyncConfig.CancellationSource)</exception>
+        /// <exception cref="ArgumentException">Arguments were incomplete.</exception>
+        /// <exception cref="MatchmakingExtensions.Exception">Connection failed.</exception>
+        /// <exception cref="DisconnectException">Is thrown when the connection terminated.</exception>
+        /// <exception cref="AuthenticationFailedException">Is thrown when the authentication failed.</exception>
+        /// <exception cref="OperationStartException">Is thrown when the operation could not be started.</exception>
+        /// <exception cref="OperationException">Is thrown when the operation completed unsuccessfully.</exception>
+        /// <exception cref="OperationTimeoutException">Is thrown when the operation timed out.</exception>
+        /// <exception cref="OperationCanceledException">Is thrown when the operation have been canceled (AsyncConfig.CancellationSource).</exception>
         public static Task<RealtimeClient> ConnectToRoomAsync(this RealtimeClient client, MatchmakingArguments arguments)
         {
             return ConnectToRoomAsync(arguments, client);
@@ -47,7 +69,10 @@
         {
             arguments.Validate();
 
-            Log.Info("Connecting to room");
+            if (arguments.PhotonSettings != null)
+            {
+                Log.Info("Connecting to room", arguments.PhotonSettings.ClientLogging);
+            }
 
             var asyncConfig = arguments.AsyncConfig ?? AsyncConfig.Global;
 
@@ -66,27 +91,33 @@
                 short result = 0;
                 if (isRandom)
                 {
-                    var joinRandomRoomParams = new JoinRandomRoomArgs();
-                    // public string[] ExpectedUsers;
-                    //joinRandomRoomParams.SqlLobbyFilter;
                     if (canCreate)
                     {
-                        result = await client.JoinRandomOrCreateRoomAsync(joinRandomRoomParams, BuildEnterRoomArgs(arguments), config: asyncConfig);
+                        result = await client.JoinRandomOrCreateRoomAsync(
+                            arguments.BuildJoinRandomRoomArgs(), 
+                            arguments.BuildEnterRoomArgs(),
+                            config: asyncConfig);
                     }
                     else
                     {
-                        result = await client.JoinRandomRoomAsync(joinRandomRoomParams, config: asyncConfig);
+                        result = await client.JoinRandomRoomAsync(
+                            arguments.BuildJoinRandomRoomArgs(), 
+                            config: asyncConfig);
                     }
                 }
                 else
                 {
                     if (canCreate)
                     {
-                        result = await client.JoinOrCreateRoomAsync(BuildEnterRoomArgs(arguments), config: asyncConfig);
+                        result = await client.JoinOrCreateRoomAsync(
+                            arguments.BuildEnterRoomArgs(),
+                            config: asyncConfig);
                     }
                     else
                     {
-                        result = await client.JoinRoomAsync(BuildEnterRoomArgs(arguments), config: asyncConfig);
+                        result = await client.JoinRoomAsync(
+                            arguments.BuildEnterRoomArgs(),
+                            config: asyncConfig);
                     }
                 }
 
@@ -111,15 +142,16 @@
         /// This method throws an exception on any errors.
         /// </summary>
         /// <param name="client">Optionally client object to start the matchmaking with. Can be null.</param>
-        /// <param name="arguments">Photon matchmaking arguments</param>
+        /// <param name="arguments">Photon matchmaking arguments.</param>
         /// <returns>Client connection object that is connected to a Photon room</returns>
-        /// <exception cref="ArgumentException">Arguments were incomplete, reconnection information not set or invalid</exception>
-        /// <exception cref="MatchmakingExtensions.Exception">Reconnection failed</exception>
-        /// <exception cref="DisconnectException">Is thrown when the connection terminated</exception>
-        /// <exception cref="OperationStartException">Is thrown when the operation could not be started</exception>
-        /// <exception cref="OperationException">Is thrown when the operation completed unsuccesfully</exception>
-        /// <exception cref="OperationTimeoutException">Is thrown when the operation timed out</exception>
-        /// <exception cref="OperationCanceledException">Is thrown when the operation have been canceled (AsyncConfig.CancellationSource)</exception>
+        /// <exception cref="ArgumentException">Arguments were incomplete, reconnection information not set or invalid.</exception>
+        /// <exception cref="MatchmakingExtensions.Exception">Reconnection failed.</exception>
+        /// <exception cref="DisconnectException">Is thrown when the connection terminated.</exception>
+        /// <exception cref="AuthenticationFailedException">Is thrown when the authentication failed.</exception>
+        /// <exception cref="OperationStartException">Is thrown when the operation could not be started.</exception>
+        /// <exception cref="OperationException">Is thrown when the operation completed unsuccessfully.</exception>
+        /// <exception cref="OperationTimeoutException">Is thrown when the operation timed out.</exception>
+        /// <exception cref="OperationCanceledException">Is thrown when the operation have been canceled (AsyncConfig.CancellationSource).</exception>
         public static Task<RealtimeClient> ReconnectToRoomAsync(this RealtimeClient client, MatchmakingArguments arguments)
         {
             return ReconnectToRoomAsync(arguments, client);
@@ -249,11 +281,14 @@
 
                     if (canRejoin)
                     {
-                        result = await client.RejoinRoomAsync(arguments.ReconnectInformation.Room, throwOnError: false, config: asyncConfig);
+                        result = await client.RejoinRoomAsync(arguments.ReconnectInformation.Room,
+                            ticket: arguments.Ticket, 
+                            throwOnError: false, 
+                            config: asyncConfig);
                     }
                     else
                     {
-                        result = await client.JoinRoomAsync(BuildEnterRoomParams(arguments, arguments.ReconnectInformation.Room), throwOnError: false, config: asyncConfig);
+                        result = await client.JoinRoomAsync(arguments.BuildEnterRoomArgs().SetRoomName(arguments.ReconnectInformation.Room), throwOnError: false, config: asyncConfig);
                     }
                 }
 
@@ -266,37 +301,49 @@
             }).Unwrap();
         }
 
-        private static EnterRoomArgs BuildEnterRoomArgs(MatchmakingArguments arguments)
+        private static EnterRoomArgs SetRoomName(this EnterRoomArgs args, string roomName)
         {
-            return BuildEnterRoomArgs(arguments.Lobby, arguments.RoomName, arguments.MaxPlayers, arguments.Plugins, arguments.PlayerTtlInSeconds, arguments.EmptyRoomTtlInSeconds, arguments.CustomProperties);
+            args.RoomName = roomName;
+            return args;
         }
 
-        private static EnterRoomArgs BuildEnterRoomParams(MatchmakingArguments arguments, string roomName)
-        {
-            return BuildEnterRoomArgs(arguments.Lobby, roomName, arguments.MaxPlayers, arguments.Plugins, arguments.PlayerTtlInSeconds, arguments.EmptyRoomTtlInSeconds, arguments.CustomProperties);
-        }
-
-        private static EnterRoomArgs BuildEnterRoomArgs(TypedLobby typedLobby, string roomName, int maxPlayers, string[] plugins = null, int playerTtlInSeconds = 0, int emptyRoomTtlInSeconds = 0, Hashtable customProperties = null, string[] customLobbyProperties = null)
+        private static EnterRoomArgs BuildEnterRoomArgs(this MatchmakingArguments arguments)
         {
             return new EnterRoomArgs
             {
-                RoomName = roomName,
-                Lobby = typedLobby,
+                RoomName = arguments.RoomName,
+                Lobby = arguments.Lobby,
+                Ticket = arguments.Ticket,
+                ExpectedUsers = arguments.ExpectedUsers,
                 RoomOptions = new RoomOptions()
                 {
-                    MaxPlayers = (byte)maxPlayers,
+                    MaxPlayers = (byte)arguments.MaxPlayers,
                     IsOpen = true,
                     IsVisible = true,
                     DeleteNullProperties = true,
-                    PlayerTtl = playerTtlInSeconds * 1000,
-                    EmptyRoomTtl = emptyRoomTtlInSeconds * 1000,
-                    Plugins = plugins,
+                    PlayerTtl = arguments.PlayerTtlInSeconds * 1000,
+                    EmptyRoomTtl = arguments.EmptyRoomTtlInSeconds * 1000,
+                    Plugins = arguments.Plugins,
                     SuppressRoomEvents = false,
                     SuppressPlayerInfo = false,
                     PublishUserId = true,
-                    //CustomRoomProperties = customProperties,
-                    //CustomRoomPropertiesForLobby = customLobbyProperties,
+                    CustomRoomProperties = arguments.CustomProperties,
+                    CustomRoomPropertiesForLobby = arguments.CustomLobbyProperties,
                 }
+            };
+        }
+
+        private static JoinRandomRoomArgs BuildJoinRandomRoomArgs(this MatchmakingArguments arguments)
+        {
+            return new JoinRandomRoomArgs
+            {
+                Ticket = arguments.Ticket,
+                ExpectedUsers = arguments.ExpectedUsers,
+                ExpectedCustomRoomProperties = arguments.CustomProperties,
+                SqlLobbyFilter = arguments.SqlLobbyFilter,
+                ExpectedMaxPlayers = arguments.MaxPlayers,
+                Lobby = arguments.Lobby,
+                MatchingType = arguments.RandomMatchingType
             };
         }
     }
@@ -304,17 +351,21 @@
 
 namespace Photon.Realtime
 {
+    using Photon.Client;
     using System;
     using System.Collections;
 #if NETCOREAPP3_1_OR_GREATER
     using System.Text.Json.Serialization;
 #endif
 
+    /// <summary>
+    /// The arguments list for the matchmaking extension method ConnectToRoomAsync().
+    /// </summary>
     [Serializable]
     public struct MatchmakingArguments
     {
         /// <summary>
-        /// Photon realtime <see cref="AppSettings"/>.
+        /// Photon Realtime <see cref="AppSettings"/>.
         /// </summary>
         public AppSettings PhotonSettings;
         /// <summary>
@@ -334,21 +385,13 @@ namespace Photon.Realtime
         public string RoomName;
         /// <summary>
         /// Max clients for the Photon room. 0 = unlimited. 
-        /// Will be configured as <see cref="EnterRoomArgs"/>.MaxPlayers when creating a Photon room.
+        /// Set on <see cref="JoinRandomRoomArgs.ExpectedMaxPlayers"/> and <see cref="EnterRoomArgs.RoomOptions"/>.MaxPlayers."/>
         /// </summary>
         public int MaxPlayers;
         /// <summary>
         /// Configure if the connect request can also create rooms or if it only tries to join.
         /// </summary>
         public bool CanOnlyJoin;
-        /// <summary>
-        /// Custom room properties that are configured as <see cref="EnterRoomArgs.RoomOptions"/>.CustomRoomProperties.
-        /// </summary>
-        public Hashtable CustomProperties;
-        /// <summary>
-        /// List of room properties that are used for lobby matchmaking. Will be configured as <see cref="EnterRoomArgs.RoomOptions"/>.CustomRoomPropertiesForLobby.
-        /// </summary>
-        public string[] CustomLobbyProperties;
         /// <summary>
         /// Async configuration that include TaskFactory and global cancellation support. If null then <see cref="AsyncConfig.Global"/> is used.
         /// </summary>
@@ -370,13 +413,39 @@ namespace Photon.Realtime
         /// </summary>
         public MatchmakingReconnectInformation ReconnectInformation;
         /// <summary>
-        /// Optional Realtime lobby to use for matchmaking.
+        /// Custom room properties. 
+        /// Set on <see cref="EnterRoomArgs.RoomOptions"/> and <see cref="JoinRandomRoomArgs.ExpectedCustomRoomProperties"/>
+        /// </summary>
+        public PhotonHashtable CustomProperties;
+        /// <summary>
+        /// An optional list of users users list blocks player slots for your friends or team mates to join the room, too.
+        /// Set as <see cref="EnterRoomArgs.ExpectedUsers"/> or <see cref="JoinRandomRoomArgs.ExpectedUsers"/>.
+        /// </summary>
+        public string[] ExpectedUsers;
+        /// <summary>
+        /// Optional Photon Realtime lobby to use for matchmaking.
+        /// Used for <see cref="JoinRandomRoomArgs.Lobby"/> and <see cref="EnterRoomArgs.Lobby"/>."
         /// </summary>
         public TypedLobby Lobby;
-        ///// <summary>
-        ///// Optional SQL query to filter room matches.
-        ///// </summary>
-        //public string SqlLobbyFilter;
+        /// <summary>
+        /// Optional list of room properties that are used for lobby matchmaking.
+        /// Will be configured as <see cref="EnterRoomArgs.RoomOptions"/>.
+        /// </summary>
+        public string[] CustomLobbyProperties;
+        /// <summary>
+        /// Optional SQL query to filter room matches used for <see cref="JoinRandomRoomArgs.SqlLobbyFilter"/>.
+        /// </summary>
+        public string SqlLobbyFilter;
+        /// <summary>
+        /// Optional Photon matchmaking ticket.
+        /// Used for <see cref="JoinRandomRoomArgs.Ticket"/> and <see cref="EnterRoomArgs.Ticket"/>."/>
+        /// </summary>
+        public object Ticket;
+        /// <summary>
+        /// The MatchmakingMode affects how rooms get filled for random matchmaking. By default, the server fills rooms.
+        /// Set on <see cref="JoinRandomRoomArgs.MatchingType"/>
+        /// </summary>
+        public MatchmakingMode RandomMatchingType;
 
         /// <summary>
         /// Creates authentication values object in field <see cref="AuthValues"/> and sets the <see cref="AuthenticationValues.UserId"/>.
@@ -437,7 +506,7 @@ namespace Photon.Realtime
         /// <summary>
         /// Run validation and throw on missing fields.
         /// </summary>
-        /// <exception cref="ArgumentException">Is thrown when some minimum configurations are missing</exception>
+        /// <exception cref="ArgumentException">Is thrown when some minimum configurations are missing.</exception>
         public void Validate()
         {
             Assert(MaxPlayers >= 0, "MaxPlayer must be greater or equal than 0");
@@ -486,7 +555,7 @@ namespace Photon.Realtime
         /// </summary>
         public string UserId;
         /// <summary>
-        /// The timout after this information is considered to useable.
+        /// The timeout after this information is considered to useable.
         /// </summary>
         public long TimeoutInTicks;
         /// <summary>
@@ -517,7 +586,7 @@ namespace Photon.Realtime
         /// <summary>
         /// Set is called from the matchmaking when the connection has been successful.
         /// </summary>
-        /// <param name="client">Photon client object</param>
+        /// <param name="client">Photon client object.</param>
         public virtual void Set(RealtimeClient client) {
             Set(client, DefaultTimeout);
         }
@@ -525,8 +594,8 @@ namespace Photon.Realtime
         /// <summary>
         /// Update all info.
         /// </summary>
-        /// <param name="client">Photon client object</param>
-        /// <param name="timeSpan">When is this data consided be too old to use.</param>
+        /// <param name="client">Photon client object.</param>
+        /// <param name="timeSpan">When is this data considered be too old to use.</param>
         public void Set(RealtimeClient client, TimeSpan timeSpan)
         {
             if (client == null)

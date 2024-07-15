@@ -1,9 +1,17 @@
-using System;
-using Photon.Client;
+// -----------------------------------------------------------------------------
+// <copyright company="Exit Games GmbH">
+// Photon Realtime API - Copyright (C) 2022 Exit Games GmbH
+// </copyright>
+// <summary>Join Random Arguments.</summary>
+// <author>developer@photonengine.com</author>
+// -----------------------------------------------------------------------------
 
 
 namespace Photon.Realtime
 {
+    using System;
+    using Photon.Client;
+
     /// <summary>
     /// Parameters for the matchmaking of JoinRandomRoom and JoinRandomOrCreateRoom.
     /// </summary>

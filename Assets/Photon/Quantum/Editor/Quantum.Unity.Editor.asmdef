@@ -1,6 +1,6 @@
 {
     "name": "Quantum.Unity.Editor",
-    "rootNamespace": "",
+    "rootNamespace": "Quantum.Editor",
     "references": [
         "GUID:831409e8f9d13b5479a3baef9822ad34",
         "GUID:f6fa0c2f8b9a9f64897d3351666f3d66",
@@ -56,6 +56,11 @@
             "name": "com.unity.ai.navigation",
             "expression": "1.0",
             "define": "QUANTUM_ENABLE_AI_NAVIGATION"
+        },
+        {
+            "name": "com.unity.multiplayer.playmode",
+            "expression": "1.0",
+            "define": "QUANTUM_ENABLE_MPPM"
         }
     ],
     "noEngineReferences": false

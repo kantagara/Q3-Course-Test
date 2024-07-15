@@ -4,6 +4,9 @@ namespace Quantum.Editor {
   using UnityEditor;
   using UnityEngine;
 
+  /// <summary>
+  /// An editor scriptable object that stores UI skins and different <see cref="GUIStyle"/> Unity inspectors and custom windows.
+  /// </summary>
 #if QUANTUM_DEV
   [CreateAssetMenu(menuName = "Quantum/Editor Skin")]
 #endif

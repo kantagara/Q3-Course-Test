@@ -2,10 +2,13 @@ namespace Quantum {
   using Quantum.Profiling;
   using System;
   using System.Collections.Generic;
-  using System.Linq;
   using UnityEngine;
   using static QuantumUnityExtensions;
 
+  /// <summary>
+  /// The Entity View Updater is essential. An instance needs to be present to create Entity Views as the 
+  /// simulation view representations based on the <see cref="Quantum.EntityView"/> components.
+  /// </summary>
   public unsafe class QuantumEntityViewUpdater : QuantumMonoBehaviour {
     /// <summary>
     /// "Optionally provide a transform that all entity views will be parented under."
@@ -18,6 +21,12 @@ namespace Quantum {
     /// </summary>
     [InlineHelp]
     public bool AutoFindMapData = true;
+
+    /// <summary>
+    /// Configuration of the snapshot interpolation mode of EntityViews.
+    /// </summary>
+    [InlineHelp]
+    public QuantumSnapshotInterpolationTimer SnapshotInterpolation = new QuantumSnapshotInterpolationTimer();
 
     // current map
     [NonSerialized] QuantumMapData _mapData = null;
@@ -40,15 +49,34 @@ namespace Quantum {
     // the pool that can optionally be used to create entity views
     IQuantumEntityViewPool _entityViewPool;
 
-    // Provide access for derived QuantumEntityViewUpdater classes
+
+    /// <summary>
+    /// Provides access to MapData when deriving from this class for example.
+    /// </summary>
     protected QuantumMapData MapData => _mapData;
+    /// <summary>
+    /// Provides access to the active entities. 
+    /// </summary>
     protected HashSet<EntityRef> ActiveEntities => _activeEntities;
+    /// <summary>
+    /// Privates access to the entities that should be removed.
+    /// </summary>
     protected HashSet<EntityRef> RemoveEntities => _removeEntities;
+    /// <summary>
+    /// Provides access to the active views.
+    /// </summary>
     protected Dictionary<EntityRef, QuantumEntityView> ActiveViews => _activeViews;
+    /// <summary>
+    /// Returns <see langword="true"/> when the entities are marked to teleport next update. Set by <see cref="TeleportAllEntities"/>.
+    /// </summary>
     protected Boolean Teleport => _teleport;
-
+    /// <summary>
+    /// Returns the currently observed game.
+    /// </summary>
     public QuantumGame ObservedGame => _observedGame;
-
+    /// <summary>
+    /// Get or set the EntityViewPool. If not set, the EntityViewUpdater will use the first found pool in the hierarchy.
+    /// </summary>
     public IQuantumEntityViewPool Pool {
       get {
         return _entityViewPool;
@@ -58,36 +86,53 @@ namespace Quantum {
         _entityViewPool = value;
       }
     }
-
+    /// <summary>
+    /// Access all view contexts that could be loaded in the scene as children of the EntityViewUpdater.
+    /// </summary>
     public Dictionary<Type, IQuantumViewContext> Context {
       get {
         return _viewContexts;
       }
     }
-
+    /// <summary>
+    /// Obsolete: Use GetView instead
+    /// </summary>
     [Obsolete("Use GetView instead")]
     public QuantumEntityView GetPrefab(EntityRef entityRef) => GetView(entityRef);
 
+    /// <summary>
+    /// Try to get the view instance for the given Quantum entity reference.
+    /// </summary>
+    /// <param name="entityRef"></param>
+    /// <returns></returns>
     public QuantumEntityView GetView(EntityRef entityRef) {
       _activeViews.TryGetValue(entityRef, out QuantumEntityView root);
       return root;
     }
 
+    /// <summary>
+    /// Obsolete: Use TeleportAllEntities() instead.
+    /// </summary>
     [Obsolete("Use TeleportAllEntities() instead")]
-    public void SetTeleportOnce() {
-      TeleportAllEntities();
-    }
+    public void SetTeleportOnce() => TeleportAllEntities();
 
+    /// <summary>
+    /// Set all entity views to teleport on the next update.
+    /// </summary>
     public void TeleportAllEntities() {
       _teleport = true;
     }
 
+    /// <summary>
+    /// Set the current observed game.
+    /// </summary>
     public void SetCurrentGame(QuantumGame game) {
       var gameChanged = _observedGame != null;
 
       _observedGame = game;
 
       if (gameChanged) {
+
         for (int i = 0; i < _viewComponents.Count; i++) {
           _viewComponents[i].GameChanged(_observedGame);
         }
@@ -97,6 +142,9 @@ namespace Quantum {
       }
     }
 
+    /// <summary>
+    /// Unity Awake() callback, register callbacks and load view contexts.
+    /// </summary>
     public void Awake() {
       QuantumCallback.Subscribe(this, (CallbackGameInit c) => OnGameInit(c.Game));
       QuantumCallback.Subscribe(this, (CallbackUnitySceneLoadDone c) => OnGameInit(c.Game));
@@ -191,16 +239,19 @@ namespace Quantum {
         return;
       }
 
-      HostProfiler.Start("QuantumEntityView.OnObservedGameUpdated");
-
-      if (game.Frames.Verified != null) {
+      using var profilerScope = HostProfiler.Start("QuantumEntityView.OnObservedGameUpdated");
+      var verifiedFrame = game.Frames.Verified;
+      
+      if (verifiedFrame != null) {
 
         // Add view components
         while (_viewComponentsToAdd.Count > 0) {
           var vc = _viewComponentsToAdd.Dequeue();
-          vc.Activate(game.Frames.Verified, game, null);
+          vc.Activate(verifiedFrame, game, null);
           _viewComponents.Add(vc);
         }
+        
+        SnapshotInterpolation.Advance(verifiedFrame.Number, 1f / game.Session.SessionConfig.UpdateFPS);
 
         // Update view components
         for (int i = 0; i < _viewComponents.Count; i++) {
@@ -276,8 +327,6 @@ namespace Quantum {
         }
       }
 
-      HostProfiler.End();
-
       // reset teleport to false always
       _teleport = false;
     }
@@ -310,13 +359,19 @@ namespace Quantum {
       // update map entities
       if (_mapData) {
         var currentMap = _mapData.Asset.Guid;
-        if (currentMap != frame.MapAssetRef.Id) {
-          // can't update map entities because of map mismatch
+        if (currentMap == frame.MapAssetRef.Id) {
+          BindMapEntities(game, frame, createBehaviour);
+        } else if (frame.Map is DynamicMap dynamicMap && dynamicMap.SourceMap.Id == currentMap) {
+          BindMapEntities(game, frame, createBehaviour);
         } else {
-          foreach (var (entity, mapEntityLink) in frame.GetComponentIterator<MapEntityLink>()) {
-            BindMapEntityIfNeeded(game, game.Frames.Predicted, entity, mapEntityLink, createBehaviour);
-          }
+          // can't update map entities because of map mismatch
         }
+      }
+    }
+
+    private void BindMapEntities(QuantumGame game, Frame frame, QuantumEntityViewBindBehaviour createBehaviour) {
+      foreach (var (entity, mapEntityLink) in frame.GetComponentIterator<MapEntityLink>()) {
+        BindMapEntityIfNeeded(game, game.Frames.Predicted, entity, mapEntityLink, createBehaviour);
       }
     }
 
@@ -441,12 +496,6 @@ namespace Quantum {
 
       instance.EntityRef = handle;
 
-      if (f.Has<Transform2D>(handle)) {
-        instance.UpdateFromTransform2D(game, false, false);
-      } else if (f.Has<Transform3D>(handle)) {
-        instance.UpdateFromTransform3D(game, false, false);
-      }
-
       // add to lookup
       _activeViews.Add(handle, instance);
 
@@ -464,6 +513,12 @@ namespace Quantum {
       _activeViews.Remove(entityRef);
     }
 
+    /// <summary>
+    /// Destroys the entity view instance and removes it from the active views list.
+    /// <para>Can be overwritten in derived class.</para>
+    /// </summary>
+    /// <param name="game">The game reference the entity belongs to.</param>
+    /// <param name="view">The entity view object.</param>
     protected virtual void DestroyEntityView(QuantumGame game, QuantumEntityView view) {
       Debug.Assert(view != null);
       view.OnEntityDestroyed.Invoke(game);
@@ -493,6 +548,14 @@ namespace Quantum {
       }
     }
 
+    /// <summary>
+    /// Creates a new entity view instance.
+    /// <para>Can be overwritten in derived class.</para>
+    /// </summary>
+    /// <param name="asset">View asset.</param>
+    /// <param name="position">World position.</param>
+    /// <param name="rotation">Initial rotation.</param>
+    /// <returns>A new Quantum entity view instance.</returns>
     protected virtual QuantumEntityView CreateEntityViewInstance(Quantum.EntityView asset, Vector3? position = null, Quaternion? rotation = null) {
       Debug.Assert(asset.Prefab != null);
       var viewPrefab = asset.Prefab.GetComponent<QuantumEntityView>();
@@ -515,6 +578,11 @@ namespace Quantum {
       }
     }
 
+    /// <summary>
+    /// Destroys an entity view.
+    /// <para>Can be overwritten in derived class.</para>
+    /// </summary>
+    /// <param name="instance">Instance to destroy.</param>
     protected virtual void DestroyEntityViewInstance(QuantumEntityView instance) {
       if (Pool != null) {
         Pool.Destroy(instance);
@@ -523,6 +591,10 @@ namespace Quantum {
       }
     }
 
+    /// <summary>
+    /// Activates a map entity instance.
+    /// <para>Can be overwritten in derived class.</para>
+    /// </summary>
     protected virtual void ActivateMapEntityInstance(QuantumEntityView instance, Vector3? position = null, Quaternion? rotation = null) {
       if (position.HasValue)
         instance.transform.position = position.Value;
@@ -533,12 +605,20 @@ namespace Quantum {
       }
     }
 
+    /// <summary>
+    /// Disabled a map entity instance.
+    /// <para>Can be overwritten in derived class.</para>
+    /// </summary>
     protected virtual void DisableMapEntityInstance(QuantumEntityView instance) {
       instance.gameObject.SetActive(false);
     }
 
+    /// <summary>
+    /// Is triggered when <see cref="EntityView.Prefab"/> is null and expects to be set after this callback.
+    /// <para>Can be overwritten in derived class.</para>
+    /// </summary>
+    /// <param name="viewAsset">View asset to load.</param>
     protected virtual void LoadMissingPrefab(Quantum.EntityView viewAsset) {
-      //
     }
 
     private static bool TryGetTransform(Frame f, EntityRef handle, out Vector3 position, out Quaternion rotation) {

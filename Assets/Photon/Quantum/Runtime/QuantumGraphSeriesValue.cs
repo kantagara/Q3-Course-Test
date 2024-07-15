@@ -1,79 +1,86 @@
-namespace Quantum.Profiling
-{
+namespace Quantum.Profiling {
   using System;
   using System.Globalization;
   using UnityEngine;
   using UnityEngine.UI;
 
-  public sealed class QuantumGraphSeriesValue : QuantumGraphSeries
-  {
-    private const string SHADER_PROPERTY_COLOR_NORMAL      = "_NormalColor";
-    private const string SHADER_PROPERTY_COLOR_AVERAGE     = "_AverageColor";
+  /// <summary>
+  /// The series value graph is used format, average values add graphical features to the graph rendering.
+  /// </summary>
+  public sealed class QuantumGraphSeriesValue : QuantumGraphSeries {
+    private const string SHADER_PROPERTY_COLOR_NORMAL = "_NormalColor";
+    private const string SHADER_PROPERTY_COLOR_AVERAGE = "_AverageColor";
     private const string SHADER_PROPERTY_COLOR_THRESHOLD_1 = "_Threshold1Color";
     private const string SHADER_PROPERTY_COLOR_THRESHOLD_2 = "_Threshold2Color";
     private const string SHADER_PROPERTY_COLOR_THRESHOLD_3 = "_Threshold3Color";
-    private const string SHADER_PROPERTY_THRESHOLD_1       = "_Threshold1";
-    private const string SHADER_PROPERTY_THRESHOLD_2       = "_Threshold2";
-    private const string SHADER_PROPERTY_THRESHOLD_3       = "_Threshold3";
-    private const string SHADER_PROPERTY_AVERAGE           = "_Average";
+    private const string SHADER_PROPERTY_THRESHOLD_1 = "_Threshold1";
+    private const string SHADER_PROPERTY_THRESHOLD_2 = "_Threshold2";
+    private const string SHADER_PROPERTY_THRESHOLD_3 = "_Threshold3";
+    private const string SHADER_PROPERTY_AVERAGE = "_Average";
 
     [SerializeField]
-    private float  _fixedMaxValue;
-    [SerializeField][Range(0.0f, 1.0f)]
-    private float  _fixedAveragePosition;
+    private float _fixedMaxValue;
     [SerializeField]
-    private float  _threshold1;
+    [Range(0.0f, 1.0f)]
+    private float _fixedAveragePosition;
     [SerializeField]
-    private float  _threshold2;
+    private float _threshold1;
     [SerializeField]
-    private float  _threshold3;
+    private float _threshold2;
     [SerializeField]
-    private float  _textRefreshTime     = 0.25f;
+    private float _threshold3;
     [SerializeField]
-    private Text   _peakValueText;
+    private float _textRefreshTime = 0.25f;
     [SerializeField]
-    private Text   _averageValueText;
+    private Text _peakValueText;
     [SerializeField]
-    private Text   _threshold1Text;
+    private Text _averageValueText;
     [SerializeField]
-    private Text   _threshold2Text;
+    private Text _threshold1Text;
     [SerializeField]
-    private Text   _threshold3Text;
+    private Text _threshold2Text;
     [SerializeField]
-    private string _valueTextFormat     = "{0}";
+    private Text _threshold3Text;
     [SerializeField]
-    private float  _valueTextMultiplier = 1.0f;
+    private string _valueTextFormat = "{0}";
     [SerializeField]
-    private bool   _disableThresholdTexts;
+    private float _valueTextMultiplier = 1.0f;
     [SerializeField]
-    private bool   _ignoreZeroValuesInAverage;
+    private bool _disableThresholdTexts;
+    [SerializeField]
+    private bool _ignoreZeroValuesInAverage;
 
-    private float      _peak;
-    private float      _average;
-    private float      _minValue;
-    private float      _maxValue;
-    private float      _averageValue;
-    private float      _maxRenderValue;
-    private float      _threshold1Normalized;
-    private float      _threshold2Normalized;
-    private float      _threshold3Normalized;
-    private float      _nextTextRefreshTime;
-    private int        _threshold1ShaderPropertyID;
-    private int        _threshold2ShaderPropertyID;
-    private int        _threshold3ShaderPropertyID;
-    private int        _averageShaderPropertyID;
-    private bool       _updatePeak;
-    private bool       _updateAverage;
-    private bool       _updateThreshold1;
-    private bool       _updateThreshold2;
-    private bool       _updateThreshold3;
+    private float _peak;
+    private float _average;
+    private float _minValue;
+    private float _maxValue;
+    private float _averageValue;
+    private float _maxRenderValue;
+    private float _threshold1Normalized;
+    private float _threshold2Normalized;
+    private float _threshold3Normalized;
+    private float _nextTextRefreshTime;
+    private int _threshold1ShaderPropertyID;
+    private int _threshold2ShaderPropertyID;
+    private int _threshold3ShaderPropertyID;
+    private int _averageShaderPropertyID;
+    private bool _updatePeak;
+    private bool _updateAverage;
+    private bool _updateThreshold1;
+    private bool _updateThreshold2;
+    private bool _updateThreshold3;
     private string[][] _lookupTable;
-    private float      _lookupMultiplier;
+    private float _lookupMultiplier;
 
     private static readonly IFormatProvider _formatProvider = CultureInfo.GetCultureInfo("en-US");
 
-    public void SetThresholds(float threshold1, float threshold2, float threshold3)
-    {
+    /// <summary>
+    /// Set the thresholds for color changes.
+    /// </summary>
+    /// <param name="threshold1">Threshold one</param>
+    /// <param name="threshold2">Threshold two</param>
+    /// <param name="threshold3">Threshold three</param>
+    public void SetThresholds(float threshold1, float threshold2, float threshold3) {
       _threshold1 = threshold1;
       _threshold2 = threshold2;
       _threshold3 = threshold3;
@@ -81,10 +88,17 @@ namespace Quantum.Profiling
       Refresh();
     }
 
-    public void SetColors(Color normalColor, Color averageColor, Color threshold1Color, Color threshold2Color, Color threshold3Color)
-    {
-      _material.SetColor(SHADER_PROPERTY_COLOR_NORMAL,      normalColor);
-      _material.SetColor(SHADER_PROPERTY_COLOR_AVERAGE,     averageColor);
+    /// <summary>
+    /// Set colors for the thresholds.
+    /// </summary>
+    /// <param name="normalColor">Normal color</param>
+    /// <param name="averageColor">Average color</param>
+    /// <param name="threshold1Color">Threshold one color</param>
+    /// <param name="threshold2Color">Threshold two color</param>
+    /// <param name="threshold3Color">Threshold three color</param>
+    public void SetColors(Color normalColor, Color averageColor, Color threshold1Color, Color threshold2Color, Color threshold3Color) {
+      _material.SetColor(SHADER_PROPERTY_COLOR_NORMAL, normalColor);
+      _material.SetColor(SHADER_PROPERTY_COLOR_AVERAGE, averageColor);
       _material.SetColor(SHADER_PROPERTY_COLOR_THRESHOLD_1, threshold1Color);
       _material.SetColor(SHADER_PROPERTY_COLOR_THRESHOLD_2, threshold2Color);
       _material.SetColor(SHADER_PROPERTY_COLOR_THRESHOLD_3, threshold3Color);
@@ -92,54 +106,44 @@ namespace Quantum.Profiling
       Refresh();
     }
 
-    public override void SetValues(float[] values, int offset, int samples)
-    {
+    /// <inheritdoc/>
+    public override void SetValues(float[] values, int offset, int samples) {
       if (_values == null || values == null || _values.Length != values.Length)
         return;
 
-      float minValue     = float.MaxValue;
-      float maxValue     = float.MinValue;
+      float minValue = float.MaxValue;
+      float maxValue = float.MinValue;
       float averageValue = 0.0f;
-      int   averageCount = 0;
+      int averageCount = 0;
 
-      if (_ignoreZeroValuesInAverage == true)
-      {
-        for (int i = 0; i < values.Length; ++i)
-        {
+      if (_ignoreZeroValuesInAverage == true) {
+        for (int i = 0; i < values.Length; ++i) {
           float value = values[i];
 
-          if (value != 0.0f)
-          {
+          if (value != 0.0f) {
             averageValue += value;
             ++averageCount;
           }
 
-          if (value > maxValue)
-          {
+          if (value > maxValue) {
             maxValue = value;
           }
-          if (value < minValue)
-          {
+          if (value < minValue) {
             minValue = value;
           }
         }
 
         averageCount = Mathf.Clamp(Mathf.Min(samples, averageCount), 1, _samples);
-      }
-      else
-      {
-        for (int i = 0; i < values.Length; ++i)
-        {
+      } else {
+        for (int i = 0; i < values.Length; ++i) {
           float value = values[i];
 
           averageValue += value;
 
-          if (value > maxValue)
-          {
+          if (value > maxValue) {
             maxValue = value;
           }
-          if (value < minValue)
-          {
+          if (value < minValue) {
             minValue = value;
           }
         }
@@ -152,33 +156,35 @@ namespace Quantum.Profiling
       SetValues(values, offset, minValue, maxValue, averageValue);
     }
 
-    public void SetValues(float[] values, int offset, float minValue, float maxValue, float averageValue)
-    {
+
+    /// <summary>
+    /// Set the values to render
+    /// </summary>
+    /// <param name="values">Values array</param>
+    /// <param name="offset">Offset to start reading values from the array</param>
+    /// <param name="minValue">Min value </param>
+    /// <param name="maxValue">Max value</param>
+    /// <param name="averageValue">Average value</param>
+    public void SetValues(float[] values, int offset, float minValue, float maxValue, float averageValue) {
       if (_values == null || values == null || _values.Length != values.Length)
         return;
 
-      _minValue     = minValue;
-      _maxValue     = maxValue;
+      _minValue = minValue;
+      _maxValue = maxValue;
       _averageValue = averageValue;
 
-      if (_fixedMaxValue != 0.0f)
-      {
+      if (_fixedMaxValue != 0.0f) {
         _maxRenderValue = _fixedMaxValue;
-      }
-      else if (_fixedAveragePosition != 0.0f)
-      {
+      } else if (_fixedAveragePosition != 0.0f) {
         _maxRenderValue = _averageValue / _fixedAveragePosition;
-      }
-      else
-      {
+      } else {
         _maxRenderValue = Mathf.Lerp(_maxRenderValue, _maxValue, Time.deltaTime * 16.0f);
       }
 
       _maxRenderValue = Mathf.Max(0.000001f, _maxRenderValue);
 
       float invertedMaxValue = 1.0f / _maxRenderValue;
-      for (int i = 0; i < _samples; ++i, ++offset)
-      {
+      for (int i = 0; i < _samples; ++i, ++offset) {
         offset %= _samples;
 
         _values[i] = values[offset] * invertedMaxValue;
@@ -190,28 +196,26 @@ namespace Quantum.Profiling
       OnSetValues();
     }
 
-    protected override void OnInitialize()
-    {
+    /// <inheritdoc/>
+    protected override void OnInitialize() {
       _threshold1ShaderPropertyID = Shader.PropertyToID(SHADER_PROPERTY_THRESHOLD_1);
       _threshold2ShaderPropertyID = Shader.PropertyToID(SHADER_PROPERTY_THRESHOLD_2);
       _threshold3ShaderPropertyID = Shader.PropertyToID(SHADER_PROPERTY_THRESHOLD_3);
-      _averageShaderPropertyID    = Shader.PropertyToID(SHADER_PROPERTY_AVERAGE);
+      _averageShaderPropertyID = Shader.PropertyToID(SHADER_PROPERTY_AVERAGE);
 
-      _lookupTable      = null;
+      _lookupTable = null;
       _lookupMultiplier = 1.0f;
 
-      switch (_valueTextFormat)
-      {
-        case "{0:0}"      : { _lookupTable = LOOKUP_TABLE_0;      _lookupMultiplier =   1.0f; break; }
-        case "{0:0}ms"    : { _lookupTable = LOOKUP_TABLE_0ms;    _lookupMultiplier =   1.0f; break; }
-        case "{0:0.00}ms" : { _lookupTable = LOOKUP_TABLE_0_00ms; _lookupMultiplier = 100.0f; break; }
+      switch (_valueTextFormat) {
+        case "{0:0}": { _lookupTable = LOOKUP_TABLE_0; _lookupMultiplier = 1.0f; break; }
+        case "{0:0}ms": { _lookupTable = LOOKUP_TABLE_0ms; _lookupMultiplier = 1.0f; break; }
+        case "{0:0.00}ms": { _lookupTable = LOOKUP_TABLE_0_00ms; _lookupMultiplier = 100.0f; break; }
       }
 
       Refresh();
     }
 
-    private void OnSetValues()
-    {
+    private void OnSetValues() {
       if (_maxRenderValue == 0.0f)
         return;
 
@@ -223,50 +227,43 @@ namespace Quantum.Profiling
       _material.SetFloat(_threshold2ShaderPropertyID, threshold2Normalized);
       _material.SetFloat(_threshold3ShaderPropertyID, threshold3Normalized);
 
-      if (Time.realtimeSinceStartup > _nextTextRefreshTime)
-      {
+      if (Time.realtimeSinceStartup > _nextTextRefreshTime) {
         _nextTextRefreshTime = Time.realtimeSinceStartup + _textRefreshTime;
 
-        if (_updatePeak == true && _peak != _maxValue)
-        {
+        if (_updatePeak == true && _peak != _maxValue) {
           _peak = _maxValue;
           _peakValueText.text = GetValueText(_peak * _valueTextMultiplier);
         }
 
-        if (_updateAverage == true && _average != _averageValue)
-        {
+        if (_updateAverage == true && _average != _averageValue) {
           _average = _averageValue;
           _averageValueText.text = GetValueText(_average * _valueTextMultiplier);
         }
 
-        if (_updateThreshold1 == true && _threshold1Normalized != threshold1Normalized && (_threshold1Normalized <= 1.0f || threshold1Normalized <= 1.0f))
-        {
+        if (_updateThreshold1 == true && _threshold1Normalized != threshold1Normalized && (_threshold1Normalized <= 1.0f || threshold1Normalized <= 1.0f)) {
           _threshold1Normalized = threshold1Normalized;
           UpdateThresholdPosition(_threshold1Text, _threshold1, threshold1Normalized);
         }
 
-        if (_updateThreshold2 == true && _threshold2Normalized != threshold2Normalized && (_threshold2Normalized <= 1.0f || threshold2Normalized <= 1.0f))
-        {
+        if (_updateThreshold2 == true && _threshold2Normalized != threshold2Normalized && (_threshold2Normalized <= 1.0f || threshold2Normalized <= 1.0f)) {
           _threshold2Normalized = threshold2Normalized;
           UpdateThresholdPosition(_threshold2Text, _threshold2, threshold2Normalized);
         }
 
-        if (_updateThreshold3 == true && _threshold3Normalized != threshold3Normalized && (_threshold3Normalized <= 1.0f || threshold3Normalized <= 1.0f))
-        {
+        if (_updateThreshold3 == true && _threshold3Normalized != threshold3Normalized && (_threshold3Normalized <= 1.0f || threshold3Normalized <= 1.0f)) {
           _threshold3Normalized = threshold3Normalized;
           UpdateThresholdPosition(_threshold3Text, _threshold3, threshold3Normalized);
         }
       }
     }
 
-    protected override void OnRestore()
-    {
-      _maxValue       = 0.0f;
-      _averageValue   = 0.0f;
+    /// <inheritdoc/>
+    protected override void OnRestore() {
+      _maxValue = 0.0f;
+      _averageValue = 0.0f;
       _maxRenderValue = 0.0f;
 
-      if (_material != null)
-      {
+      if (_material != null) {
         _material.SetFloat(_threshold1ShaderPropertyID, 0.0f);
         _material.SetFloat(_threshold2ShaderPropertyID, 0.0f);
         _material.SetFloat(_threshold3ShaderPropertyID, 0.0f);
@@ -274,43 +271,36 @@ namespace Quantum.Profiling
       }
     }
 
-    private void Refresh()
-    {
-      _updatePeak       = _peakValueText    != null && string.IsNullOrEmpty(_valueTextFormat) == false;
-      _updateAverage    = _averageValueText != null && string.IsNullOrEmpty(_valueTextFormat) == false;
-      _updateThreshold1 = _threshold1Text   != null && string.IsNullOrEmpty(_valueTextFormat) == false && _threshold1 > 0.0f && _material.GetColor(SHADER_PROPERTY_COLOR_THRESHOLD_1).a > 0.0f;
-      _updateThreshold2 = _threshold2Text   != null && string.IsNullOrEmpty(_valueTextFormat) == false && _threshold2 > 0.0f && _material.GetColor(SHADER_PROPERTY_COLOR_THRESHOLD_2).a > 0.0f;
-      _updateThreshold3 = _threshold3Text   != null && string.IsNullOrEmpty(_valueTextFormat) == false && _threshold3 > 0.0f && _material.GetColor(SHADER_PROPERTY_COLOR_THRESHOLD_3).a > 0.0f;
+    private void Refresh() {
+      _updatePeak = _peakValueText != null && string.IsNullOrEmpty(_valueTextFormat) == false;
+      _updateAverage = _averageValueText != null && string.IsNullOrEmpty(_valueTextFormat) == false;
+      _updateThreshold1 = _threshold1Text != null && string.IsNullOrEmpty(_valueTextFormat) == false && _threshold1 > 0.0f && _material.GetColor(SHADER_PROPERTY_COLOR_THRESHOLD_1).a > 0.0f;
+      _updateThreshold2 = _threshold2Text != null && string.IsNullOrEmpty(_valueTextFormat) == false && _threshold2 > 0.0f && _material.GetColor(SHADER_PROPERTY_COLOR_THRESHOLD_2).a > 0.0f;
+      _updateThreshold3 = _threshold3Text != null && string.IsNullOrEmpty(_valueTextFormat) == false && _threshold3 > 0.0f && _material.GetColor(SHADER_PROPERTY_COLOR_THRESHOLD_3).a > 0.0f;
 
-      if (_peakValueText    != null) { _peakValueText.text    = _updatePeak       == true                                    ? GetValueText(0.0f)                               : ""; }
-      if (_averageValueText != null) { _averageValueText.text = _updateAverage    == true                                    ? GetValueText(0.0f)                               : ""; }
-      if (_threshold1Text   != null) { _threshold1Text.text   = _updateThreshold1 == true && _disableThresholdTexts == false ? GetValueText(_threshold1 * _valueTextMultiplier) : ""; }
-      if (_threshold2Text   != null) { _threshold2Text.text   = _updateThreshold2 == true && _disableThresholdTexts == false ? GetValueText(_threshold2 * _valueTextMultiplier) : ""; }
-      if (_threshold3Text   != null) { _threshold3Text.text   = _updateThreshold3 == true && _disableThresholdTexts == false ? GetValueText(_threshold3 * _valueTextMultiplier) : ""; }
+      if (_peakValueText != null) { _peakValueText.text = _updatePeak == true ? GetValueText(0.0f) : ""; }
+      if (_averageValueText != null) { _averageValueText.text = _updateAverage == true ? GetValueText(0.0f) : ""; }
+      if (_threshold1Text != null) { _threshold1Text.text = _updateThreshold1 == true && _disableThresholdTexts == false ? GetValueText(_threshold1 * _valueTextMultiplier) : ""; }
+      if (_threshold2Text != null) { _threshold2Text.text = _updateThreshold2 == true && _disableThresholdTexts == false ? GetValueText(_threshold2 * _valueTextMultiplier) : ""; }
+      if (_threshold3Text != null) { _threshold3Text.text = _updateThreshold3 == true && _disableThresholdTexts == false ? GetValueText(_threshold3 * _valueTextMultiplier) : ""; }
     }
 
-    private void UpdateThresholdPosition(Text text, float threshold, float thresholdNormalized)
-    {
-      try
-      {
+    private void UpdateThresholdPosition(Text text, float threshold, float thresholdNormalized) {
+      try {
         Vector3 position = text.rectTransform.anchoredPosition3D;
         position.y = _targetImage.rectTransform.offsetMin.y + _targetImage.rectTransform.rect.height * thresholdNormalized;
         text.rectTransform.anchoredPosition3D = position;
-      }
-      catch {}
+      } catch { }
     }
 
-    private string GetValueText(float value)
-    {
-      if (_lookupTable != null)
-      {
-        int rows    = _lookupTable.Length;
+    private string GetValueText(float value) {
+      if (_lookupTable != null) {
+        int rows = _lookupTable.Length;
         int columns = _lookupTable[0].Length;
 
         int intValue = Mathf.RoundToInt(value * _lookupMultiplier);
-        if (intValue >= 0 && intValue < rows * columns)
-        {
-          int row    = intValue % rows;
+        if (intValue >= 0 && intValue < rows * columns) {
+          int row = intValue % rows;
           int column = intValue / rows;
 
           return _lookupTable[row][column];

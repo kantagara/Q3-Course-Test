@@ -5,53 +5,89 @@ namespace Quantum.Editor {
   using UnityEditor;
   using UnityEngine;
   
+  /// <summary>
+  /// A utility window to quickly access Quantum global configs.
+  /// </summary>
   public class QuantumEditorShortcutsWindow : EditorWindow {
+    /// <summary>
+    /// Configure the button width.
+    /// </summary>
     public static float ButtonWidth = 200.0f;
 
-    [MenuItem("Tools/Quantum/Find Config/Photon Server Settings", priority = (int)QuantumEditorMenuPriority.GlobalConfigs + 1)]
+    /// <summary>
+    /// Search and select PhotonServerSettings.
+    /// </summary>
+    [MenuItem("Tools/Quantum/Find Config/Photon Server Settings", priority = (int)QuantumEditorMenuPriority.GlobalConfigs + 0)]
     public static void SearchPhotonServerSettings() => SearchAndSelect<PhotonServerSettings>();
-
-    [MenuItem("Tools/Quantum/Find Config/Quantum Editor Settings", priority = (int)QuantumEditorMenuPriority.GlobalConfigs + 2)]
+    /// <summary>
+    /// Search and select QuantumEditorSettings.
+    /// </summary>
+    [MenuItem("Tools/Quantum/Find Config/Quantum Editor Settings", priority = (int)QuantumEditorMenuPriority.GlobalConfigs + 11)]
     public static void SearchQuantumEditorSettings() => SearchAndSelect<QuantumEditorSettings>("QuantumEditorSettings");
-
-    [MenuItem("Tools/Quantum/Find Config/Quantum Gizmo Settings", priority = (int)QuantumEditorMenuPriority.GlobalConfigs + 3)]
+    /// <summary>
+    /// Search and select game gizmo settings.
+    /// </summary>
+    [MenuItem("Tools/Quantum/Find Config/Quantum Gizmo Settings", priority = (int)QuantumEditorMenuPriority.GlobalConfigs + 11)]
     public static void SearchQuantumGizmoSettings() => SearchAndSelect<QuantumGameGizmosSettingsScriptableObject>("QuantumGameGizmosSettings");
-
-    [MenuItem("Tools/Quantum/Find Config/Quantum Default Configs", priority = (int)QuantumEditorMenuPriority.GlobalConfigs + 4)]
+    /// <summary>
+    /// Search and select the Quantum default config asset.
+    /// </summary>
+    [MenuItem("Tools/Quantum/Find Config/Quantum Default Configs", priority = (int)QuantumEditorMenuPriority.GlobalConfigs + 22)]
     public static void SearchDefaultConfigs() => SearchAndSelect<QuantumDefaultConfigs>();
-
-    [MenuItem("Tools/Quantum/Find Config/Quantum Session Config", priority = (int)QuantumEditorMenuPriority.GlobalConfigs + 5)]
+    /// <summary>
+    /// Search and select the session config.
+    /// </summary>
+    [MenuItem("Tools/Quantum/Find Config/Quantum Session Config", priority = (int)QuantumEditorMenuPriority.GlobalConfigs + 22)]
     public static void SearchSessionConfig() => SearchAndSelect<QuantumDeterministicSessionConfigAsset>();
-
-    [MenuItem("Tools/Quantum/Find Config/Quantum Simulation Config", priority = (int)QuantumEditorMenuPriority.GlobalConfigs + 6)]
+    /// <summary>
+    /// Search and select simulation config assets.
+    /// </summary>
+    [MenuItem("Tools/Quantum/Find Config/Quantum Simulation Config", priority = (int)QuantumEditorMenuPriority.GlobalConfigs + 22)]
     public static void SearchSimulationConfig() => SearchAndSelect<Quantum.SimulationConfig>();
-
-    [MenuItem("Tools/Quantum/Find Config/Quantum Unity DB", priority = (int)QuantumEditorMenuPriority.GlobalConfigs + 7)]
+    /// <summary>
+    /// Search and select the Quantum Unity DB file.
+    /// </summary>
+    [MenuItem("Tools/Quantum/Find Config/Quantum Unity DB", priority = (int)QuantumEditorMenuPriority.GlobalConfigs + 22)]
     public static void SearchUnityDB() => SearchAndSelect<QuantumUnityDB>();
-
-    [MenuItem("Tools/Quantum/Find Config/Quantum Dotnet Build Settings", priority = (int)QuantumEditorMenuPriority.GlobalConfigs + 8)]
+    /// <summary>
+    /// Search and select the Quantum .net build settings.
+    /// </summary>
+    [MenuItem("Tools/Quantum/Find Config/Quantum Dotnet Build Settings", priority = (int)QuantumEditorMenuPriority.GlobalConfigs + 33)]
     public static void SearchQuantumDotnetBuildSettings() {
       if (QuantumDotnetBuildSettings.TryGetGlobal(out var settings)) {
         Selection.activeObject = settings;
       }
     }
-
-    [MenuItem("Tools/Quantum/Find Config/Quantum Dotnet Project Settings", priority = (int)QuantumEditorMenuPriority.GlobalConfigs + 9)]
+    /// <summary>
+    /// Search and select the Quantum .net project settings.
+    /// </summary>
+    [MenuItem("Tools/Quantum/Find Config/Quantum Dotnet Project Settings", priority = (int)QuantumEditorMenuPriority.GlobalConfigs + 33)]
     public static void SearchQuantumDotnetProjectSettings() {
       if (QuantumDotnetProjectSettings.TryGetGlobal(out var settings)) {
         Selection.activeObject = settings;
       }
     }
-
+    /// <summary>
+    /// Open the global config shortcut window.
+    /// </summary>
     [MenuItem("Window/Quantum/Global Configs")]
     [MenuItem("Tools/Quantum/Window/Global Configs", priority = (int)QuantumEditorMenuPriority.Window + 3)]
     public static void ShowWindow() {
       GetWindow(typeof(QuantumEditorShortcutsWindow), false, "Quantum Global Configs");
     }
 
+    /// <summary>
+    /// A grid scope for the Quantum global config window.
+    /// </summary>
     public class GridScope : IDisposable {
       private bool _endHorizontal;
 
+      /// <summary>
+      /// Create a new grid scope and begin the horizontal layout.
+      /// </summary>
+      /// <param name="columnCount">How many columns</param>
+      /// <param name="currentColumn">The current column is incremented</param>
+      /// <param name="forceClose">Force closing the horizonal layout</param>
       public GridScope(int columnCount, ref int currentColumn, bool forceClose = false) {
         if (currentColumn % columnCount == 0) {
           GUILayout.BeginHorizontal();
@@ -60,6 +96,9 @@ namespace Quantum.Editor {
         _endHorizontal = (++currentColumn % columnCount == 0) || forceClose;
       }
 
+      /// <summary>
+      /// Dispose the grid view and end the horizontal layout if required.
+      /// </summary>
       public void Dispose() {
         if (_endHorizontal) { 
           GUILayout.EndHorizontal();
@@ -67,6 +106,9 @@ namespace Quantum.Editor {
       }
     }
 
+    /// <summary>
+    /// OnGUI override to draw the Quantum global config window.
+    /// </summary>
     public virtual void OnGUI() {
       var columnCount = (int)Mathf.Max(EditorGUIUtility.currentViewWidth / ButtonWidth, 1);
       var currentColumn = 0;
@@ -126,11 +168,19 @@ namespace Quantum.Editor {
       }
     }
 
+    /// <summary>
+    /// Obsolete
+    /// </summary>
     [Obsolete("Use DrawIcon() without width parameter")]
     public static Rect DrawIcon(string iconName, float width) {
       return DrawIcon(iconName);
     }
 
+    /// <summary>
+    /// Draw an icon.
+    /// </summary>
+    /// <param name="iconName">Icon name that is found by EditorGUIUtility.IconContent()</param>
+    /// <returns>Control rect</returns>
     public static Rect DrawIcon(string iconName) {
       var rect = EditorGUILayout.GetControlRect();
       var width = rect.width;
@@ -141,6 +191,11 @@ namespace Quantum.Editor {
       return rect;
     }
 
+    /// <summary>
+    /// Search and select any type.
+    /// </summary>
+    /// <typeparam name="T">Type to search</typeparam>
+    /// <returns>The first asset of the type found</returns>
     public static T SearchAndSelect<T>() where T : UnityEngine.Object {
       var t = typeof(T);
       var guids = AssetDatabase.FindAssets("t:" + t.Name, null);
@@ -158,7 +213,12 @@ namespace Quantum.Editor {
       return (T)selectedObjects[0];
     }
 
-
+    /// <summary>
+    /// Search and select any type by asset guid.
+    /// </summary>
+    /// <typeparam name="T">The asset type</typeparam>
+    /// <param name="assetGuid"></param>
+    /// <returns>The found asset</returns>
     public static T SearchAndSelect<T>(AssetGuid assetGuid) where T : UnityEngine.Object {
       var t = typeof(T);
       var guids = AssetDatabase.FindAssets("t:" + t.Name, null);
@@ -189,6 +249,12 @@ namespace Quantum.Editor {
       return specificAsset;
     }
 
+    /// <summary>
+    /// Search and select any type by name.
+    /// </summary>
+    /// <typeparam name="T">Asset type</typeparam>
+    /// <param name="name">Asset name</param>
+    /// <returns>The asset matching the type and name</returns>
     public static T SearchAndSelect<T>(string name) where T : UnityEngine.Object {
       var t = typeof(T);
       var guids = AssetDatabase.FindAssets("t:" + t.Name, null);

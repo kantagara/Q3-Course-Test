@@ -221,16 +221,6 @@
         <member name="M:Photon.Client.Encryption.IPhotonEncryptor.Init(System.Byte[],System.Byte[],System.Byte[],System.Boolean,System.Int32)">
             <summary>Initialize the encryptor.</summary>
         </member>
-        <member name="F:Photon.Client.Encryption.EncryptorNet.encryptorIn">
-            <summary>
-            Encryption/decryption algorithm implementation
-            </summary>
-        </member>
-        <member name="F:Photon.Client.Encryption.EncryptorNet.hmacsha256In">
-            <summary>
-            Packet authentication algorithm impelmenation
-            </summary>
-        </member>
         <member name="F:Photon.Client.EnetChannel.outgoingReliableUnsequencedNumber">
             <summary>Number for reliable unsequenced commands (separate from "standard" reliable sequenced). Used to avoid duplicates.</summary>
         </member>
@@ -242,6 +232,12 @@
         </member>
         <member name="F:Photon.Client.EnetChannel.highestReceivedAck">
             <summary>To store the highest acknowledged sequence number (and get some impression what the server already received and stored).</summary>
+        </member>
+        <member name="F:Photon.Client.EnetChannel.reliableCommandsInFlight">
+            <summary>Count of reliable commands sent and not yet acknowledged.</summary>
+        </member>
+        <member name="F:Photon.Client.EnetChannel.lowestUnacknowledgedSequenceNumber">
+            <summary>The lowest sequence number sent but not acknowledged yet. This defines the sequence delta "window" for sending subsequent reliable commands.</summary>
         </member>
         <member name="M:Photon.Client.EnetChannel.QueueIncomingReliableUnsequenced(Photon.Client.NCommand)">
             <summary>Checks and queues incoming reliable unsequenced commands ("send" or "fragment"), if they haven't been received yet.</summary>
@@ -257,6 +253,9 @@
         <member name="F:Photon.Client.EnetPeer.sentReliableCommands">
             <summary>One list for all channels keeps sent commands (for re-sending).</summary>
         </member>
+        <member name="P:Photon.Client.EnetPeer.SendWindowUpdateRequired">
+            <summary>When ACKs are executed they set this. Signals changes within sentReliableCommands. Thread safe.</summary>
+        </member>
         <member name="F:Photon.Client.EnetPeer.outgoingAcknowledgementsPool">
             <summary>One pool of ACK byte arrays ( 20 bytes each)  for all channels to keep acknowledgements.</summary>
         </member>
@@ -264,14 +263,24 @@
             <summary>Timestamp sent by the server in last udp package (enet header).</summary>
             TODO the serverSentTime should possibly never decrease?!
         </member>
-        <member name="F:Photon.Client.EnetPeer.datagramEncryptedConnection">
-            <summary>Gets enabled by "request" from server (not by client).</summary>
+        <member name="P:Photon.Client.EnetPeer.DatagramEncryptedConnection">
+            <summary>Gets enabled by "request" from server (not by client). Thread safe.</summary>
         </member>
         <member name="F:Photon.Client.EnetPeer.PeerIdForConnect">
             <summary>Initial PeerId as used in Connect command. If EnableServerTracing is false.</summary>
         </member>
         <member name="F:Photon.Client.EnetPeer.PeerIdForConnectTrace">
             <summary>Initial PeerId to enable Photon Tracing, as used in Connect command. See: EnableServerTracing.</summary>
+        </member>
+        <member name="F:Photon.Client.EnetPeer.CommandQueue">
+            <summary>Queue of received commands. ReceiveIncomingCommands will queue commands, except ACKs which Execute immediately.</summary>
+        </member>
+        <member name="M:Photon.Client.EnetPeer.DispatchCommandQueue">
+            <summary>Handles the incoming commands which are not executed yet in the CommandQueue.</summary>
+            <remarks>
+            Must be called in DispatchIncomingCommands and SendOutgoingCommands as that queue contains ACKs (which prevent re-sends).
+            ACKs may set SendWindowUpdateRequired.
+            </remarks>
         </member>
         <member name="M:Photon.Client.EnetPeer.DispatchIncomingCommands">
             <summary>
@@ -288,17 +297,16 @@
             <returns></returns>
         </member>
         <member name="M:Photon.Client.EnetPeer.SendAcksOnly">
-            <summary>
-            gathers acks until udp-packet is full and sends it!
-            </summary>
+            <summary></summary>
+            <returns></returns>
         </member>
-        <member name="F:Photon.Client.EnetPeer.CommandQueue">
-            <summary>Queue of received commands. ReceiveIncomingCommands will queue commands, except ACKs which Execute immediately.</summary>
+        <member name="M:Photon.Client.EnetPeer.SendOutgoingCommands(System.Boolean)">
+            <summary>Fills one datagram to send outgoing commands (acks, ping, commands sent by game logic).</summary>
+            <param name="sendAcksOnly">Skips sending "new" commands and does not time out, when true. Default: false.</param>
+            <returns>True if there are commands not sent within the current datagram.</returns>
         </member>
-        <member name="M:Photon.Client.EnetPeer.SendOutgoingCommands">
-            <summary>
-            gathers commands from all (out)queues until udp-packet is full and sends it!
-            </summary>
+        <member name="F:Photon.Client.EnetPeer.channelsToUpdateLowestSent">
+            <summary>Used to store temporary values in UpdateSendWindow().</summary>
         </member>
         <member name="M:Photon.Client.EnetPeer.EnqueuePhotonMessage(Photon.Client.StreamBuffer,Photon.Client.SendOptions)">
             <summary>
@@ -608,6 +616,7 @@
         </member>
         <member name="P:Photon.Client.NCommand.IsFlaggedReliable">
             <summary>Checks commandFlags &amp; FV_RELIABLE &amp;&amp; this.commandType &lt; CT_EG_ACK_2.</summary>
+            <remarks>ACK2 commands re-purpose the flags byte, so those never signal "is reliable" for ACK2.</remarks>
         </member>
         <member name="M:Photon.Client.NCommand.CreateAck(System.Byte[],System.Int32,Photon.Client.NCommand,System.Int32)">
             <summary>
@@ -619,14 +628,8 @@
             <param name="sentTime"></param>
             <returns></returns>
         </member>
-        <member name="M:Photon.Client.NCommand.#ctor(Photon.Client.EnetPeer,System.Byte,Photon.Client.StreamBuffer,System.Byte)">
-            <summary>this variant does only create outgoing commands and increments . incoming ones are created from a DataInputStream</summary>
-        </member>
         <member name="M:Photon.Client.NCommand.Initialize(Photon.Client.EnetPeer,System.Byte,Photon.Client.StreamBuffer,System.Byte)">
             <summary>this variant does only create outgoing commands and increments . incoming ones are created from a DataInputStream</summary>
-        </member>
-        <member name="M:Photon.Client.NCommand.#ctor(Photon.Client.EnetPeer,System.Byte[],System.Int32@)">
-            <summary>reads the command values (commandHeader and command-values) from incoming bytestream and populates the incoming command*</summary>
         </member>
         <member name="T:Photon.Client.SimulationItem">
             <summary>
@@ -904,9 +907,18 @@
         <member name="T:Photon.Client.PeerBase">
             <summary>Base class to implement the transport-protocols on.</summary>
         </member>
+        <member name="P:Photon.Client.PeerBase.Stats">
+            <summary>See PhotonPeer value.</summary>
+        </member>
+        <member name="F:Photon.Client.PeerBase.SerializationProtocol">
+            <summary>Set to a "Protocol implementation" (1.8 by default) which provides de/serialization for supported containers and types.</summary>
+        </member>
         <member name="P:Photon.Client.PeerBase.ServerAddress">
             <summary>The server's address, as set by a Connect() call, including any protocol, ports and or path.</summary>
             <remarks>If rHTTP is used, this can be set directly.</remarks>
+        </member>
+        <member name="P:Photon.Client.PeerBase.ProxyServerAddress">
+            <summary>Optional proxy address defined for the current WS/WSS connection. Ignored by other protocols.</summary>
         </member>
         <member name="F:Photon.Client.PeerBase.peerConnectionState">
             <summary>
@@ -932,16 +944,6 @@
             The serverTimeOffset is serverTimestamp - localTime. Used to approximate the serverTimestamp with help of localTime
             </summary>
         </member>
-        <member name="P:Photon.Client.PeerBase.BytesOut">
-            <summary>
-            Count of all bytes going out (including headers)
-            </summary>
-        </member>
-        <member name="P:Photon.Client.PeerBase.BytesIn">
-            <summary>
-            Count of all bytes coming in (including headers)
-            </summary>
-        </member>
         <member name="P:Photon.Client.PeerBase.PeerID">
             <summary>When using UDP, the server will assign a PeerID (int) to each connection. This is an internal value but useful to know for debugging connections.</summary>
             <remarks>There is no PeerID for other transport protocols.</remarks>
@@ -955,7 +957,7 @@
         <member name="F:Photon.Client.PeerBase.AppId">
             <summary>Temporary cache of AppId. Used in Connect() to keep the AppId until we send the Init-Request (after the network-level (and Enet) connect).</summary>
         </member>
-        <member name="F:Photon.Client.PeerBase.timeLastSendOutgoing">
+        <member name="F:Photon.Client.PeerBase.timeIntCurrentSend">
             <summary>Set to timeInt, whenever SendOutgoingCommands actually checks outgoing queues to send them. Must be connected.</summary>
         </member>
         <member name="P:Photon.Client.PeerBase.mtu">
@@ -975,7 +977,16 @@
             <remarks>Uses this.ServerAddress, this.AppId, this.PhotonToken and CustomInitData and some more values.</remarks>
             <returns>Bytes of the init request.</returns>
         </member>
-        <member name="M:Photon.Client.PeerBase.InitCallback">
+        <member name="F:Photon.Client.PeerBase.prepareWebSocketUrlCount">
+            <summary>Count of URLs this peer prepared for WS/WSS yet.</summary>
+        </member>
+        <member name="F:Photon.Client.PeerBase.prepareWebSocketUrlSB">
+            <summary>Used to prepare websocket urls (with appid, etc).</summary>
+        </member>
+        <member name="M:Photon.Client.PeerBase.OnConnect">
+            <summary>Now obsolete. Was required to be called by PhotonSocket implementations to signal when they connected (which triggered sending the initial message, init or connect).</summary>
+        </member>
+        <member name="M:Photon.Client.PeerBase.OnInitResponse">
             <summary>Called when the server's Init Response arrived.</summary>
         </member>
         <member name="M:Photon.Client.PeerBase.SerializeOperationToMessage(System.Byte,Photon.Client.ParameterDictionary,Photon.Client.EgMessageType,System.Boolean)">
@@ -1015,21 +1026,6 @@
             Core of the Network Simulation, which is available in Debug builds.
             Called by a timer in intervals.
             </summary>
-        </member>
-        <member name="F:Photon.Client.PeerBase.TrafficPackageHeaderSize">
-            <summary>EnetPeer will set this value, so trafficstats can use it. TCP has 0 bytes per package extra</summary>
-        </member>
-        <member name="P:Photon.Client.PeerBase.TrafficStatsEnabled">
-            <summary>See PhotonPeer value.</summary>
-        </member>
-        <member name="P:Photon.Client.PeerBase.TrafficStatsIncoming">
-            <summary>See PhotonPeer value.</summary>
-        </member>
-        <member name="P:Photon.Client.PeerBase.TrafficStatsOutgoing">
-            <summary>See PhotonPeer value.</summary>
-        </member>
-        <member name="P:Photon.Client.PeerBase.TrafficStatsGameLevel">
-            <summary>See PhotonPeer value.</summary>
         </member>
         <member name="T:Photon.Client.PhotonPeer">
             <summary>
@@ -1106,6 +1102,10 @@
             Use the SocketImplementationConfig to define which PhotonSocket is used per ConnectionProtocol.
             </remarks>
         </member>
+        <member name="P:Photon.Client.PhotonPeer.SocketErrorCode">
+            <summary>Provides access to a SocketError code (if available) after a call to OnStatusChanged with a Socket-level exception.</summary>
+            <remarks>Useful for debugging send / receive error cases.</remarks>
+        </member>
         <member name="F:Photon.Client.PhotonPeer.LogLevel">
             <summary>
             Sets the level (and amount) of logging for the PhotonPeer.
@@ -1144,7 +1144,7 @@
              <remarks>
              This reduces memory garbage.
              If enabled, the event provided via OnEvent(EventData photonEvent) is invalid once the callback finished.
-             That event's content will get modified. Typically this is not a problem as events are rarely cached.
+             That event's content will get modified. Typically, this is not a problem as events are rarely cached.
             
              Changing this value acquires the same lock that DispatchIncomingCommands() uses.
              </remarks>
@@ -1201,21 +1201,18 @@
             This debug setting enables a new send-ordering for commands. Defaults to true and commands are sent in the order they are created. Set to false to use Enet ordering.
             </summary>
         </member>
-        <member name="F:Photon.Client.PhotonPeer.SequenceDeltaLimitResends">
-            <summary>Skips resending (individual) commands if their reliable sequence number is this amount larger than the highest acknowledged sequence number.</summary>
-            <remarks>
-            This puts focus on resending commands that are older and are needed on the receiver side to dispatch commands.
-            It queues more on the client side than on the server.
-            Affects only reliable UDP (based on enet).
-            </remarks>
+        <member name="F:Photon.Client.PhotonPeer.SendWindowSize">
+             <summary>Defines how far ahead the client can go sending commands (on UDP connections), compared to the acknowledged sequence number.</summary>
+             <remarks>
+             This avoids spamming the receiver and puts focus on resending commands that are older and are needed on the receiver side to dispatch commands.
+            
+             When acks arrive, the SendWindow will move forward and newer commands get sent.
+             This indirectly affects unreliable commands as they are by default sent in creation order.
+             It queues more on the client side than on the server.
+             </remarks>
         </member>
-        <member name="F:Photon.Client.PhotonPeer.SequenceDeltaLimitSends">
-            <summary>Skips sending reliable and unreliable commands if their reliable sequence number is this amount larger than the highest acknowledged sequence number.</summary>
-            <remarks>
-            This puts focus on resending commands that are older and are needed on the receiver side to dispatch commands.
-            It queues more on the client side than on the server.
-            Affects only reliable UDP (based on enet).
-            </remarks>
+        <member name="P:Photon.Client.PhotonPeer.SequenceDeltaLimitSends">
+            <summary>Obsolete. Use SendWindowSize instead.</summary>
         </member>
         <member name="P:Photon.Client.PhotonPeer.QuickResendAttempts">
             <summary>
@@ -1375,10 +1372,6 @@
         <member name="F:Photon.Client.PhotonPeer.RandomizedSequenceNumbers">
             <summary>Initialization array, used to modify the sequence numbers of channels.</summary>
         </member>
-        <member name="F:Photon.Client.PhotonPeer.GcmDatagramEncryption">
-            <summary>If GCM is used for DatagramEncryption.</summary>
-            <remarks>If true, the randomization-value gets added to the current value, else (CBC/old style) the randomization-value replaces the current value.</remarks>
-        </member>
         <member name="P:Photon.Client.PhotonPeer.PayloadEncryptorType">
              <summary>Setter for the Payload Encryptor type. Used for next connection.</summary>
              <remarks>
@@ -1512,10 +1505,6 @@
              int opJoinByteCount = this.client.ByteCountLastOperation;
              </remarks>
         </member>
-        <member name="P:Photon.Client.PhotonPeer.SocketErrorCode">
-            <summary>Provides access to a SocketError code (if available) after a call to OnStatusChanged with a Socket-level exception.</summary>
-            <remarks>Useful for debugging send / receive error cases.</remarks>
-        </member>
         <member name="F:Photon.Client.PhotonPeer.PingUsedAsInit">
             <summary>Debug / info value indicating the client worked around a minor problem of WebSockets. See description.</summary>
             <remarks>Background:
@@ -1543,33 +1532,17 @@
         <member name="P:Photon.Client.PhotonPeer.LastSendAckTime">
             <summary>The last ConnectionTime value, when some ACKs were sent out by this client.</summary>
         </member>
-        <member name="P:Photon.Client.PhotonPeer.LastSendAckTimestamp">
-            <summary>The last ConnectionTime value, when some ACKs were sent out by this client.</summary>
-            <remarks>Only applicable to UDP connections.</remarks>
-        </member>
         <member name="P:Photon.Client.PhotonPeer.LastSendAckDeltaTime">
             <summary>Milliseconds since the last SendAcksOnly call.</summary>
         </member>
         <member name="P:Photon.Client.PhotonPeer.LastSendOutgoingTime">
             <summary>The last ConnectionTime value, when SendOutgoingCommands actually checked outgoing queues to send them. Must be connected.</summary>
         </member>
-        <member name="P:Photon.Client.PhotonPeer.LastSendOutgoingTimestamp">
-            <summary>The last ConnectionTime value, when SendOutgoingCommands actually checked outgoing queues to send them. Must be connected.</summary>
-            <remarks>Available for UDP and TCP connections.</remarks>
-        </member>
         <member name="P:Photon.Client.PhotonPeer.LastSendOutgoingDeltaTime">
             <summary>Milliseconds since the last SendOutgoing call.</summary>
         </member>
         <member name="P:Photon.Client.PhotonPeer.TimestampOfLastSocketReceive">
             <summary>Milliseconds since the last SendOutgoing call.</summary>
-        </member>
-        <member name="P:Photon.Client.PhotonPeer.LastReceiveTimestamp">
-            <summary>
-            Timestamp of the last time anything (!) was received from the server (including low level Ping, ACKs, events and operation-returns).
-            </summary>
-            <remarks>
-            This is not the time when something was dispatched. If you enable NetworkSimulation, this value is affected as well.
-            </remarks>
         </member>
         <member name="P:Photon.Client.PhotonPeer.LastReceiveDeltaTime">
             <summary>Milliseconds since the last received message or datagram (anything received by the socket).</summary>
@@ -1600,51 +1573,11 @@
         <member name="P:Photon.Client.PhotonPeer.SentReliableCommandsCount">
             <summary>Count of reliable commands "in flight". They are sent but not yet acknowledged by the receiving peer / server.</summary>
         </member>
-        <member name="P:Photon.Client.PhotonPeer.TrafficStatsIncoming">
-            <summary>
-            Gets the byte-count of incoming "low level" messages, which are either Enet Commands or Tcp Messages.
-            These include all headers, except those of the underlying internet protocol Udp or Tcp.
-            </summary>
+        <member name="P:Photon.Client.PhotonPeer.Stats">
+            <summary>Provides stats of incoming and outgoing traffic for the current connection. Replaced with new instance when connecting.</summary>
         </member>
-        <member name="P:Photon.Client.PhotonPeer.TrafficStatsOutgoing">
-            <summary>
-            Gets the byte-count of outgoing "low level" messages, which are either Enet Commands or Tcp Messages.
-            These include all headers, except those of the underlying internet protocol Udp or Tcp.
-            </summary>
-        </member>
-        <member name="P:Photon.Client.PhotonPeer.TrafficStatsGameLevel">
-            <summary>
-            Gets a statistic of incoming and outgoing traffic, split by operation, operation-result and event.
-            </summary>
-            <remarks>
-            Operations are outgoing traffic, results and events are incoming.
-            Includes the per-command header sizes (Udp: Enet Command Header or Tcp: Message Header).
-            </remarks>
-        </member>
-        <member name="P:Photon.Client.PhotonPeer.TrafficStatsElapsedMs">
-            <summary>
-            Returns the count of milliseconds the stats are enabled for tracking.
-            </summary>
-        </member>
-        <member name="P:Photon.Client.PhotonPeer.TrafficStatsEnabled">
-            <summary>
-            Enables or disables collection of statistics in TrafficStatsIncoming, TrafficStatsOutgoing and TrafficstatsGameLevel. This does not reset the stats.
-            </summary>
-            <remarks>
-            Setting this to true, also starts the stopwatch to measure the timespan the stats are collected.
-            Enables the traffic statistics of a peer: TrafficStatsIncoming, TrafficStatsOutgoing and TrafficstatsGameLevel (nothing else).
-            Default value: false (disabled).
-            </remarks>
-        </member>
-        <member name="M:Photon.Client.PhotonPeer.TrafficStatsReset">
-            <summary>
-            Creates new instances of TrafficStats and starts a new timer for those.
-            </summary>
-        </member>
-        <member name="M:Photon.Client.PhotonPeer.InitializeTrafficStats">
-            <summary>
-            Creates new TrafficStats values and the related Stopwatch instance. To be called when the peer is created / reset.
-            </summary>
+        <member name="F:Photon.Client.PhotonPeer.TrafficStatsEnabled">
+            <summary>Now obsolete and without function. See PhotonPeer.Stats.</summary>
         </member>
         <member name="M:Photon.Client.PhotonPeer.VitalStatsToString(System.Boolean)">
             <summary>
@@ -1748,6 +1681,15 @@
             <param name="randomizedSequenceNumbers">Sets if enet Sequence Numbers will be randomized or not. Preferably should be true.</param>
             <param name="chainingModeGCM">Sets if the chaining mode should be CBC (false, default) or GCM (true). GCM mode is only available with a native encryption plugin.</param>
         </member>
+        <member name="M:Photon.Client.PhotonPeer.InitDatagramEncryption(System.Byte[],System.Byte[])">
+            <summary>
+            Sets up the Datagram Encryption secrets for this connection. These should be exchanged on a WSS connection for safety.
+            </summary>
+            <param name="encryptionSecret">Secret encryption key. Must be non null.</param>
+            <param name="hmacSecret">Hmac init. May be null.</param>
+            <returns>True if Datagram Encryption could be setup</returns>
+            <exception cref="T:System.NullReferenceException">If the EncryptorType is not set properly or failed initialization.</exception>
+        </member>
         <member name="M:Photon.Client.PhotonPeer.InitPayloadEncryption(System.Byte[])">
             <summary>
             Photon's Payload Encryption secret may be set by a response from the server.
@@ -1805,7 +1747,7 @@
             
              Call this 2..20 times per second (depending on your target platform).
              </remarks>
-             <returns>The if commands are not yet sent. Udp limits it's package size, Tcp does not.</returns>
+             <returns>If commands are not yet sent. Udp limits its package size, Tcp does not.</returns>
         </member>
         <member name="M:Photon.Client.PhotonPeer.SendAcksOnly">
             <summary>
@@ -1856,7 +1798,7 @@
             <summary>Sends a custom "Message" to the server, which must be handled by a Plugin or custom Server.</summary>
             <param name="message">When passing a byte[], the client will send a Raw Message (message type 9). Else it is a message with serialization (type code 8).</param>
             <param name="sendOptions">Defines how to send the operation. Reliability, encryption and channel.</param>
-            <returns>True if the message got queued for senging.</returns>
+            <returns>True if the message got queued for sending.</returns>
             <exception cref="T:System.ArgumentException">If the message failed serialization or queueing.</exception>
         </member>
         <member name="M:Photon.Client.PhotonPeer.RegisterType(System.Type,System.Byte,Photon.Client.SerializeStreamMethod,Photon.Client.DeserializeStreamMethod)">
@@ -2568,7 +2510,7 @@
         </member>
         <member name="T:Photon.Client.Pool`1">
             <summary>
-            Simple Queue-based pool for objects. Threadsafe (will lock).
+            Simple Queue-based pool for objects. Thread-safe (will lock).
             </summary>
             <typeparam name="T">Type of the items to pool.</typeparam>
         </member>
@@ -2585,6 +2527,15 @@
         </member>
         <member name="F:Photon.Client.TPeer.ALL_HEADER_BYTES">
             <summary>TCP header combined: 9 bytes</summary>
+        </member>
+        <member name="F:Photon.Client.TPeer.lastPingActivity">
+            <summary>Timestamp of last ping activity (updated when sending to avoid sending again immediately).</summary>
+        </member>
+        <member name="F:Photon.Client.TPeer.pingRequest">
+            <summary>Re-used binary message used in the TCP protocol (WSS uses a Ping Operation due to lack of framing).</summary>
+        </member>
+        <member name="F:Photon.Client.TPeer.pingParamDict">
+            <summary>Re-used ping-Operation parameter-dict used in the WS/WSS protocol (TCP uses pingRequest).</summary>
         </member>
         <member name="F:Photon.Client.TPeer.DoFraming">
             <summary>Defines if the (TCP) socket implementation needs to do "framing".</summary>
@@ -2608,95 +2559,180 @@
         <member name="M:Photon.Client.TPeer.EnqueueMessageAsPayload(Photon.Client.DeliveryMode,Photon.Client.StreamBuffer,System.Byte)">
             <summary>enqueues serialized operations to be sent as tcp stream / package</summary>
         </member>
-        <member name="M:Photon.Client.TPeer.SendPing">
-            <summary>Sends a ping and modifies this.lastPingResult to avoid another ping for a while.</summary>
+        <member name="M:Photon.Client.TPeer.SendPing(System.Boolean)">
+            <summary>Queues a ping (operation or "message") and updates this.lastPingActivity to avoid another ping for a while.</summary>
+            <param name="sendImmediately">Set to true to immediately send a Ping (not queueing it first). This is useful for SendAcksOnly() to keep the connection up.</param>
         </member>
         <member name="M:Photon.Client.TPeer.ReceiveIncomingCommands(System.Byte[],System.Int32)">
             <summary>reads incoming tcp-packages to create and queue incoming commands*</summary>
+            <remarks>
+            TCP Sockets have 9 bytes headers (except for ping messages, which are 9 bytes total).
+            WebSockets have 0 bytes header (so dataLength == actual received payload bytes).
+            See Confluence, "RTS Protocol".
+            </remarks>
         </member>
-        <member name="T:Photon.Client.TrafficStatsGameLevel">
+        <member name="T:Photon.Client.TrafficStatsBase">
+            <summary>Base class for traffic statistics. This contains the values that can be snapshot and compared.</summary>
+        </member>
+        <member name="P:Photon.Client.TrafficStatsBase.BytesIn">
+            <summary>Count of received bytes (excluding all transport layer headers).</summary>
+        </member>
+        <member name="P:Photon.Client.TrafficStatsBase.BytesOut">
+            <summary>Count of sent bytes (excluding all transport layer headers).</summary>
+        </member>
+        <member name="P:Photon.Client.TrafficStatsBase.PackagesIn">
+            <summary>Count of received packages / datagrams.</summary>
+        </member>
+        <member name="P:Photon.Client.TrafficStatsBase.PackagesOut">
+            <summary>Count of sent packages / datagrams.</summary>
+        </member>
+        <member name="P:Photon.Client.TrafficStatsBase.UdpFragmentsIn">
+            <summary>Count of incoming Fragment commands (data split into multiple commands due to being larger than mtu size).</summary>
+        </member>
+        <member name="P:Photon.Client.TrafficStatsBase.UdpFragmentsOut">
+            <summary>Count of outgoing Fragment commands (data split into multiple commands due to being larger than mtu size).</summary>
+        </member>
+        <member name="P:Photon.Client.TrafficStatsBase.UdpReliableCommandsSent">
+            <summary>Count of reliable commands sent so far (total on all channels). Does not include resends.</summary>
+        </member>
+        <member name="P:Photon.Client.TrafficStatsBase.UdpReliableCommandsResent">
+            <summary>Count of reliable commands which got repeated (due to local repeat-timing before an ACK was received).</summary>
+        </member>
+        <member name="P:Photon.Client.TrafficStatsBase.UdpReliableCommandsInFlight">
+            <summary>Count of reliable commands sent but not yet acknowledged by the receiver / server.</summary>
+        </member>
+        <member name="P:Photon.Client.TrafficStatsBase.DispatchIncomingCommandsCalls">
+            <summary>Count of calls of DispatchIncomingCommands.</summary>
+        </member>
+        <member name="P:Photon.Client.TrafficStatsBase.SendOutgoingCommandsCalls">
+            <summary>Count of calls of SendOutgoingCommands.</summary>
+        </member>
+        <member name="P:Photon.Client.TrafficStatsBase.RoundtripTime">
+             <summary>Time until a reliable command is acknowledged by the server.</summary>
+             <remarks>
+             The value measures network latency and for UDP it includes the server's ACK-delay (setting in config).
+             In TCP, there is no ACK-delay, so the value is slightly lower (if you use default settings for Photon).
+            
+             RoundTripTime is updated constantly. Every reliable command will contribute a fraction to this value.
+            
+             This is also the approximate time until a raised event reaches another client or until an operation
+             result is available.
+             </remarks>
+        </member>
+        <member name="P:Photon.Client.TrafficStatsBase.RoundtripTimeVariance">
+            <summary>Changes of the roundtriptime as variance value. Gives a hint about how much the time is changing.</summary>
+        </member>
+        <member name="P:Photon.Client.TrafficStatsBase.LastRoundtripTime">
+            <summary>The last measured roundtrip time for this connection.</summary>
+        </member>
+        <member name="M:Photon.Client.TrafficStatsBase.#ctor">
+            <summary>Default constructor which leaves all values at default.</summary>
+        </member>
+        <member name="M:Photon.Client.TrafficStatsBase.#ctor(Photon.Client.TrafficStatsBase)">
+            <summary>Creates a new instance, copying the given origin's values.</summary>
+            <param name="origin">Provides initial values for the new TrafficStatsBase (copy).</param>
+        </member>
+        <member name="T:Photon.Client.TrafficStatsDelta">
+            <summary>Delta values for TrafficStats, compared to some TrafficStatsSnapshot.</summary>
+        </member>
+        <member name="F:Photon.Client.TrafficStatsDelta.DeltaTime">
+            <summary>Timespan / delta time between the two snapshots.</summary>
+        </member>
+        <member name="P:Photon.Client.TrafficStatsDelta.ReferenceRoundtripTime">
+            <summary>RoundtripTime of the reference (earlier) snapshot.</summary>
+        </member>
+        <member name="P:Photon.Client.TrafficStatsDelta.ReferenceRoundtripTimeVariance">
+            <summary>RoundtripTimeVariance of the reference (earlier) snapshot.</summary>
+        </member>
+        <member name="P:Photon.Client.TrafficStatsDelta.LaterRoundtripTime">
+            <summary>RoundtripTime of the later snapshot.</summary>
+        </member>
+        <member name="P:Photon.Client.TrafficStatsDelta.LaterRoundtripTimeVariance">
+            <summary>RoundtripTimeVariance of the later snapshot.</summary>
+        </member>
+        <member name="M:Photon.Client.TrafficStatsDelta.#ctor(Photon.Client.TrafficStatsSnapshot,Photon.Client.TrafficStatsSnapshot)">
+            <summary>Creates a TrafficStatsDelta instance for a given reference (earlier) snapshot and a later one (now).</summary>
+            <param name="reference">Earlier snapshot to compare the newer one with.</param>
+            <param name="now">Newer snapshot marking the end of the timespan to compare.</param>
+        </member>
+        <member name="M:Photon.Client.TrafficStatsDelta.#ctor(Photon.Client.TrafficStatsSnapshot,Photon.Client.TrafficStats)">
+            <summary>Creates a TrafficStatsDelta instance for a given reference (earlier) snapshot and newer TrafficStats (now).</summary>
+            <param name="reference">Earlier snapshot to compare the newer one with.</param>
+            <param name="now">Newer (likely current) stats, marking the end of the timespan to compare.</param>
+        </member>
+        <member name="M:Photon.Client.TrafficStatsDelta.ToString">
+            <summary>Provides a string representation of the delta values.</summary>
+            <returns>ToString(true, true, true).</returns>
+        </member>
+        <member name="M:Photon.Client.TrafficStatsDelta.ToString(System.Boolean,System.Boolean,System.Boolean)">
+            <summary>Provides a string representation of the delta values.</summary>
+            <param name="udpValues">Includes UDP related values (if any). Reliable commands, resends, in flight, fragments in and out.</param>
+            <param name="rttValues">Includes Roundtrip Time and variance (from reference in the past and current values).</param>
+            <param name="callValues">Includes how often DispatchIncomingCommands and SendOutgoingCommands have been called in the timespan.</param>
+            <returns>String (e.g. for logging).</returns>
+        </member>
+        <member name="T:Photon.Client.TrafficStatsSnapshot">
+            <summary>Snapshot of connection statistics at a specific time. Useful to calculate changes over time (e.g. to get BytesIn for each second).</summary>
+        </member>
+        <member name="T:Photon.Client.TrafficStats">
+            <summary>Statistics about the current connection (if any).</summary>
+        </member>
+        <member name="M:Photon.Client.TrafficStats.#ctor(System.Diagnostics.Stopwatch)">
+            <summary>Creates a new TrafficStats instance, using the given Stopwatch.</summary>
+            <param name="connectionTimeSw">Can't be null.</param>
+        </member>
+        <member name="M:Photon.Client.TrafficStats.ToSnapshot">
+            <summary>Creates a new snapshot of the current stats.</summary>
+            <returns>New snapshot.</returns>
+        </member>
+        <member name="M:Photon.Client.TrafficStats.ToDelta(Photon.Client.TrafficStatsSnapshot)">
+            <summary>Creates a new stats delta instance between current stats and the reference (current - reference).</summary>
+            <returns>New TrafficStatsDelta (current - reference).</returns>
+        </member>
+        <member name="F:Photon.Client.TrafficStats.LastSendOutgoingTimestamp">
+            <summary>When the last call to SendOutgoingCommands happened in milliseconds since Connect().</summary>
+        </member>
+        <member name="F:Photon.Client.TrafficStats.LastSendAckTimestamp">
+            <summary>The last ConnectionTime value, when some ACKs were sent out by this client.</summary>
+            <remarks>Only applicable to UDP connections.</remarks>
+        </member>
+        <member name="P:Photon.Client.TrafficStats.LastSendAckDeltaTime">
+            <summary>How long ago some ACKs were sent out by this client.</summary>
+        </member>
+        <member name="P:Photon.Client.TrafficStats.LastReceiveTimestamp">
             <summary>
-            Only in use as long as PhotonPeer.TrafficStatsEnabled = true;
+            Timestamp of the last time anything (!) was received from the server (including low level Ping, ACKs, events and operation-returns).
             </summary>
+            <remarks>
+            This is not the time when something was dispatched. If you enable NetworkSimulation, this value is affected as well.
+            </remarks>
         </member>
-        <member name="P:Photon.Client.TrafficStatsGameLevel.OperationByteCount">
-            <summary>Gets sum of outgoing operations in bytes.</summary>
+        <member name="P:Photon.Client.TrafficStats.LastReceiveDeltaTime">
+            <summary>How long ago this client received anything (based on LastReceiveTimestamp).</summary>
         </member>
-        <member name="P:Photon.Client.TrafficStatsGameLevel.OperationCount">
-            <summary>Gets count of outgoing operations.</summary>
+        <member name="P:Photon.Client.TrafficStats.LastDispatchTimestamp">
+            <summary>When the last call to DispatchIncomingCommands happened in milliseconds since Connect().</summary>
         </member>
-        <member name="P:Photon.Client.TrafficStatsGameLevel.ResultByteCount">
-            <summary>Gets sum of byte-cost of incoming operation-results.</summary>
+        <member name="P:Photon.Client.TrafficStats.LastDispatchDeltaTime">
+            <summary>How long ago the last call to DispatchIncomingCommands happened (based on LastDispatchTimestamp).</summary>
         </member>
-        <member name="P:Photon.Client.TrafficStatsGameLevel.ResultCount">
-            <summary>Gets count of incoming operation-results.</summary>
-        </member>
-        <member name="P:Photon.Client.TrafficStatsGameLevel.EventByteCount">
-            <summary>Gets sum of byte-cost of incoming events.</summary>
-        </member>
-        <member name="P:Photon.Client.TrafficStatsGameLevel.EventCount">
-            <summary>Gets count of incoming events.</summary>
-        </member>
-        <member name="P:Photon.Client.TrafficStatsGameLevel.LongestOpResponseCallback">
-            <summary>
-            Gets longest time it took to complete a call to OnOperationResponse (in your code).
-            If such a callback takes long, it will lower the network performance and might lead to timeouts.
-            </summary>
-        </member>
-        <member name="P:Photon.Client.TrafficStatsGameLevel.LongestOpResponseCallbackOpCode">
-            <summary>Gets OperationCode that causes the LongestOpResponseCallback. See that description.</summary>
-        </member>
-        <member name="P:Photon.Client.TrafficStatsGameLevel.LongestEventCallback">
-            <summary>
-            Gets longest time a call to OnEvent (in your code) took.
-            If such a callback takes long, it will lower the network performance and might lead to timeouts.
-            </summary>
-        </member>
-        <member name="P:Photon.Client.TrafficStatsGameLevel.LongestEventCallbackCode">
-            <summary>Gets EventCode that caused the LongestEventCallback. See that description.</summary>
-        </member>
-        <member name="P:Photon.Client.TrafficStatsGameLevel.LongestDeltaBetweenDispatching">
+        <member name="P:Photon.Client.TrafficStats.LongestDeltaBetweenDispatchCalls">
             <summary>
             Gets longest time between subsequent calls to DispatchIncomingCommands in milliseconds.
             Note: This is not a crucial timing for the networking. Long gaps just add "local lag" to events that are available already.
             </summary>
         </member>
-        <member name="P:Photon.Client.TrafficStatsGameLevel.LongestDeltaBetweenSending">
+        <member name="P:Photon.Client.TrafficStats.LastDispatchDuration">
+            <summary>How long the last callback from DispatchIncomingCommands took in Milliseconds.</summary>
+        </member>
+        <member name="P:Photon.Client.TrafficStats.LongestDeltaBetweenSendOutgoingCalls">
             <summary>
             Gets longest time between subsequent calls to SendOutgoingCommands in milliseconds.
             Note: This is a crucial value for network stability. Without calling SendOutgoingCommands,
             nothing will be sent to the server, who might time out this client.
             </summary>
         </member>
-        <member name="P:Photon.Client.TrafficStatsGameLevel.DispatchIncomingCommandsCalls">
-            <summary>
-            Gets number of calls of DispatchIncomingCommands.
-            </summary>
-        </member>
-        <member name="P:Photon.Client.TrafficStatsGameLevel.SendOutgoingCommandsCalls">
-            <summary>
-            Gets number of calls of SendOutgoingCommands.
-            </summary>
-        </member>
-        <member name="P:Photon.Client.TrafficStatsGameLevel.TotalByteCount">
-            <summary>Gets sum of byte-cost of all "logic level" messages.</summary>
-        </member>
-        <member name="P:Photon.Client.TrafficStatsGameLevel.TotalMessageCount">
-            <summary>Gets sum of counted "logic level" messages.</summary>
-        </member>
-        <member name="P:Photon.Client.TrafficStatsGameLevel.TotalIncomingByteCount">
-            <summary>Gets sum of byte-cost of all incoming "logic level" messages.</summary>
-        </member>
-        <member name="P:Photon.Client.TrafficStatsGameLevel.TotalIncomingMessageCount">
-            <summary>Gets sum of counted incoming "logic level" messages.</summary>
-        </member>
-        <member name="P:Photon.Client.TrafficStatsGameLevel.TotalOutgoingByteCount">
-            <summary>Gets sum of byte-cost of all outgoing "logic level" messages (= OperationByteCount).</summary>
-        </member>
-        <member name="P:Photon.Client.TrafficStatsGameLevel.TotalOutgoingMessageCount">
-            <summary>Gets sum of counted outgoing "logic level" messages (= OperationCount).</summary>
-        </member>
-        <member name="M:Photon.Client.TrafficStatsGameLevel.ResetMaximumCounters">
+        <member name="M:Photon.Client.TrafficStats.ResetMaximumCounters">
             <summary>
             Resets the values that can be maxed out, like LongestDeltaBetweenDispatching. See remarks.
             </summary>
@@ -2705,22 +2741,13 @@
             Also resets internal values: timeOfLastDispatchCall and timeOfLastSendCall (so intervals are tracked correctly).
             </remarks>
         </member>
-        <member name="P:Photon.Client.TrafficStats.PackageHeaderSize">
-            <summary>Gets the byte-size of per-package headers.</summary>
+        <member name="M:Photon.Client.TrafficStats.ToString">
+            <summary>Provides a string representation of the current values.</summary>
+            <returns>ToString(true).</returns>
         </member>
-        <member name="P:Photon.Client.TrafficStats.ReliableCommandCount">
-            <summary>
-            Counts commands created/received by this client, ignoring repeats (out command count can be higher due to repeats).
-            </summary>
-        </member>
-        <member name="P:Photon.Client.TrafficStats.TotalPacketBytes">
-            <summary>Gets count of bytes as traffic, excluding UDP/TCP headers (42 bytes / x bytes).</summary>
-        </member>
-        <member name="P:Photon.Client.TrafficStats.TimestampOfLastAck">
-            <summary>Timestamp of the last incoming ACK that has been read (every PhotonPeer.PingInterval milliseconds this client sends a PING which must be ACKd).</summary>
-        </member>
-        <member name="P:Photon.Client.TrafficStats.TimestampOfLastReliableCommand">
-            <summary>Timestamp of last incoming reliable command (every second we expect a PING).</summary>
+        <member name="M:Photon.Client.TrafficStats.ToString(System.Boolean)">
+            <summary>Provides a string representation of the current stats values.</summary>
+            <returns>String (e.g. for logging).</returns>
         </member>
     </members>
 </doc>

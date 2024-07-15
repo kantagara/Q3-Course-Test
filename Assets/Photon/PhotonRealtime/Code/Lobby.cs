@@ -15,12 +15,6 @@
 
 namespace Photon.Realtime
 {
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using Photon.Client;
-
     #if SUPPORTED_UNITY
     using UnityEngine;
     using Debug = UnityEngine.Debug;
@@ -31,7 +25,7 @@ namespace Photon.Realtime
 
 
     /// <summary>
-    /// Info for a lobby on the server. Used when <see cref="RealtimeClient.AppSettings.EnableLobbyStatistics"/> is true (can be passed to ConnectUsingSettings).
+    /// Info for a lobby on the server. Used when <see cref="AppSettings.EnableLobbyStatistics"/> is true (can be passed to ConnectUsingSettings).
     /// </summary>
     public class TypedLobbyInfo : TypedLobby
     {
@@ -95,15 +89,15 @@ namespace Photon.Realtime
         {
             get
             {
-                return defaultLobby;
+                return DefaultLobby;
             }
         }
 
-        private static readonly TypedLobby defaultLobby = new TypedLobby();
+        private static readonly TypedLobby DefaultLobby = new TypedLobby();
 
 
         /// <summary>
-        /// Returns whether or not this instance points to the "default lobby" (<see cref="TypedLobby.Default"/>).
+        /// Returns if this instance points to the "default lobby" (<see cref="TypedLobby.Default"/>).
         /// </summary>
         /// <remarks>
         /// This comes up to checking if the Name is null or empty.

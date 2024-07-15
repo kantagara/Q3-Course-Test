@@ -34,6 +34,6 @@ namespace Quantum {
     public virtual void BeforeBake() {
       UpdateFromSourceCollider();
     }
-  }
 #endif
+  }
 }

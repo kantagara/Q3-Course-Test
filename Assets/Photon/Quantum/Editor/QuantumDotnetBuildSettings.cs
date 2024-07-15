@@ -54,27 +54,27 @@ namespace Quantum.Editor {
     /// The project settings to use for the generated csproj.
     /// </summary>
     public QuantumDotnetProjectSettings ProjectSettings;
-   
+
     /// <summary>
-    /// The project template to use for the generated csproj.
+    /// The project template to use for the generated simulation csproj.
     /// </summary>
-    public TextAsset ProjectTemplate;
-   
+    public TextAsset SimulationProjectTemplate;
+
     /// <summary>
-    /// The name of the generated csproj.
+    /// The project template to use for the generated runner csproj.
     /// </summary>
-    public string ProjectFilename = "Quantum.Simulation.Dotnet";
-   
+    public TextAsset RunnerProjectTemplate;
+
     /// <summary>
-    /// The path where to output the generated csproj.
+    /// The path to the base folder of the dotnet project structure relative to the Unity project folder.
     /// </summary>
-    public string ProjectOutputPath = "Assets/..";
+    public string ProjectBasePath = "Quantum.Dotnet";
     
     /// <summary>
-    /// Where to output the compiled DLL.
+    /// Where to output the compiled DLL. Relative to the project folder.
     /// </summary>
-    public string BinOutputPath = "Temp/Quantum.Simulation.Dotnet/bin";
-    public string LibOutputPath = "Temp/Quantum.Simulation.Dotnet/lib";
+    public string BinOutputPath = "bin";
+
     /// <summary>
     /// The path to the Photon Server SDK.
     /// </summary>
@@ -90,11 +90,11 @@ namespace Quantum.Editor {
     /// </summary>
     public DotnetConfiguration TargetConfiguration;
 
-
     const string PluginSdkAssetPath = "Photon.Server/deploy_win/Plugins/QuantumPlugin3.0/bin/assets";
     const string PhotonServerPath = "Photon.Server/deploy_win/bin";
     const string PluginSdkLibPath = "Lib";
-    const string ProjectAssetDefaultPath = "Assets/Photon/Quantum/Editor/Dotnet/Quantum.Simulation.Dotnet.csproj.txt";
+    const string SimulationProjectAssetDefaultPath = "Assets/Photon/Quantum/Editor/Dotnet/Quantum.Simulation.Dotnet.csproj.txt";
+    const string RunnerProjectAssetDefaultPath = "Assets/Photon/Quantum/Editor/Dotnet/Quantum.Runner.Dotnet.csproj.txt";
     const string DependencyArchivePath = "Assets/Photon/Quantum/Editor/Dotnet/Quantum.Dotnet.{0}.zip";
 
     /// <summary>
@@ -113,13 +113,19 @@ namespace Quantum.Editor {
     /// <summary>
     /// Try to initialize ProjectSettings and ProjectTemplate when the scriptable object was created.
     /// </summary>
-    protected virtual void Awake() {
+    private void Awake() {
       if (ProjectSettings == null) {
         QuantumDotnetProjectSettings.TryGetGlobal(out ProjectSettings);
         EditorUtility.SetDirty(this);
       }
-      if (ProjectTemplate == null) {
-        ProjectTemplate = AssetDatabase.LoadAssetAtPath<TextAsset>(ProjectAssetDefaultPath);
+
+      if (SimulationProjectTemplate == null) {
+        SimulationProjectTemplate = AssetDatabase.LoadAssetAtPath<TextAsset>(SimulationProjectAssetDefaultPath);
+        EditorUtility.SetDirty(this);
+      }
+
+      if (RunnerProjectTemplate == null) {
+        RunnerProjectTemplate = AssetDatabase.LoadAssetAtPath<TextAsset>(RunnerProjectAssetDefaultPath);
         EditorUtility.SetDirty(this);
       }
     }
@@ -144,7 +150,7 @@ namespace Quantum.Editor {
     public static void SynchronizePluginSdk(QuantumDotnetBuildSettings settings) {
       ExportPluginSdkData(settings);
       GenerateProject(settings);
-      BuildProject(settings, Path.GetFullPath($"{settings.PluginSdkPath}/{PluginSdkLibPath}"), true);
+      BuildProject(settings, Path.GetFullPath($"{settings.PluginSdkPath}/{PluginSdkLibPath}"), disablePopup: true);
     }
 
     /// <summary>
@@ -161,19 +167,41 @@ namespace Quantum.Editor {
     /// </summary>
     /// <param name="settings">Settings instance</param>
     public static void GenerateProject(QuantumDotnetBuildSettings settings) {
-      Assert.Always(settings.ProjectSettings != null, "No Project Settings found");
-      Assert.Always(settings.ProjectTemplate != null, "No Project Template found");
+      if (RunDotnetCommand("--version", out var output) == false) {
+        QuantumEditorLog.Error("Dotnet installation not found");
+        return;
+      }
+
+      Assert.Always(settings.ProjectSettings != null, "No project settings found");
+      Assert.Always(settings.SimulationProjectTemplate != null, "No project template found");
+      Assert.Always(settings.RunnerProjectTemplate != null, "No runner template found");
+
+      // Create directories
+      Directory.CreateDirectory($"{settings.ProjectBasePath}/Quantum.Simulation.Dotnet");
+      Directory.CreateDirectory($"{settings.ProjectBasePath}/Quantum.Runner.Dotnet");
 
       // Export the actual file list
-      settings.ProjectSettings.Export($"{settings.ProjectOutputPath}/{settings.ProjectFilename}.csproj.include");
+      settings.ProjectSettings.Export($"{settings.ProjectBasePath}/Quantum.Simulation.Dotnet/Quantum.Simulation.Dotnet.csproj.include");
 
-      // Export the csproj template
-      File.WriteAllText($"{settings.ProjectOutputPath}/{settings.ProjectFilename}.csproj",
-        settings.ProjectTemplate.text);
+      // Export the csproj templates
+      var simulationProjectText = settings.SimulationProjectTemplate.text;
+      simulationProjectText = simulationProjectText.Replace("[UnityProjectPath]", Path.GetRelativePath(Path.GetFullPath($"{settings.ProjectBasePath}/Quantum.Simulation.Dotnet"), GetUnityProjectRoot));
+      File.WriteAllText($"{settings.ProjectBasePath}/Quantum.Simulation.Dotnet/Quantum.Simulation.Dotnet.csproj", simulationProjectText);
+
+      var runnerProjectText = settings.RunnerProjectTemplate.text;
+      runnerProjectText = runnerProjectText.Replace("[UnityProjectPath]", Path.GetRelativePath(Path.GetFullPath($"{settings.ProjectBasePath}/Quantum.Runner.Dotnet"), GetUnityProjectRoot));
+      File.WriteAllText($"{settings.ProjectBasePath}/Quantum.Runner.Dotnet/Quantum.Runner.Dotnet.csproj", runnerProjectText);
 
       // Extract zip folders
-      ZipFile.ExtractToDirectory(string.Format(DependencyArchivePath, "Debug"), $"{settings.LibOutputPath}/Debug", true);
-      ZipFile.ExtractToDirectory(string.Format(DependencyArchivePath, "Release"), $"{settings.LibOutputPath}/Release", true);
+      ZipFile.ExtractToDirectory(string.Format(DependencyArchivePath, "Debug"), $"{settings.ProjectBasePath}/Lib/Debug", true);
+      ZipFile.ExtractToDirectory(string.Format(DependencyArchivePath, "Release"), $"{settings.ProjectBasePath}/Lib/Release", true);
+
+      // Create the solution file
+      if (File.Exists($"{settings.ProjectBasePath}/{settings.ProjectBasePath}.sln") == false) {
+        RunDotnetCommand($" new sln --output {settings.ProjectBasePath}", out output);
+        RunDotnetCommand($" sln {settings.ProjectBasePath}/{settings.ProjectBasePath}.sln add {settings.ProjectBasePath}/Quantum.Simulation.Dotnet", out output);
+        RunDotnetCommand($" sln {settings.ProjectBasePath}/{settings.ProjectBasePath}.sln add {settings.ProjectBasePath}/Quantum.Runner.Dotnet", out output);
+      }
     }
 
     /// <summary>
@@ -183,17 +211,31 @@ namespace Quantum.Editor {
     /// <param name="copyOutputDir">Copy result to output dir</param>
     /// <param name="disablePopup">Disable file explorer popup</param>
     public static void BuildProject(QuantumDotnetBuildSettings settings, string copyOutputDir = null, bool disablePopup = false) {
-      var arguments = $" build {Path.GetFullPath(settings.ProjectOutputPath)}/Quantum.Simulation.Dotnet.csproj";
+      if (RunDotnetCommand("--version", out var output) == false) {
+        QuantumEditorLog.Error("Dotnet installation not found");
+        return;
+      }
+
+      var arguments = $" build {Path.GetFullPath(settings.ProjectBasePath)}/Quantum.Simulation.Dotnet/Quantum.Simulation.Dotnet.csproj";
       arguments += $" --configuration {settings.TargetConfiguration}";
       arguments += $" --property:TargetPlatform={settings.TargetPlatform}";
-      arguments += $" --property:BaseOutputPath={settings.BinOutputPath}/";
-      arguments += $" --property:BaseLibPath={settings.LibOutputPath}/";
+      arguments += $" --property:OutputPath={settings.BinOutputPath}/";
       if (string.IsNullOrEmpty(copyOutputDir) == false) {
         arguments += $" --property:CopyOutput=true";
         arguments += $" --property:CopyOutputDir={copyOutputDir}";
       }
 
-      // TODO: Before BUILD try run dotnet command, see if fails, then print error message
+      if (RunDotnetCommand(arguments, out output)) {
+        if (settings.ShowCompiledDllAfterBuild && disablePopup == false) {
+          var simulationDllPath = $"{Path.GetFullPath(settings.ProjectBasePath)}/Quantum.Simulation.Dotnet/bin/Quantum.Simulation.dll";
+          if (File.Exists(simulationDllPath)) {
+            EditorUtility.RevealInFinder(simulationDllPath);
+          }
+        }
+      }
+    }
+
+    private static bool RunDotnetCommand(string arguments, out string output) {
       var startInfo = new System.Diagnostics.ProcessStartInfo() {
         FileName = "dotnet",
         Arguments = arguments,
@@ -205,27 +247,12 @@ namespace Quantum.Editor {
       };
       var p = new System.Diagnostics.Process { StartInfo = startInfo };
       p.Start();
-      var output = p.StandardOutput.ReadToEnd();
-      if (!string.IsNullOrEmpty(output)) {
-        if (output.Contains("Build succeeded.")) {
-          QuantumEditorLog.Log(output);
-          var outputDir = Path.Combine(
-            settings.BinOutputPath,
-            settings.TargetConfiguration.ToString(),
-            "netstandard2.1",
-            "Quantum.Simulation.dll"
-            );
-
-          if (settings.ShowCompiledDllAfterBuild && disablePopup == false) {
-            QuantumEditorLog.Log("Dll was saved to: " + outputDir);
-            EditorUtility.RevealInFinder(outputDir);
-          }
-        } else {
-          QuantumEditorLog.Error(output);
-        }
-      }
-
+      output = p.StandardOutput.ReadToEnd();
       p.WaitForExit();
+      if (p.ExitCode != 0) {
+        QuantumEditorLog.Error(output);
+      }
+      return p.ExitCode == 0;
     }
 
     /// <summary>
@@ -337,41 +364,41 @@ namespace Quantum.Editor {
 
     #region Menu
 
-    [MenuItem("Tools/Quantum/Export/Generate Dotnet Quantum.Simulation Project", true, (int)QuantumEditorMenuPriority.Export + 21)]
-    public static bool GenerateProjectCheck() => TryGetGlobal(out var settings);
+    [MenuItem("Tools/Quantum/Export/Dotnet Quantum.Simulation - Generate Project", true, (int)QuantumEditorMenuPriority.Export + 22)]
+    public static bool GenerateDefaultProjectCheck() => TryGetGlobal(out var settings);
 
-    [MenuItem("Tools/Quantum/Export/Generate Dotnet Quantum.Simulation Project", false, (int)QuantumEditorMenuPriority.Export + 21)]
-    public static void GenerateProject() {
+    [MenuItem("Tools/Quantum/Export/Dotnet Quantum.Simulation - Generate Project", false, (int)QuantumEditorMenuPriority.Export + 22)]
+    public static void GenerateDefaultProject() {
       if (TryGetGlobal(out var settings)) {
         GenerateProject(settings);
       }
     }
 
-    [MenuItem("Tools/Quantum/Export/Build Dotnet Quantum.Simulation Dll", true, (int)QuantumEditorMenuPriority.Export + 22)]
-    public static bool BuildProjectCheck() => TryGetGlobal(out var settings);
+    [MenuItem("Tools/Quantum/Export/Dotnet Quantum.Simulation - Build", true, (int)QuantumEditorMenuPriority.Export + 22)]
+    public static bool BuildDefaultProjectCheck() => TryGetGlobal(out var settings);
 
-    [MenuItem("Tools/Quantum/Export/Build Dotnet Quantum.Simulation Dll", false, (int)QuantumEditorMenuPriority.Export + 22)]
-    public static void BuildProject() {
+    [MenuItem("Tools/Quantum/Export/Dotnet Quantum.Simulation - Build", false, (int)QuantumEditorMenuPriority.Export + 22)]
+    public static void BuildDefaultProject() {
       if (TryGetGlobal(out var settings)) {
         GenerateProject(settings);
         BuildProject(settings);
       }
     }
 
-    [MenuItem("Tools/Quantum/Export/Synchronize Quantum Plugin SDK", true, (int)QuantumEditorMenuPriority.Export + 41)]
+    [MenuItem("Tools/Quantum/Export/Plugin SDK - Sync Server Simulation", true, (int)QuantumEditorMenuPriority.Export + 33)]
     public static bool SynchronizePluginSdkCheck() => TryGetGlobal(out var settings) && settings.HasCustomPluginSdk;
 
-    [MenuItem("Tools/Quantum/Export/Synchronize Quantum Plugin SDK", false, (int)QuantumEditorMenuPriority.Export + 41)]
+    [MenuItem("Tools/Quantum/Export/Plugin SDK - Sync Server Simulation", false, (int)QuantumEditorMenuPriority.Export + 33)]
     public static void SynchronizePluginSdk() {
       if (TryGetGlobal(out var settings)) {
         SynchronizePluginSdk(settings);
       }
     }
 
-    [MenuItem("Tools/Quantum/Export/Export Quantum Plugin Data", true, (int)QuantumEditorMenuPriority.Export + 42)]
+    [MenuItem("Tools/Quantum/Export/Plugin SDK - Sync Assets Only", true, (int)QuantumEditorMenuPriority.Export + 33)]
     public static bool ExportPluginSdkDataCheck() => TryGetGlobal(out var settings) && settings.HasCustomPluginSdk;
 
-    [MenuItem("Tools/Quantum/Export/Export Quantum Plugin Data", false, (int)QuantumEditorMenuPriority.Export + 42)]
+    [MenuItem("Tools/Quantum/Export/Plugin SDK - Sync Assets Only", false, (int)QuantumEditorMenuPriority.Export + 33)]
     public static void ExportPluginSdkData() {
       if (TryGetGlobal(out var settings)) {
         ExportPluginSdkData(settings);

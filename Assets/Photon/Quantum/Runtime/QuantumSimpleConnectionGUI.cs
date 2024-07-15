@@ -6,11 +6,29 @@ namespace Quantum.Demo {
   using Quantum;
   using UnityEngine;
 
+  /// <summary>
+  /// A Unity script that demonstrates how to connect to a Quantum cloud and start a Quantum game session.
+  /// </summary>
   public class QuantumSimpleConnectionGUI : QuantumMonoBehaviour {
+    /// <summary>
+    /// The RuntimeConfig to use for the Quantum game session. The RuntimeConfig describes custom game properties.
+    /// </summary>
     public RuntimeConfig RuntimeConfig;
+    /// <summary>
+    /// The RuntimePlayers to add to the Quantum game session. The RuntimePlayers describe individual custom player properties.
+    /// </summary>
     public List<RuntimePlayer> RuntimePlayers;
+    /// <summary>
+    /// The Photon RealtimeClient object that represents the connection to the Quantum cloud.
+    /// </summary>
     public RealtimeClient Client;
+    /// <summary>
+    /// Set this number as maximum Quantum player count. If 0, the default value is used. Default is Quantum.Input.MAX_COUNT.
+    /// </summary>
     public int OverwritePlayerCount;
+    /// <summary>
+    /// Overwrite the AppVersion used by the global <see cref="PhotonServerSettings.AppSettings"/>.
+    /// </summary>
     public string OverwriteAppVersion;
 
     #region OnGUI

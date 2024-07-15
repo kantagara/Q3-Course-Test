@@ -1,8 +1,17 @@
-﻿using Photon.Client;
+﻿// -----------------------------------------------------------------------------
+// <copyright company="Exit Games GmbH">
+// Photon Realtime API - Copyright (C) 2022 Exit Games GmbH
+// </copyright>
+// <summary>Error information event type.</summary>
+// <author>developer@photonengine.com</author>
+// -----------------------------------------------------------------------------
 
 
 namespace Photon.Realtime
 {
+    using Photon.Client;
+
+
     /// <summary>
     /// Class wrapping the received <see cref="EventCode.ErrorInfo"/> event.
     /// </summary>

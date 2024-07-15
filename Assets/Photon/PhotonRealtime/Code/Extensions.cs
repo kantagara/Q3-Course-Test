@@ -34,7 +34,11 @@ namespace Photon.Realtime
     /// </summary>
     public static class Extensions
     {
-
+        /// <summary>Used to get a "stable" hashcode for strings.</summary>
+        /// <remarks>Used by RealtimeClient.GetMatchmakingHash for matchmaking debugging.</remarks>
+        /// <see href="https://stackoverflow.com/questions/36845430/persistent-hashcode-for-strings"/>
+        /// <param name="str">String to create hashcode for.</param>
+        /// <returns>Hashcode of string.</returns>
         public static int GetStableHashCode(this string str)
         {
             // https://stackoverflow.com/questions/36845430/persistent-hashcode-for-strings

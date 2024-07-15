@@ -15,6 +15,7 @@ namespace Quantum {
   
   [UnityEngine.DisallowMultipleComponent()]
   public unsafe partial class QPrototypeBullet : QuantumUnityComponentPrototype<Quantum.Prototypes.BulletPrototype>, IQuantumUnityPrototypeWrapperForComponent<Quantum.Bullet> {
+    partial void CreatePrototypeUser(Quantum.QuantumEntityPrototypeConverter converter, ref Quantum.Prototypes.BulletPrototype prototype);
     [DrawInline()]
     [ReadOnly(InEditMode = false)]
     public Quantum.Prototypes.Unity.BulletPrototype Prototype;
@@ -26,6 +27,7 @@ namespace Quantum {
     public override ComponentPrototype CreatePrototype(Quantum.QuantumEntityPrototypeConverter converter) {
       Quantum.Prototypes.BulletPrototype result;
       converter.Convert(Prototype, out result);
+      CreatePrototypeUser(converter, ref result);
       return result;
     }
   }

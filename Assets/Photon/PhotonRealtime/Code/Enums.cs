@@ -1,10 +1,8 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="Callbacks.cs" company="Exit Games GmbH">
+// <copyright file="Enums.cs" company="Exit Games GmbH">
 // Photon Realtime API - Copyright (C) 2022 Exit Games GmbH
 // </copyright>
-// <summary>
-// Enum defines for Photon Realtime API.
-// </summary>
+// <summary>Enum defines for Photon Realtime API.</summary>
 // <author>developer@photonengine.com</author>
 // ----------------------------------------------------------------------------
 
@@ -16,9 +14,6 @@
 namespace Photon.Realtime
 {
     using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Diagnostics;
 
     #if SUPPORTED_UNITY
     using UnityEngine;
@@ -453,7 +448,11 @@ namespace Photon.Realtime
     public class ActorProperties
     {
         /// <summary>(255) Name of a player/actor.</summary>
-        public const byte PlayerName = 255; // was: 1
+        [Obsolete("Renamed. Use ActorProperties.NickName.")]
+        public const byte PlayerName = 255;
+
+        /// <summary>(255) NickName of a player/actor.</summary>
+        public const byte NickName = 255;
 
         /// <summary>(254) Tells you if the player is currently in this game (getting events live).</summary>
         /// <remarks>A server-set value for async games, where players can leave the game and return later.</remarks>
@@ -970,10 +969,12 @@ namespace Photon.Realtime
         Default = 0,
         /// <summary>This lobby type lists rooms like Default but JoinRandom has a parameter for SQL-like "where" clauses for filtering. This allows bigger, less, or and and combinations.</summary>
         Sql = 2,
+        /// <summary>Use LobbyType.Sql</summary>
         [Obsolete("Use LobbyType.Sql")]
         SqlLobby = 2,
         /// <summary>This lobby does not send lists of games. It is only used for OpJoinRandomRoom. It keeps rooms available for a while when there are only inactive users left.</summary>
         AsyncRandom = 3,
+        /// <summary>Use LobbyType.AsyncRandom</summary>
         [Obsolete("Use LobbyType.AsyncRandom")]
         AsyncRandomLobby = 3
     }
@@ -997,13 +998,13 @@ namespace Photon.Realtime
     /// </summary>
     public enum CustomAuthenticationType : byte
     {
-        /// <summary>Use a custom authentication service. Currently the only implemented option.</summary>
+        /// <summary>Use a custom authentication service. Currently, the only implemented option.</summary>
         Custom = 0,
 
         /// <summary>Authenticates users by their Steam Account. Set Steam's ticket as "ticket" via AddAuthParameter().</summary>
         Steam = 1,
 
-        /// <summary>Authenticates users by their Facebook Account.  Set Facebooks's tocken as "token" via AddAuthParameter().</summary>
+        /// <summary>Authenticates users by their Facebook Account. Set Facebook's token as "token" via AddAuthParameter().</summary>
         Facebook = 2,
 
         /// <summary>Authenticates users by their Oculus Account and token. Set Oculus' userid as "userid" and nonce as "nonce" via AddAuthParameter().</summary>
@@ -1012,13 +1013,13 @@ namespace Photon.Realtime
         /// <summary>Authenticates users by their PSN Account and token on PS4. Set token as "token", env as "env" and userName as "userName" via AddAuthParameter().</summary>
         PlayStation4 = 4,
 
-        /// <summary>Authenticates users by their Xbox Account. Pass the XSTS token via SetAuthPostData().</summary>
+        /// <summary>Authenticates users by their Xbox Account. Pass the XSTS token via SetAuthPostData(byte[]).</summary>
         Xbox = 5,
 
         /// <summary>Authenticates users by their HTC Viveport Account. Set userToken as "userToken" via AddAuthParameter().</summary>
         Viveport = 10,
 
-        /// <summary>Authenticates users by their NSA ID. Set token  as "token" and appversion as "appversion" via AddAuthParameter(). The appversion is optional.</summary>
+        /// <summary>Authenticates users by their NSA ID. Set Nintendo's token as "token" and appversion as "appversion" via AddAuthParameter(). The appversion is optional.</summary>
         NintendoSwitch = 11,
 
         /// <summary>Authenticates users by their PSN Account and token on PS5. Set token as "token", env as "env" and userName as "userName" via AddAuthParameter().</summary>
@@ -1027,7 +1028,7 @@ namespace Photon.Realtime
         /// <summary>Authenticates users with Epic Online Services (EOS). Set token as "token" and ownershipToken as "ownershipToken" via AddAuthParameter(). The ownershipToken is optional.</summary>
         Epic = 13,
 
-        /// <summary>Authenticates users with Facebook Gaming api. Set token as "token" via AddAuthParameter().</summary>
+        /// <summary>Authenticates users with Facebook Gaming api. Set Facebook's token as "token" via AddAuthParameter().</summary>
         FacebookGaming = 15,
 
         /// <summary>Disables custom authentication. Same as not providing any AuthenticationValues for connect (more precisely for: OpAuthenticate).</summary>

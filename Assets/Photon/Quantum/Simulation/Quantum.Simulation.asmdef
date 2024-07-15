@@ -1,6 +1,6 @@
 {
     "name": "Quantum.Simulation",
-    "rootNamespace": "",
+    "rootNamespace": "Quantum",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -10,7 +10,9 @@
         "Quantum.Deterministic.dll",
         "Quantum.Engine.dll",
         "Quantum.Log.dll",
-        "Quantum.BotSDK.Core.dll"
+        "Quantum.BotSDK.Core.dll",
+        "Sirenix.Serialization.dll",
+        "Sirenix.OdinInspector.Attributes.dll"
     ],
     "autoReferenced": true,
     "defineConstraints": [],

@@ -18,7 +18,9 @@ namespace Quantum {
     /// </summary>
     public int BorrowedCount { get { return _borrowed.Count; } }
 
+#pragma warning disable CS0414 // The private field is assigned but its value is never used (#if UNITY_EDITOR)
     [SerializeField] private bool _hidePooledObjectsInHierarchy = true;
+#pragma warning restore CS0414 // The private field is assigned but its value is never used
     [SerializeField] private bool _resetGameObjectScale = false;
     [SerializeField] private List<PooledObject> _precacheObjects;
     private readonly Dictionary<GameObject, Stack<GameObject>> _cached = new(128);

@@ -2,14 +2,29 @@ namespace Quantum {
   using Photon.Deterministic;
   using UnityEngine;
 
+  /// <summary>
+  /// This script can be used to start a Quantum simulation from a savegame file and is very similar to <see cref="QuantumRunnerLocalReplay"/>.
+  /// </summary>
   public class QuantumRunnerLocalSavegame : QuantumMonoBehaviour {
-    public  TextAsset             SavegameFile;
-    public  TextAsset             DatabaseFile;
-    public  string                DatabasePath;
-    public  InstantReplaySettings InstantReplayConfig = InstantReplaySettings.Default;
-    private ResourceManagerStatic _resourceManager;
-    private Native.Allocator      _resourceAllocator;
+    /// <summary>
+    /// The savegame file (<see cref="ReplayFile"/>).
+    /// </summary>
+    public TextAsset SavegameFile;
+    /// <summary>
+    /// The optional database file.
+    /// </summary>
+    public TextAsset DatabaseFile;
+    /// <summary>
+    /// The instant replay settings.
+    /// </summary>
+    public InstantReplaySettings InstantReplayConfig = InstantReplaySettings.Default;
 
+    private ResourceManagerStatic _resourceManager;
+    private Native.Allocator _resourceAllocator;
+
+    /// <summary>
+    /// Unity start method loads the savegame files and starts the runner.
+    /// </summary>
     public void Start() {
       if (QuantumRunner.Default != null)
         return;
@@ -23,26 +38,29 @@ namespace Quantum {
 
       // Load replay file in json or bson
       var serializer = new QuantumUnityJsonSerializer();
-      var replayFile = JsonUtility.FromJson<ReplayFile>(SavegameFile.text);
+      var replayFile = JsonUtility.FromJson<QuantumReplayFile>(SavegameFile.text);
 
       var arguments = new SessionRunner.Arguments {
-        RunnerFactory         = QuantumRunnerUnityFactory.DefaultFactory,
-        GameParameters        = QuantumRunnerUnityFactory.CreateGameParameters,
-        RuntimeConfig         = replayFile.RuntimeConfig,
-        SessionConfig         = replayFile.DeterministicConfig,
-        GameMode              = DeterministicGameMode.Local,
-        FrameData             = replayFile.Frame,
-        InitialFrame          = replayFile.LastTick,
-        RunnerId              = "LOCALSAVEGAME",
-        PlayerCount           = replayFile.DeterministicConfig.PlayerCount,
+        RunnerFactory = QuantumRunnerUnityFactory.DefaultFactory,
+        GameParameters = QuantumRunnerUnityFactory.CreateGameParameters,
+        RuntimeConfig = serializer.ConfigFromByteArray<RuntimeConfig>(replayFile.RuntimeConfigData.Decode(), compressed: true),
+        SessionConfig = replayFile.DeterministicConfig,
+        GameMode = DeterministicGameMode.Local,
+        FrameData = replayFile.InitialFrameData,
+        InitialTick = replayFile.LastTick,
+        RunnerId = "LOCALSAVEGAME",
+        PlayerCount = replayFile.DeterministicConfig.PlayerCount,
         InstantReplaySettings = InstantReplayConfig,
       };
 
+      var assets = replayFile.AssetDatabaseData?.Decode();
       if (DatabaseFile != null) {
-        // This is potentially breaking, as it introduces UnityDB-ResourceManager duality
-        var assets = serializer.AssetsFromByteArray(DatabaseFile.bytes);
-        _resourceAllocator        = new QuantumUnityNativeAllocator();
-        _resourceManager          = new ResourceManagerStatic(assets, _resourceAllocator);
+        assets = DatabaseFile.bytes;
+      }
+
+      if (assets?.Length > 0) {
+        _resourceAllocator = new QuantumUnityNativeAllocator();
+        _resourceManager = new ResourceManagerStatic(serializer.AssetsFromByteArray(assets), new QuantumUnityNativeAllocator());
         arguments.ResourceManager = _resourceManager;
       }
 

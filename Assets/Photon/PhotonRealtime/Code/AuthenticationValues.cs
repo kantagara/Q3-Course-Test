@@ -8,6 +8,7 @@
 // <author>developer@photonengine.com</author>
 // ----------------------------------------------------------------------------
 
+
 #if UNITY_2017_4_OR_NEWER
 #define SUPPORTED_UNITY
 #endif
@@ -15,6 +16,8 @@
 
 namespace Photon.Realtime
 {
+    using System;
+    using System.Text.RegularExpressions;
     using System.Collections.Generic;
 
 
@@ -114,6 +117,68 @@ namespace Photon.Realtime
         {
             string ampersand = string.IsNullOrEmpty(this.AuthGetParameters) ? "" : "&";
             this.AuthGetParameters = string.Format("{0}{1}{2}={3}", this.AuthGetParameters, ampersand, System.Uri.EscapeDataString(key), System.Uri.EscapeDataString(value));
+        }
+
+        /// <summary>Shallow validation if the mandatory data / parameters are set for the given AuthType.</summary>
+        /// <returns>True if mandatory values are set.</returns>
+        public virtual bool AreValid()
+        {
+            switch (this.authType)
+            {
+                case CustomAuthenticationType.Steam:
+                    return this.AuthGetParametersContain("ticket");
+
+                case CustomAuthenticationType.NintendoSwitch:
+                case CustomAuthenticationType.Epic:
+                case CustomAuthenticationType.Facebook:
+                case CustomAuthenticationType.FacebookGaming:
+                    return this.AuthGetParametersContain("token");
+
+                case CustomAuthenticationType.Oculus:
+                    return this.AuthGetParametersContain("userid", "nonce");
+
+
+                case CustomAuthenticationType.PlayStation4:
+                case CustomAuthenticationType.PlayStation5:
+                    return this.AuthGetParametersContain("userName", "token", "env");
+
+                case CustomAuthenticationType.Xbox:
+                    return this.AuthPostData != null;
+
+                case CustomAuthenticationType.Viveport:
+                    return this.AuthGetParametersContain("userToken");
+            }
+
+            return true;
+        }
+
+        /// <summary>Uses Regex to make sure the url-parameters are in the AuthGetParameters and have some value.</summary>
+        /// <param name="keys">Keys which must be present.</param>
+        /// <returns>False if any key isn't present with "=" and some value in the AuthGetParameters.</returns>
+        public bool AuthGetParametersContain(params string[] keys)
+        {
+            if (string.IsNullOrEmpty(this.AuthGetParameters))
+            {
+                return false;
+            }
+
+            if (keys == null)
+            {
+                return true;
+            }
+
+            foreach (string key in keys)
+            {
+                string keyEquals = $".*{key}=\\w+";
+                bool ok = Regex.IsMatch(this.AuthGetParameters, keyEquals);
+
+                if (!ok)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         /// <summary>

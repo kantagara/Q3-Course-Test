@@ -7,15 +7,33 @@ namespace Quantum.Editor {
   using UnityEditor;
   using UnityEngine;
 
+  /// <summary>
+  /// A configuration asset that describes the search paths to create a non-Unity simulation project.
+  /// </summary>
   [Serializable]
   [CreateAssetMenu(menuName = "Quantum/Configurations/Dotnet Project Settings", order = EditorDefines.AssetMenuPriorityConfigurations + 61)]
   [QuantumGlobalScriptableObject(DefaultPath)]
   public class QuantumDotnetProjectSettings : QuantumGlobalScriptableObject<QuantumDotnetProjectSettings> {
+    /// <summary>
+    /// The default location of the global instance.
+    /// </summary>
     public const string DefaultPath = "Assets/QuantumUser/Editor/QuantumDotnetProjectSettings.asset";
+    /// <summary>
+    /// Use this Unity asset label to mark assets or paths that should be included in the search paths to generate a non-Unity simulation project file.
+    /// </summary>
     public const string IncludeLabel = "QuantumDotnetInclude";
 
+    /// <summary>
+    /// The destination path when pressing the Export button in the inspector of this asset, absolute or relative to the Unity project.
+    /// </summary>
     public string OutputProjectPath = "../Quantum.Simulation.Gen.csproj";
+    /// <summary>
+    /// Enable to include all qtn assets in the result.
+    /// </summary>
     public bool IncludeAllQtnAssets = true;
+    /// <summary>
+    /// Enabled to include all asset object script in the result.
+    /// </summary>
     public bool IncludeAllAssetObjectScripts = true;
 
     private static string GetUnityProjectRoot {
@@ -26,18 +44,28 @@ namespace Quantum.Editor {
       }
     }
     
+    /// <summary>
+    /// The search paths to collect all simulation source files from.E.g. files that are included in the Quantum.Simulation.asmdef.
+    /// </summary>
     [Header("Files and folders can either be marked with " + IncludeLabel + " label or included here.")]
     public string[] IncludePaths = new[] {
       "Assets/QuantumUser/Simulation",
       "Assets/Photon/Quantum/Simulation"
     };
 
+    /// <summary>
+    /// Export the non-Unity simulation project to <see cref="OutputProjectPath"/>.
+    /// </summary>
     [EditorButton("Export")]
     public void Export() {
       Export(null);
     }
     
-    public void Export(string outputProjectPath) {
+    /// <summary>
+    /// Export the non-Unity simulation project to a certain location.
+    /// </summary>
+    /// <param name="outputPath">Destination path, should end with .csproj</param>
+    public void Export(string outputPath) {
       var includes = new List<string>();
       
       if (IncludeAllQtnAssets) {
@@ -82,9 +110,14 @@ namespace Quantum.Editor {
         includes.Add(path);
       }
       
-      Export(outputProjectPath ?? OutputProjectPath, includes.ToArray());
+      Export(outputPath ?? OutputProjectPath, includes.ToArray());
     }
 
+    /// <summary>
+    /// Export the non-Unity simulation project to a certain location.
+    /// </summary>
+    /// <param name="outputPath">Destination path, should end with .csproj</param>
+    /// <param name="includes">The list of files to add to the Includes list of the project file</param>
     public static void Export(string outputPath, string[] includes) {
       // turn current path into path relative to outputPath
       var contents = GeneratePartialQuantumGameCsProj(
@@ -93,6 +126,8 @@ namespace Quantum.Editor {
         includes
       );
       
+      Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+
       File.WriteAllText(outputPath, contents);
     }
 

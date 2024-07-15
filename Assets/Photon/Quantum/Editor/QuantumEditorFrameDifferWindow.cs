@@ -7,6 +7,10 @@ namespace Quantum.Editor {
   using Quantum;
   using static QuantumUnityExtensions;
 
+  /// <summary>
+  /// The Quantum Frame Differ window shown in the Unity Editor.
+  /// Readable and comparable frame dumps are sent by other clients and can be compared after a desync error.
+  /// </summary>
   public class QuantumEditorFrameDifferWindow : EditorWindow {
     private class StaticFrameStateStorage : ScriptableObject {
       public QuantumFrameDifferGUI.FrameDifferState State = new QuantumFrameDifferGUI.FrameDifferState();
@@ -114,6 +118,9 @@ namespace Quantum.Editor {
       }
     }
 
+    /// <summary>
+    /// Open the Frame Differ window.
+    /// </summary>
     [MenuItem("Window/Quantum/Frame Differ")]
     [MenuItem("Tools/Quantum/Window/Frame Differ", false, (int)QuantumEditorMenuPriority.Window + 2)]
     public static void ShowWindow() {

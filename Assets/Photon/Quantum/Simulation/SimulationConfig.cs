@@ -1,6 +1,5 @@
 namespace Quantum {
   using System;
-  using System.Runtime.InteropServices;
   using Photon.Deterministic;
   using Quantum.Core;
   using Quantum.Allocator;
@@ -14,13 +13,34 @@ namespace Quantum {
   /// The SimulationConfig holds parameters used in the ECS layer and inside core systems like physics and navigation.
   /// </summary>
   public partial class SimulationConfig : AssetObject {
+    /// <summary>
+    /// Obsolete: Don't use the hard coded guids instead reference the simulation config used in the RuntimeConfig.
+    /// </summary>
     [Obsolete("Don't use the hard coded guids instead reference the simulation config used in the RuntimeConfig")]
     public const long DEFAULT_ID = (long)DefaultAssetGuids.SimulationConfig;
 
+    /// <summary>
+    /// The scene load mode to use when changing Quantum maps.
+    /// <para>Will trigger for example for the initial map that is set in Quantum by <see cref="RuntimeConfig.Map"/> and on subsequent map changes.</para>
+    /// <para>The Unity scene referenced by <see cref="Quantum.Map.Scene"/> will be loaded.</para>
+    /// </summary>
     public enum AutoLoadSceneFromMapMode {
+      /// <summary>
+      /// Automatic scene loading disabled.
+      /// </summary>
       Disabled,
+      /// <summary>
+      /// Obsolete: unused.
+      /// </summary>
+      [Obsolete]
       Legacy,
+      /// <summary>
+      /// Unload the current scene then load the new scene.
+      /// </summary>
       UnloadPreviousSceneThenLoad,
+      /// <summary>
+      /// Load the new scene then unload the current scene.
+      /// </summary>
       LoadThenUnloadPreviousScene
     }
 
@@ -107,11 +127,18 @@ namespace Quantum {
     [InlineHelp]
     public int HeapExtraCount = 0;
 
-
+    /// <summary>
+    /// The asset loaded callback, caches fixed calculation results.
+    /// </summary>
+    /// <param name="resourceManager">Resource manager.</param>
+    /// <param name="allocator">The allocator.</param>
     public override void Loaded(IResourceManager resourceManager, Native.Allocator allocator) {
       Physics.PenetrationCorrection = FPMath.Clamp01(Physics.PenetrationCorrection);
     }
     
+    /// <summary>
+    /// Unity Reset() method is used to initialized class fields with default values.
+    /// </summary>
 #if QUANTUM_UNITY
     public override void Reset() {
       Physics    = new PhysicsCommon.Config();
@@ -134,16 +161,32 @@ namespace Quantum {
 #endif
     }
     
+    /// <summary>
+    /// Physics 2D or 3D used for importing layers from Unity.
+    /// </summary>
     public enum PhysicsType {
+      /// <summary>
+      /// Quantum Physics 3D.
+      /// </summary>
       Physics3D,
+      /// <summary>
+      /// Quantum Physics 2D.
+      /// </summary>
       Physics2D
     }
     
+    /// <summary>
+    /// Import Unity physics layers.
+    /// </summary>
+    /// <param name="physicsType">The physics type to import from.</param>
     public void ImportLayersFromUnity(PhysicsType physicsType = PhysicsType.Physics3D) {
       Physics.Layers      = GetUnityLayerNameArray();
       Physics.LayerMatrix = GetUnityLayerMatrix(physicsType);
     }
     
+    /// <summary>
+    /// Creates 32 physics layer names from Unity.
+    /// </summary>
     public static String[] GetUnityLayerNameArray() {
       var layers = new String[32];
 
@@ -158,6 +201,10 @@ namespace Quantum {
       return layers;
     }
 
+    /// <summary>
+    /// Creates 32 physics layer masks from Unity.
+    /// </summary>
+    /// <param name="physicsType"></param>
     public static Int32[] GetUnityLayerMatrix(PhysicsType physicsType) {
       var matrix = new Int32[32];
 
@@ -192,11 +239,26 @@ namespace Quantum {
 #endif
   }
 
+  /// <summary>
+  /// Configuration options for checksum error dumps.
+  /// </summary>
   [Flags]
   public enum SimulationConfigChecksumErrorDumpOptions {
+    /// <summary>
+    /// Sends asset db checksums.
+    /// </summary>
     SendAssetDBChecksums = 1 << 0,
+    /// <summary>
+    /// Dumps readable information from the dynamic db.
+    /// </summary>
     ReadableDynamicDB    = 1 << 1,
+    /// <summary>
+    /// Prints raw FP values.
+    /// </summary>
     RawFPValues          = 1 << 2,
+    /// <summary>
+    /// Dumps component checksums.
+    /// </summary>
     ComponentChecksums   = 1 << 3,
   }
 

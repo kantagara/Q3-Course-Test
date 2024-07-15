@@ -2,11 +2,23 @@ namespace Quantum {
   using UnityEditor;
   using UnityEngine;
 
+  /// <summary>
+  /// A scriptable object to store the Quantum game gizmos settings <see cref="QuantumGameGizmosSettings"/>.
+  /// Global configs are marked with "QuantumDefaultGlobal" asset label and there should be only one instance of this asset tagged as such.
+  /// </summary>
   [CreateAssetMenu(menuName = "Quantum/Configurations/GameGizmoSettings", fileName = "QuantumGameGizmoSettings",
     order = EditorDefines.AssetMenuPriorityConfigurations + 31)]
   [QuantumGlobalScriptableObject(DefaultPath)]
   public class QuantumGameGizmosSettingsScriptableObject : QuantumGlobalScriptableObject<QuantumGameGizmosSettingsScriptableObject> {
+    /// <summary>
+    /// The default location where the initial asset is being created.
+    /// </summary>
     public const string DefaultPath = "Assets/QuantumUser/Editor/QuantumGameGizmosSettings.asset";
+
+    /// <summary>
+    /// The global and default settings for Quantum gizmos.
+    /// </summary>
+    [DrawInline] public QuantumGameGizmosSettings Settings;
 
     /// <summary>
     /// Open the overlay for the Quantum gizmos.
@@ -35,10 +47,5 @@ namespace Quantum {
       }
 #endif
     }
-
-    /// <summary>
-    /// The global and default settings for Quantum gizmos.
-    /// </summary>
-    [DrawInline] public QuantumGameGizmosSettings Settings;
   }
 }

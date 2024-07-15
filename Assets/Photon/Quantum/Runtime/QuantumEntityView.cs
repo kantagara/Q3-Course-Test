@@ -9,6 +9,7 @@ using Quantum.Profiling;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
+
 #pragma warning restore IDE0065 // Misplaced using directive
 
 namespace Quantum {
@@ -31,25 +32,23 @@ namespace Quantum {
   public unsafe abstract class EntityView
 #endif
     : QuantumMonoBehaviour {
-
     /// <summary>
     /// Wrapping UnityEvent(QuantumGame) into a class. Is used by the QuantumEntityView to make create and destroy publish Unity events.
     /// </summary>
     [Serializable]
-    public class EntityUnityEvent : UnityEvent<QuantumGame> { }
+    public class EntityUnityEvent : UnityEvent<QuantumGame> {
+    }
 
     /// <summary>
     /// Will set to the <see cref="AssetObject.Guid"/> that the underlying <see cref="EntityView"/> asset has.
     /// Or receives a new Guid when binding this view script to a scene entity.
     /// </summary>
-    [NonSerialized]
-    public AssetGuid AssetGuid;
+    [NonSerialized] public AssetGuid AssetGuid;
 
     /// <summary>
     /// References the Quantum entity that this view script is liked to.
     /// </summary>
-    [NonSerialized]
-    public EntityRef EntityRef;
+    [NonSerialized] public EntityRef EntityRef;
 
     /// <summary>
     /// Set the entity view bind behaviour. If set to <see cref="QuantumEntityViewBindBehaviour.NonVerified"/> then the view is created during a predicted frame.
@@ -67,21 +66,30 @@ namespace Quantum {
     [FormerlySerializedAs("ManualDiposal")]
     [InlineHelp]
     public bool ManualDisposal;
-    [Obsolete("Use ManualDisposal")]
-    public bool ManualDiposal => ManualDisposal;
+
+    /// <summary>
+    /// Obsolete property, use ManualDisposal
+    /// </summary>
+    [Obsolete("Use ManualDisposal")] public bool ManualDiposal => ManualDisposal;
 
     /// <summary>
     /// Set the <see cref="QuantumEntityViewFlags"/> to further configure the entity view.
     /// </summary>
-    [InlineHelp]
-    public QuantumEntityViewFlags ViewFlags;
+    [InlineHelp] public QuantumEntityViewFlags ViewFlags;
+
+    /// <summary>
+    /// Set the <see cref="QuantumEntityViewInterpolationMode"/> allowing the view timing to be switched between prediction and snapshot-interpolation.
+    /// Requires the QuantumEntityViewFlags.SnapshotInterpolationEnabled flag to be set to have an effect.
+    /// AUTO selects the mode dynamically based on the prediction-culled state of the entity. 
+    /// </summary>
+    [InlineHelp] public QuantumEntityViewInterpolationMode InterpolationMode;
 
     /// <summary>
     /// If set to true, the game object will be renamed to the EntityRef number.
     /// </summary>
     [Obsolete("Use QuantumEntityViewFlags.DisableEntityRefNaming")]
     public bool GameObjectNameIsEntityRef {
-      get { 
+      get {
         return !HasViewFlag(QuantumEntityViewFlags.DisableEntityRefNaming);
       }
       set {
@@ -132,8 +140,7 @@ namespace Quantum {
     ///     or above the <see cref="ErrorRotationTeleportDistance">ErrorRotationTeleportDistance</see>, for the rotation error.
     ///   </para>
     /// </summary>
-    [InlineHelp]
-    public Single ErrorCorrectionRateMax = 10f;
+    [InlineHelp] public Single ErrorCorrectionRateMax = 10f;
 
     /// <summary>
     ///   <para>
@@ -159,8 +166,7 @@ namespace Quantum {
     ///     which are factors that affect the expected magnitude of prediction errors.
     ///   </para>
     /// </summary>
-    [InlineHelp]
-    public Single ErrorPositionBlendStart = 0.25f;
+    [InlineHelp] public Single ErrorPositionBlendStart = 0.25f;
 
     /// <summary>
     ///   <para>
@@ -186,8 +192,7 @@ namespace Quantum {
     ///     which are factors that affect the expected magnitude of prediction errors.
     ///   </para>
     /// </summary>
-    [InlineHelp]
-    public Single ErrorPositionBlendEnd = 1f;
+    [InlineHelp] public Single ErrorPositionBlendEnd = 1f;
 
     /// <summary>
     ///   <para>
@@ -207,8 +212,7 @@ namespace Quantum {
     ///     it will be corrected at the <see cref="ErrorCorrectionRateMax">ErrorCorrectionRateMax</see>.
     ///   </para>
     /// </summary>
-    [InlineHelp]
-    public Single ErrorRotationBlendStart = 0.1f;
+    [InlineHelp] public Single ErrorRotationBlendStart = 0.1f;
 
     /// <summary>
     ///   <para>
@@ -229,8 +233,7 @@ namespace Quantum {
     ///     it will be corrected at the <see cref="ErrorCorrectionRateMin">ErrorCorrectionRateMin</see>.
     ///   </para>
     /// </summary>
-    [InlineHelp]
-    public Single ErrorRotationBlendEnd = 0.5f;
+    [InlineHelp] public Single ErrorRotationBlendEnd = 0.5f;
 
     /// <summary>
     ///   <para>
@@ -250,8 +253,7 @@ namespace Quantum {
     ///     which are factors that affect the expected magnitude of prediction errors.
     ///   </para>
     /// </summary>
-    [InlineHelp]
-    public Single ErrorPositionMinCorrection = 0.025f;
+    [InlineHelp] public Single ErrorPositionMinCorrection = 0.025f;
 
     /// <summary>
     ///   <para>
@@ -271,8 +273,7 @@ namespace Quantum {
     ///     which are factors that affect the expected magnitude of prediction errors.
     ///   </para>
     /// </summary>
-    [InlineHelp]
-    public Single ErrorPositionTeleportDistance = 2f;
+    [InlineHelp] public Single ErrorPositionTeleportDistance = 2f;
 
     /// <summary>
     ///   <para>
@@ -287,14 +288,13 @@ namespace Quantum {
     ///     the one computed according to the min/max rates and start/end blend values.
     ///   </para>
     /// </summary>
-    [InlineHelp]
-    public Single ErrorRotationTeleportDistance = 0.5f;
+    [InlineHelp] public Single ErrorRotationTeleportDistance = 0.5f;
 
     /// <summary>
     /// Is called after the entity view has been instantiated.
     /// </summary>
-    [Header("Events")]
-    public EntityUnityEvent OnEntityInstantiated;
+    [Header("Events")] public EntityUnityEvent OnEntityInstantiated;
+
     /// <summary>
     /// Is called before the entity view is destroyed.
     /// </summary>
@@ -305,14 +305,17 @@ namespace Quantum {
     /// All view components found on this game object during creation are used.
     /// </summary>
     public IQuantumViewComponent[] ViewComponents => _viewComponents;
+
     /// <summary>
     /// A reference to the entity view updater that controls this entity view.
     /// </summary>
     public QuantumEntityViewUpdater EntityViewUpdater { get; private set; }
+
     /// <summary>
     /// A reference to the current game that this entity view belongs to <see cref="QuantumEntityViewUpdater.ObservedGame"/>.
     /// </summary>
-    public QuantumGame Game { get; private set; }
+    public QuantumGame Game { get; internal set; }
+
     /// <summary>
     /// All contexts found on the <see cref="EntityViewUpdater"/> game object accessible by their type.
     /// </summary>
@@ -326,11 +329,11 @@ namespace Quantum {
     public void SetViewFlag(QuantumEntityViewFlags flag, bool isEnabled) {
       if (isEnabled) {
         ViewFlags |= flag;
-      }
-      else {
+      } else {
         ViewFlags &= ~flag;
       }
     }
+
     /// <summary>
     /// Test if a view flag is set.
     /// </summary>
@@ -338,6 +341,10 @@ namespace Quantum {
     /// <returns></returns>
     public bool HasViewFlag(QuantumEntityViewFlags flag) => (ViewFlags & flag) == flag;
 
+    /// <summary>
+    /// Access the transform of the entity view.
+    /// In play mode the transform object will be cached to improve the performance.
+    /// </summary>
     public Transform Transform {
       get {
 #if UNITY_EDITOR
@@ -353,7 +360,7 @@ namespace Quantum {
       }
     }
 
-
+    DispatcherSubscription _snapshotSubscription;
     FP _lastPredictedVerticalPosition2D;
     FPVector2 _lastPredictedPosition2D;
     FPVector3 _lastPredictedPosition3D;
@@ -364,32 +371,92 @@ namespace Quantum {
     IQuantumViewComponent[] _viewComponents;
     Transform _cachedTransform;
     bool _transformCached;
+    bool _useSnapshotInterpolation = false;
+    QuantumSnapshotInterpolationTimer.InterpolationBuffer<QuantumSnapshotInterpolationTimer.QuantumTransformData> _interpolationBuffer;
 
-    public struct UpdatePostionParameter {
+    float InterpolationAlpha => _useSnapshotInterpolation ? EntityViewUpdater.SnapshotInterpolation.Alpha : Game.InterpolationFactor;
+    int InterpolationFrameFrom => EntityViewUpdater.SnapshotInterpolation.CurrentFrom;
+
+    /// <summary>
+    /// The struct is used to gather all transform and interpolation data to apply new transform data to the entity view.
+    /// <see cref="ApplyTransform(ref UpdatePositionParameter)"/>.
+    /// </summary>
+    public struct UpdatePositionParameter {
+      /// <summary>
+      /// The new position.
+      /// </summary>
       public Vector3 NewPosition;
+      /// <summary>
+      /// The new rotation.
+      /// </summary>
       public Quaternion NewRotation;
+      /// <summary>
+      /// The un-interpolated position.
+      /// </summary>
       public Vector3 UninterpolatedPosition;
+      /// <summary>
+      /// The un-interpolated rotation.
+      /// </summary>
       public Quaternion UninterpolatedRotation;
+      /// <summary>
+      /// The position error correction.
+      /// </summary>
       public Vector3 ErrorVisualVector;
+      /// <summary>
+      /// The rotation error correction.
+      /// </summary>
       public Quaternion ErrorVisualQuaternion;
+      /// <summary>
+      /// Is there a position error induced by misprediction.
+      /// </summary>
+      public bool PositionErrorTeleport;
+      /// <summary>
+      /// Is there a rotation error induced by misprediction.
+      /// </summary>
+      public bool RotationErrorTeleport;
+      /// <summary>
+      /// Is this a position teleport.
+      /// </summary>
       public bool PositionTeleport;
+      /// <summary>
+      /// Is this a rotation teleport.
+      /// </summary>
       public bool RotationTeleport;
     }
 
+    /// <summary>
+    /// A callback to override to add custom logic to the initialization of this entity view.
+    /// </summary>
     public virtual void OnInitialize() { }
+    /// <summary>
+    /// A callback to override to add custom logic the activation of this entity view.
+    /// </summary>
+    /// <param name="frame">Frame</param>
     public virtual void OnActivate(Frame frame) { }
+    /// <summary>
+    /// A callback to override to add custom logic to the deactivation of this entity view.
+    /// </summary>
     public virtual void OnDeactivate() { }
+    /// <summary>
+    /// A callback to override to add custom logic to the update method.
+    /// </summary>
     public virtual void OnUpdateView() { }
+    /// <summary>
+    /// A callback to override to add custom logic to the late update method.
+    /// </summary>
     public virtual void OnLateUpdateView() { }
+    /// <summary>
+    /// A callback to override to add custom logic when the associate game has changed on the connected <see cref="QuantumEntityViewUpdater"/>.
+    /// </summary>
     public virtual void OnGameChanged() { }
 
     void Initialize(Dictionary<Type, IQuantumViewContext> contexts, QuantumEntityViewUpdater entityViewUpdater) {
       if ((ViewFlags & QuantumEntityViewFlags.DisableSearchChildrenForEntityViewComponents) > 0) {
         _viewComponents = GetComponents<IQuantumViewComponent>();
-      }
-      else {
+      } else {
         _viewComponents = GetComponentsInChildren<IQuantumViewComponent>();
       }
+
       EntityViewUpdater = entityViewUpdater;
 
       OnInitialize();
@@ -399,14 +466,36 @@ namespace Quantum {
       }
     }
 
+    internal void TryInitSnapshotInterpolation() {
+      if ((ViewFlags & QuantumEntityViewFlags.EnableSnapshotInterpolation) == 0) {
+        return;
+      }
+
+      _interpolationBuffer ??= new QuantumSnapshotInterpolationTimer.InterpolationBuffer<
+          QuantumSnapshotInterpolationTimer.QuantumTransformData>(32);
+
+      _interpolationBuffer?.Reset();
+
+      _snapshotSubscription =
+          QuantumCallback.Subscribe(this, (CallbackSimulateFinished callback) => RegisterSnapshot(callback.Frame));
+    }
+
     internal void Activate(QuantumGame game, Frame frame, Dictionary<Type, IQuantumViewContext> contexts, QuantumEntityViewUpdater entityViewUpdater) {
       // TODO: When the observed game is switched, this needs to be propagated here.
       _lastPredictedPosition2D = default(FPVector2);
       _lastPredictedRotation2D = default(FP);
       _lastPredictedPosition3D = default(FPVector3);
-      _lastPredictedRotation3D = default(FPQuaternion);
+      _lastPredictedRotation3D = FPQuaternion.Identity;
       _errorVisualVector = default(Vector3);
       _errorVisualQuaternion = Quaternion.identity;
+
+      if (frame.Has<Transform2D>(EntityRef)) {
+        Game = game;
+        UpdateFromTransform2D(game, false, false, isSpawning: true);
+      } else if (frame.Has<Transform3D>(EntityRef)) {
+        Game = game;
+        UpdateFromTransform3D(game, false, false, isSpawning: true);
+      }
 
       ViewContexts = contexts;
 
@@ -418,14 +507,27 @@ namespace Quantum {
 
       OnActivate(frame);
 
+      TryInitSnapshotInterpolation();
+
       for (int i = 0; i < _viewComponents.Length; i++) {
 #if QUANTUM_ENABLE_MIGRATION
       _viewComponents[i].Activate(frame, Game, (QuantumEntityView)this);
 #else
         _viewComponents[i].Activate(frame, Game, this);
 #endif
+      }
     }
-  }
+
+    internal void RegisterSnapshot(Frame frame) {
+      if (frame.IsVerified == false) return;
+      QuantumSnapshotInterpolationTimer.QuantumTransformData data =
+        new QuantumSnapshotInterpolationTimer.QuantumTransformData();
+      if (frame.TryGet<Transform2D>(EntityRef, out data.Transform2D) || frame.TryGet<Transform3D>(EntityRef, out data.Transform3D)) {
+        data.Has2DVertical = frame.TryGet<Transform2DVertical>(EntityRef, out data.Transform2DVertical);
+        data.IsValid = true;
+        _interpolationBuffer.Add(data, frame.Number);
+      }
+    }
 
     internal void GameChanged(QuantumGame game) {
       Game = game;
@@ -443,6 +545,8 @@ namespace Quantum {
         return;
       }
 
+      QuantumCallback.Unsubscribe(_snapshotSubscription);
+
       for (int i = 0; i < _viewComponents.Length; i++) {
         _viewComponents[i].Deactivate();
       }
@@ -454,16 +558,18 @@ namespace Quantum {
       if ((ViewFlags & QuantumEntityViewFlags.DisableUpdatePosition) == 0) {
         if (Game.Frames.Predicted.Has<Transform2D>(EntityRef)) {
           // update 2d transform
-          UpdateFromTransform2D(Game, useClockAliasingInterpolation, useErrorCorrection);
+          UpdateFromTransform2D(Game, useClockAliasingInterpolation, useErrorCorrection, isSpawning: false);
         } else {
           // update 3d transform
           if (Game.Frames.Predicted.Has<Transform3D>(EntityRef)) {
-            UpdateFromTransform3D(Game, useClockAliasingInterpolation, useErrorCorrection);
+            UpdateFromTransform3D(Game, useClockAliasingInterpolation, useErrorCorrection, isSpawning: false);
           }
         }
       }
 
       if ((ViewFlags & QuantumEntityViewFlags.DisableUpdateView) == 0) {
+        
+
         OnUpdateView();
 
         for (int i = 0; i < _viewComponents.Length; i++) {
@@ -478,7 +584,7 @@ namespace Quantum {
       if ((ViewFlags & QuantumEntityViewFlags.DisableUpdateView) > 0) {
         return;
       }
-      
+
       OnLateUpdateView();
 
       for (int i = 0; i < _viewComponents.Length; i++) {
@@ -488,34 +594,112 @@ namespace Quantum {
       }
     }
 
-    public void UpdateFromTransform3D(QuantumGame game, Boolean useClockAliasingInterpolation, Boolean useErrorCorrectionInterpolation) {
-      if (game == null || !game.Frames.Predicted.Has<Transform3D>(EntityRef))
+    /// <summary>
+    /// There are two sources how to get the transform 3D data from an entity.
+    /// Using the Quantum predicted frames or a snapshot interpolation. Toggle the setting on <see cref="InterpolationMode"/>.
+    /// </summary>
+    /// <param name="timeRef">Time reference context</param>
+    /// <param name="param">Transform parameter to be filled out</param>
+    /// <param name="frameNumber">Resulting frame number</param>
+    /// <param name="transform">Resulting transform</param>
+    /// <param name="isSpawning">Is the entity spawning</param>
+    /// <returns>True if data could be retrieved</returns>
+    public bool TryGetTransform3DData(QuantumEntityViewTimeReference timeRef, ref UpdatePositionParameter param,
+      out int frameNumber, out Transform3D transform, bool isSpawning) {
+      transform = default;
+      frameNumber = 0;
+
+
+      Frame frame = null;
+      if (Game == null) return false;
+
+      if (isSpawning == false && _useSnapshotInterpolation) {
+        var frameFrom = InterpolationFrameFrom;
+
+        switch (timeRef) {
+          case QuantumEntityViewTimeReference.To:
+            frameNumber = frameFrom + 1;
+            break;
+          case QuantumEntityViewTimeReference.From:
+            frameNumber = frameFrom;
+            break;
+          case QuantumEntityViewTimeReference.ErrorCorrection:
+            return false;
+        }
+
+        if (_interpolationBuffer.TryGet(out var data, frameNumber) && data.IsValid) {
+          transform = data.Transform3D;
+          return true;
+        }
+
+        return false;
+      } else {
+        switch (timeRef) {
+          case QuantumEntityViewTimeReference.To:
+            frame = Game.Frames.Predicted;
+            break;
+          case QuantumEntityViewTimeReference.From:
+            frame = Game.Frames.PredictedPrevious;
+            break;
+          case QuantumEntityViewTimeReference.ErrorCorrection:
+            frame = Game.Frames.PreviousUpdatePredicted;
+            break;
+        }
+
+        frameNumber = frame.Number;
+
+        if (frame.TryGet<Transform3D>(EntityRef, out transform)) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    /// <summary>
+    /// Apply new transform 3D data and interpolation.
+    /// </summary>
+    /// <param name="game">Game</param>
+    /// <param name="useClockAliasingInterpolation">Use clock aliasing interpolation</param>
+    /// <param name="useErrorCorrectionInterpolation">Use error correction interpolation</param>
+    /// <param name="isSpawning">Is the entity just spawning</param>
+    public void UpdateFromTransform3D(QuantumGame game, Boolean useClockAliasingInterpolation,
+      Boolean useErrorCorrectionInterpolation, bool isSpawning) {
+      if (game == null)
         return;
 
-      var transform = game.Frames.Predicted.Unsafe.GetPointer<Transform3D>(EntityRef);
+      UpdateUseSnapshotInterpolation();
 
-      var param = new UpdatePostionParameter() {
-        NewPosition = transform->Position.ToUnityVector3(),
-        NewRotation = transform->Rotation.ToUnityQuaternion(),
-      };
+      var param = new UpdatePositionParameter();
 
+      if (TryGetTransform3DData(QuantumEntityViewTimeReference.To, ref param, out var frameTo, out var transform, isSpawning) ==
+          false) return;
+
+      param.NewPosition = transform.Position.ToUnityVector3();
+      param.NewRotation = transform.Rotation.ToUnityQuaternion();
+
+      param.PositionTeleport = transform.PositionTeleportFrame == frameTo;
+      param.RotationTeleport = transform.RotationTeleportFrame == frameTo;
       param.UninterpolatedPosition = param.NewPosition;
       param.UninterpolatedRotation = param.NewRotation;
 
-      if (game.Frames.PredictedPrevious.Exists(EntityRef)) {
-        if (game.Frames.PredictedPrevious.Unsafe.TryGetPointer(EntityRef, out Transform3D* transformPrevious)) {
-          if (useClockAliasingInterpolation) {
-            param.NewPosition = Vector3.Lerp(transformPrevious->Position.ToUnityVector3(), param.NewPosition, game.InterpolationFactor);
-            param.NewRotation = Quaternion.Slerp(transformPrevious->Rotation.ToUnityQuaternion(), param.NewRotation, game.InterpolationFactor);
-          }
+      if (TryGetTransform3DData(QuantumEntityViewTimeReference.From, ref param, out var frameFrom, out var transformPrevious, isSpawning)) {
+        if (useClockAliasingInterpolation) {
+          param.NewPosition = Vector3.Lerp(transformPrevious.Position.ToUnityVector3(), param.NewPosition,
+            InterpolationAlpha);
+          param.NewRotation = Quaternion.Slerp(transformPrevious.Rotation.ToUnityQuaternion(), param.NewRotation,
+            InterpolationAlpha);
+        }
 
-          if (useErrorCorrectionInterpolation && game.Frames.PreviousUpdatePredicted.Exists(EntityRef)) {
-            if (game.Frames.PreviousUpdatePredicted.Unsafe.TryGetPointer(EntityRef, out Transform3D* oldTransform)) {
-              var errorPosition = _lastPredictedPosition3D - oldTransform->Position;
-              var errorRotation = Quaternion.Inverse(oldTransform->Rotation.ToUnityQuaternion()) * _lastPredictedRotation3D.ToUnityQuaternion();
-              _errorVisualVector += errorPosition.ToUnityVector3();
-              _errorVisualQuaternion = errorRotation * _errorVisualQuaternion;
-            }
+        if (useErrorCorrectionInterpolation) {
+          if (TryGetTransform3DData(QuantumEntityViewTimeReference.ErrorCorrection, ref param, out var frameOld, out var oldTransform, false)) {
+            var errorPosition = _lastPredictedPosition3D - oldTransform.Position;
+            var errorRotation = Quaternion.Inverse(oldTransform.Rotation.ToUnityQuaternion()) *
+                                _lastPredictedRotation3D.ToUnityQuaternion();
+            _errorVisualVector += errorPosition.ToUnityVector3();
+            _errorVisualQuaternion = errorRotation * _errorVisualQuaternion;
+          } else {
+            _errorVisualVector = default;
+            _errorVisualQuaternion = Quaternion.identity;
           }
         }
       }
@@ -524,71 +708,179 @@ namespace Quantum {
       UpdateRenderPosition(ref param);
 
       // store current prediction information
-      _lastPredictedPosition3D = transform->Position;
-      _lastPredictedRotation3D = transform->Rotation;
+      _lastPredictedPosition3D = transform.Position;
+      _lastPredictedRotation3D = transform.Rotation;
     }
 
-    public void UpdateFromTransform2D(QuantumGame game, Boolean useClockAliasingInterpolation, Boolean useErrorCorrectionInterpolation) {
-      if (game == null || !game.Frames.Predicted.Has<Transform2D>(EntityRef))
+    /// <summary>
+    /// There are two sources how to get the transform 3D data from an entity.
+    /// Using the Quantum predicted frames or a snapshot interpolation. Toggle the setting on <see cref="InterpolationMode"/>.
+    /// </summary>
+    /// <param name="timeRef">Time reference context</param>
+    /// <param name="param">Transform parameter to be filled out</param>
+    /// <param name="frameNumber">Resulting frame number</param>
+    /// <param name="transform">Resulting transform</param>
+    /// <param name="transformVertical">Transform vertical component</param>
+    /// <param name="hasVertical">Has a transform vertical 2D component</param>
+    /// <param name="isSpawning">Is the entity spawning</param>
+    /// <returns>True if data could be retrieved</returns>
+    /// <returns></returns>
+    public bool TryGetTransform2DData(QuantumEntityViewTimeReference timeRef, ref UpdatePositionParameter param,
+      out int frameNumber, out Transform2D transform, out Transform2DVertical transformVertical, out bool hasVertical, bool isSpawning) {
+      transform = default;
+      transformVertical = default;
+      frameNumber = 0;
+      hasVertical = false;
+
+      Frame frame = null;
+      if (Game == null) return false;
+
+      if (isSpawning == false && _useSnapshotInterpolation) {
+        var frameFrom = InterpolationFrameFrom;
+
+        switch (timeRef) {
+          case QuantumEntityViewTimeReference.To:
+            frameNumber = frameFrom + 1;
+            break;
+          case QuantumEntityViewTimeReference.From:
+            frameNumber = frameFrom;
+            break;
+          case QuantumEntityViewTimeReference.ErrorCorrection:
+            return false;
+        }
+        //Debug.Log(frameNumber + " " + (InterolationBuffer == null));
+        if (_interpolationBuffer.TryGet(out var data, frameNumber) && data.IsValid) {
+          transform = data.Transform2D;
+          if (data.Has2DVertical) {
+            transformVertical = data.Transform2DVertical;
+            hasVertical = true;
+          }
+          return true;
+        }
+
+        return false;
+      } else {
+        switch (timeRef) {
+          case QuantumEntityViewTimeReference.To:
+            frame = Game.Frames.Predicted;
+            break;
+          case QuantumEntityViewTimeReference.From:
+            frame = Game.Frames.PredictedPrevious;
+            break;
+          case QuantumEntityViewTimeReference.ErrorCorrection:
+            frame = Game.Frames.PreviousUpdatePredicted;
+            break;
+        }
+
+        frameNumber = frame.Number;
+        
+        hasVertical = frame.TryGet<Transform2DVertical>(EntityRef, out transformVertical);
+
+          if (frame.TryGet<Transform2D>(EntityRef, out transform)) {
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    private void UpdateUseSnapshotInterpolation() {
+      _useSnapshotInterpolation = false;
+      if ((ViewFlags & QuantumEntityViewFlags.EnableSnapshotInterpolation) == QuantumEntityViewFlags.EnableSnapshotInterpolation) {
+        var culled = Game.Frames.Predicted.IsCulled(EntityRef);
+        _useSnapshotInterpolation = InterpolationMode == QuantumEntityViewInterpolationMode.SnapshotInterpolation ||
+                                    (culled && InterpolationMode == QuantumEntityViewInterpolationMode.Auto);
+      } else {
+#if DEBUG
+        // Issue a warning when the EnableSnapshotInterpolation flag is missing and disable the mode
+        if (InterpolationMode == QuantumEntityViewInterpolationMode.SnapshotInterpolation ||
+            InterpolationMode == QuantumEntityViewInterpolationMode.Auto) {
+          Log.Warn($"EntityView {name} InterpolationMode {InterpolationMode} is only supported when the QuantumEntityViewFlags.EnableSnapshotInterpolation is enabled, setting Interpolation mode to Prediction");
+          InterpolationMode = QuantumEntityViewInterpolationMode.Prediction;
+        }
+#endif
+      }
+    }
+
+    /// <summary>
+    /// Apply new transform 2D data and interpolation.
+    /// </summary>
+    /// <param name="game">Game</param>
+    /// <param name="useClockAliasingInterpolation">Use clock aliasing interpolation</param>
+    /// <param name="useErrorCorrectionInterpolation">Use error correction interpolation</param>
+    /// <param name="isSpawning">Is the entity just spawning</param>
+    public void UpdateFromTransform2D(QuantumGame game, Boolean useClockAliasingInterpolation,
+      Boolean useErrorCorrectionInterpolation, bool isSpawning) {
+      if (game == null)
         return;
 
-      var transform = game.Frames.Predicted.Unsafe.GetPointer<Transform2D>(EntityRef);
+      var param = new UpdatePositionParameter();
 
-      var param = new UpdatePostionParameter() {
-        NewPosition = transform->Position.ToUnityVector3(),
-        NewRotation = transform->Rotation.ToUnityQuaternion(),
-      };
+      UpdateUseSnapshotInterpolation();
 
-      var hasVertical = game.Frames.Predicted.Unsafe.TryGetPointer(EntityRef, out Transform2DVertical* tVertical);
+      if (TryGetTransform2DData(QuantumEntityViewTimeReference.To, ref param, out var toFrame,
+            out var transform, out var tVertical, out var hasVertical, isSpawning) == false) {
+        return;
+      }
+
+      param.NewPosition = transform.Position.ToUnityVector3();
+      param.NewRotation = transform.Rotation.ToUnityQuaternion();
+
+      param.PositionTeleport = transform.PositionTeleportFrame == toFrame;
+      param.RotationTeleport = transform.RotationTeleportFrame == toFrame;
       if (hasVertical) {
 #if QUANTUM_XY
-      param.NewPosition.z = -tVertical->Position.AsFloat;
+      param.NewPosition.z = -tVertical.Position.AsFloat;
 #else
-        param.NewPosition.y = tVertical->Position.AsFloat;
+        param.NewPosition.y = tVertical.Position.AsFloat;
 #endif
       }
 
       param.UninterpolatedPosition = param.NewPosition;
       param.UninterpolatedRotation = param.NewRotation;
 
-      if (game.Frames.PredictedPrevious.Exists(EntityRef)) {
-        if (game.Frames.PredictedPrevious.Unsafe.TryGetPointer(EntityRef, out Transform2D* transformPrevious)) {
-          if (useClockAliasingInterpolation) {
-            var previousPos = transformPrevious->Position.ToUnityVector3();
-            if (game.Frames.PredictedPrevious.Unsafe.TryGetPointer(EntityRef, out Transform2DVertical* tVerticalPrevious)) {
+      if (TryGetTransform2DData(QuantumEntityViewTimeReference.From, ref param, out var fromFrame,
+            out var transformPrevious, out var tVerticalPrevious, out var hasVerticalPrevious, isSpawning)) {
+        if (useClockAliasingInterpolation) {
+          var previousPos = transformPrevious.Position.ToUnityVector3();
+          if (hasVerticalPrevious) {
 #if QUANTUM_XY
-            previousPos.z = -tVerticalPrevious->Position.AsFloat;
+            previousPos.z = -tVerticalPrevious.Position.AsFloat;
 #else
-              previousPos.y = tVerticalPrevious->Position.AsFloat;
+            previousPos.y = tVerticalPrevious.Position.AsFloat;
 #endif
-            }
-
-            param.NewPosition = Vector3.Lerp(previousPos, param.NewPosition, game.InterpolationFactor);
-            param.NewRotation = Quaternion.Slerp(transformPrevious->Rotation.ToUnityQuaternion(), param.NewRotation, game.InterpolationFactor);
           }
 
-          if (useErrorCorrectionInterpolation && game.Frames.PreviousUpdatePredicted.Exists(EntityRef)) {
-            if (game.Frames.PreviousUpdatePredicted.Unsafe.TryGetPointer(EntityRef, out Transform2D* oldTransform)) {
-              // position error
-              var errorPosition = _lastPredictedPosition2D - oldTransform->Position;
-              var errorVertical = _lastPredictedVerticalPosition2D;
-              if (game.Frames.PreviousUpdatePredicted.Unsafe.TryGetPointer(EntityRef, out Transform2DVertical* oldTransformVertical)) {
-                errorVertical -= oldTransformVertical->Position;
-              }
+          param.NewPosition = Vector3.Lerp(previousPos, param.NewPosition, InterpolationAlpha);
+          param.NewRotation = Quaternion.Slerp(transformPrevious.Rotation.ToUnityQuaternion(), param.NewRotation,
+            InterpolationAlpha);
+        }
 
-              var errorVector = errorPosition.ToUnityVector3();
+        if (useErrorCorrectionInterpolation) {
+          if (TryGetTransform2DData(QuantumEntityViewTimeReference.ErrorCorrection, ref param, out var errorFrame,
+                out var oldTransform, out var oldTransformVertical, out var hasVerticalOld, false)) {
+            // position error
+            var errorPosition = _lastPredictedPosition2D - oldTransform.Position;
+            var errorVertical = _lastPredictedVerticalPosition2D;
+            if (hasVerticalOld) {
+              errorVertical -= oldTransformVertical.Position;
+            }
+
+            var errorVector = errorPosition.ToUnityVector3();
 #if QUANTUM_XY
             errorVector.z = -errorVertical.AsFloat;
 #else
-              errorVector.y = errorVertical.AsFloat;
+            errorVector.y = errorVertical.AsFloat;
 #endif
 
-              _errorVisualVector += errorVector;
+            _errorVisualVector += errorVector;
 
-              // rotation error
-              var errorRotation = _lastPredictedRotation2D - oldTransform->Rotation;
-              _errorVisualQuaternion = errorRotation.ToUnityQuaternion() * _errorVisualQuaternion;
-            }
+            // rotation error
+            var errorRotation = _lastPredictedRotation2D - oldTransform.Rotation;
+            _errorVisualQuaternion = errorRotation.ToUnityQuaternion() * _errorVisualQuaternion;
+          } else {
+            _errorVisualVector = default;
+            _errorVisualQuaternion = Quaternion.identity;
           }
         }
       }
@@ -597,22 +889,22 @@ namespace Quantum {
       UpdateRenderPosition(ref param);
 
       // store current prediction information
-      _lastPredictedPosition2D = transform->Position;
-      _lastPredictedVerticalPosition2D = hasVertical ? tVertical->Position : default;
-      _lastPredictedRotation2D = transform->Rotation;
+      _lastPredictedPosition2D = transform.Position;
+      _lastPredictedVerticalPosition2D = hasVertical ? tVertical.Position : default;
+      _lastPredictedRotation2D = transform.Rotation;
     }
 
-    void UpdateRenderPosition(ref UpdatePostionParameter param) {
+    void UpdateRenderPosition(ref UpdatePositionParameter param) {
       var positionCorrectionRate = ErrorCorrectionRateMin;
       var rotationCorrectionRate = ErrorCorrectionRateMin;
 
-      var positionTeleport = false;
-      var rotationTeleport = false;
+      var positionErrorTeleport = false;
+      var rotationErrorTeleport = false;
 
       // if we're going over teleport distance, we should just teleport
       var positionErrorMagnitude = _errorVisualVector.magnitude;
       if (positionErrorMagnitude > ErrorPositionTeleportDistance) {
-        positionTeleport = true;
+        positionErrorTeleport = true;
         _errorVisualVector = default(Vector3);
         // we need to revert the alias interpolation when detecting a visual teleport
         param.NewPosition = param.UninterpolatedPosition;
@@ -629,7 +921,7 @@ namespace Quantum {
       // angle, in radians, between the two quaternions
       var rotationErrorMagnitude = Mathf.Acos(quatDot) * 2.0f;
       if (rotationErrorMagnitude > ErrorRotationTeleportDistance) {
-        rotationTeleport = true;
+        rotationErrorTeleport = true;
         _errorVisualQuaternion = Quaternion.identity;
         param.NewRotation = param.UninterpolatedRotation;
       } else {
@@ -641,12 +933,12 @@ namespace Quantum {
       // apply new position (+ potential error correction)
       param.ErrorVisualVector = _errorVisualVector;
       param.ErrorVisualQuaternion = _errorVisualQuaternion;
-      param.PositionTeleport = positionTeleport;
-      param.RotationTeleport = rotationTeleport;
+      param.PositionErrorTeleport = positionErrorTeleport;
+      param.RotationErrorTeleport = rotationErrorTeleport;
 
-      HostProfiler.Start("QuantumEntityView.ApplyTransform");
-      ApplyTransform(ref param);
-      HostProfiler.End();
+      using (HostProfiler.Start("QuantumEntityView.ApplyTransform")) {
+        ApplyTransform(ref param);
+      }
 
       // reduce position error
       var positionCorrectionMultiplier = 1f - (Time.deltaTime * positionCorrectionRate);
@@ -658,23 +950,41 @@ namespace Quantum {
       }
 
       // reduce rotation error
-      _errorVisualQuaternion = Quaternion.Slerp(_errorVisualQuaternion, Quaternion.identity, Time.deltaTime * rotationCorrectionRate);
+      _errorVisualQuaternion = Quaternion.Slerp(_errorVisualQuaternion, Quaternion.identity,
+        Time.deltaTime * rotationCorrectionRate);
     }
 
-    protected virtual void ApplyTransform(ref UpdatePostionParameter param) {
+    /// <summary>
+    /// The method to override to apply the final position and rotation interpolation to the view transform.
+    /// </summary>
+    /// <param name="param"></param>
+    protected virtual void ApplyTransform(ref UpdatePositionParameter param) {
+      Vector3 newPosition;
+      if (param.PositionTeleport) {
+        newPosition = param.UninterpolatedPosition;
+      } else {
+        newPosition = param.NewPosition + param.ErrorVisualVector;
+      }
+
+      Quaternion newRotation;
+      if (param.RotationTeleport) {
+        newRotation = param.UninterpolatedRotation;
+      } else {
+        newRotation = param.ErrorVisualQuaternion * param.NewRotation;
+      }
+
       if ((ViewFlags & QuantumEntityViewFlags.UseCachedTransform) > 0) {
         // Override this in subclass to change how the new position is applied to the transform.
-        Transform.position = param.NewPosition + param.ErrorVisualVector;
+        Transform.position = newPosition;
 
         // Unity's quaternion multiplication is equivalent to applying rhs then lhs (despite their doc saying the opposite)
-        Transform.rotation = param.ErrorVisualQuaternion * param.NewRotation;
-      }
-      else {
+        Transform.rotation = newRotation;
+      } else {
         // Override this in subclass to change how the new position is applied to the transform.
-        transform.position = param.NewPosition + param.ErrorVisualVector;
+        transform.position = newPosition;
 
         // Unity's quaternion multiplication is equivalent to applying rhs then lhs (despite their doc saying the opposite)
-        transform.rotation = param.ErrorVisualQuaternion * param.NewRotation;
+        transform.rotation = newRotation;
       }
     }
 

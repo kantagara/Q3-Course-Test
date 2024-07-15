@@ -16,53 +16,78 @@ namespace Quantum {
   ///   A debug script that starts the Quantum simulation for <see cref="MaxPlayerCount" /> players when starting the game
   ///   from a gameplay scene.
   ///   Will add <see cref="LocalPlayers" /> as local players during simulation start.
-  ///   The script will disable itself when it detectes that other scene were loaded before this (to delegate adding players
+  ///   The script will disable itself when it detects that other scene were loaded before this (to delegate adding players
   ///   to a menu scene / game bootstrap).
   /// </summary>
   public class QuantumRunnerLocalDebug : QuantumMonoBehaviour {
     /// <summary>
-    ///   Set the <see cref="DeltaTypeType" /> to <see cref="SimulationUpdateTime.EngineDeltaTime" /> to not progress the
-    ///   simulation during break points.
-    ///   Has to be set before starting the runner and can only be changed on the runner directly during runtime: <see cref="SessionRunner.DeltaTimeType"/>.
+    /// Set the <see cref="DeltaTypeType" /> to <see cref="SimulationUpdateTime.EngineDeltaTime" /> to not progress the
+    /// simulation during break points.
+    /// Has to be set before starting the runner and can only be changed on the runner directly during runtime: <see cref="SessionRunner.DeltaTimeType"/>.
     /// </summary>
     [Tooltip("Set the DeltaTimeType to EngineDeltaTime to not progress the simulation time during break points.")]
     public SimulationUpdateTime DeltaTypeType = SimulationUpdateTime.EngineDeltaTime;
-
-    [Tooltip("Set RecordingFlags to Default to record input and checksums to enable saving a replay.")]
-    public RecordingFlags RecordingFlags = RecordingFlags.Default;
-
+    /// <summary>
+    /// Set RecordingFlags of the local simulation to enable saving a replay.
+    /// </summary>
+    [Tooltip("Set RecordingFlags to All to record input and checksums to enable saving a replay. Caveat: Input recording allocates during runtime.")]
+    public RecordingFlags RecordingFlags = RecordingFlags.None;
+    /// <summary>
+    /// Set InstantReplaySettings to enable instant replays.
+    /// </summary>
     [Tooltip("Customize the InstantReplaySettings.")]
     public InstantReplaySettings InstantReplayConfig = InstantReplaySettings.Default;
-
+    /// <summary>
+    /// Configure the RuntimeConfig used for the local simulation.
+    /// </summary>
     [FormerlySerializedAs("Config")]
     [Tooltip("RuntimeConfig used for this simulation.")]
     public RuntimeConfig RuntimeConfig;
-
+    /// <summary>
+    /// Select the SessionConfig used for the local simulation. Will revert to the global default if not set.
+    /// </summary>
     [Tooltip("SessionConfig used for this simulation, if null it will search for the global SessionConfig.")]
     public QuantumDeterministicSessionConfigAsset SessionConfig;
-
+    /// <summary>
+    /// Configure the players added to the game after the simulation has started.
+    /// </summary>
     [Tooltip("The local players that are added to the simulation during game start.")]
     [FormerlySerializedAs("Players")]
     public RuntimePlayer[] LocalPlayers;
-
+    /// <summary>
+    /// Overwrite the max player count for this simulation otherwise Quantum.Constants.PLAYER_COUNT is used. Default is 0.
+    /// </summary>
     [Tooltip("Overwrite the max player count for this simulation otherwise Quantum.Constants.PLAYER_COUNT is used.\nDefault is 0.")]
     public int MaxPlayerCount;
-
-    [Tooltip("Set a factor to increas or decrease the simulation speed and update the simulation during Update(). \nDefault is 1.")]
+    /// <summary>
+    /// Set a factor to increase or decrease the simulation speed and update the simulation during Update(). Default is 1.
+    /// </summary>
+    [Tooltip("Set a factor to increase or decrease the simulation speed and update the simulation during Update(). \nDefault is 1.")]
     public float SimulationSpeedMultiplier = 1.0f;
-
-    [Tooltip("Show the reload simulation button")]
+    /// <summary>
+    /// Show the reload simulation button.
+    /// </summary>
+    [Tooltip("Show the reload simulation button.")]
     public bool DisplaySaveAndReloadButton;
-
+    /// <summary>
+    /// Enabled loading Addressables before simulation start.
+    /// </summary>
     [Tooltip("Enabled loading Addressables before simulation start.")]
     public bool PreloadAddressables = false;
-
+    /// <summary>
+    /// Set a dynamic asset db.
+    /// </summary>
     [Tooltip("Set a dynamic asset db.")]
     public DynamicAssetDBSettings DynamicAssetDB;
-
-    [Tooltip("Enabled the Quantum task profiler. Must be set before starting. Works with debug and release Quantum dlls.")]
+    /// <summary>
+    /// Enable the Quantum task profiler. Must be set before starting. Works with debug and release Quantum dlls.
+    /// </summary>
+    [Tooltip("Enable the Quantum task profiler. Must be set before starting. Works with debug and release Quantum dlls.")]
     public bool IsTaskProfilerEnabled;
 
+    /// <summary>
+    /// Unity start event, will start the Quantum simulation.
+    /// </summary>
 #if (QUANTUM_ADDRESSABLES || QUANTUM_ENABLE_ADDRESSABLES) && !QUANTUM_DISABLE_ADDRESSABLES
     public async void Start()
 #else
@@ -71,7 +96,7 @@ namespace Quantum {
     {
       if (QuantumRunner.Default != null || SceneManager.sceneCount > 1) {
         // Prevents to start the simulation (again/twice) when..
-        // a) there already is a runner, because the scene is releaded during Quantum Unity map loading (AutoLoadSceneFromMap) or
+        // a) there already is a runner, because the scene is reloaded during Quantum Unity map loading (AutoLoadSceneFromMap) or
         // b) this scene is not the first scene that is ever loaded (most likely a menu scene is involved that starts the simulation itself)
         enabled = false;
         return;
@@ -82,10 +107,10 @@ namespace Quantum {
 
 #if (QUANTUM_ADDRESSABLES || QUANTUM_ENABLE_ADDRESSABLES) && !QUANTUM_DISABLE_ADDRESSABLES
       if (PreloadAddressables) {
-        // there's also an overload that accepts a target list paramter
+        // there's also an overload that accepts a target list parameter
         var addressableAssets = QuantumUnityDB.Global.Entries
          .Where(x => x.Source is QuantumAssetObjectSourceAddressable)
-         .Select(x => (x.Guid, ((QuantumAssetObjectSourceAddressable)x.Source).Address));
+         .Select(x => (x.Guid, ((QuantumAssetObjectSourceAddressable)x.Source).RuntimeKey));
         
         // preload all the addressable assets
         foreach (var (assetRef, address) in addressableAssets) {
@@ -101,6 +126,12 @@ namespace Quantum {
       StartWithFrame(0, null);
     }
 
+    /// <summary>
+    /// Start the Quantum simulation with a specific frame number and frame data.
+    /// </summary>
+    /// <param name="frameNumber">Frame number</param>
+    /// <param name="frameData">Frame data to start from</param>
+    /// <exception cref="Exception">Is raised when no map was found in the scene.</exception>
     public void StartWithFrame(int frameNumber = 0, byte[] frameData = null) {
       Log.Debug("### Starting quantum in local debug mode ###");
 
@@ -121,7 +152,7 @@ namespace Quantum {
         runtimeConfig.SimulationConfig = defaultConfigs.SimulationConfig;
       }
 
-      var dynamicDB = new DynamicAssetDB();
+      using var dynamicDB = new DynamicAssetDB(new QuantumUnityNativeAllocator(), DynamicAssetDB.IsLegacyModeEnabled);
       DynamicAssetDB.OnInitialDynamicAssetsRequested?.Invoke(dynamicDB);
 
       // create start game parameter
@@ -132,14 +163,14 @@ namespace Quantum {
         SessionConfig         = SessionConfig?.Config ?? QuantumDeterministicSessionConfigAsset.DefaultConfig,
         ReplayProvider        = null,
         GameMode              = DeterministicGameMode.Local,
-        InitialFrame          = frameNumber,
+        InitialTick           = frameNumber,
         FrameData             = frameData,
         RunnerId              = "LOCALDEBUG",
         PlayerCount           = MaxPlayerCount > 0 ? Math.Min(MaxPlayerCount, Input.MAX_COUNT) : Input.MAX_COUNT,
         InstantReplaySettings = InstantReplayConfig,
         InitialDynamicAssets  = dynamicDB,
         DeltaTimeType         = DeltaTypeType,
-        GameFlags             = IsTaskProfilerEnabled ? QuantumGameFlags.EnableTaskProfiler : 0,
+        GameFlags             = (IsTaskProfilerEnabled ? QuantumGameFlags.EnableTaskProfiler : 0),
         RecordingFlags        = RecordingFlags
       };
 
@@ -152,6 +183,9 @@ namespace Quantum {
       }
     }
 
+    /// <summary>
+    /// Unity OnGUI event updates the debug runner UI.
+    /// </summary>
     public void OnGUI() {
       if (DisplaySaveAndReloadButton && QuantumRunner.Default != null && QuantumRunner.Default.Id == "LOCALDEBUG") {
         if (GUI.Button(new Rect(Screen.width - 150, 10, 140, 25), "Save And Reload")) {
@@ -160,6 +194,9 @@ namespace Quantum {
       }
     }
 
+    /// <summary>
+    /// Unity update event. Will update the simulation if a custom <see cref="SimulationSpeedMultiplier" /> was set.
+    /// </summary>
     public void Update() {
       if (QuantumRunner.Default != null && QuantumRunner.Default.Session != null) {
         QuantumRunner.Default.IsSessionUpdateDisabled = SimulationSpeedMultiplier != 1.0f;
@@ -167,11 +204,11 @@ namespace Quantum {
           switch (QuantumRunner.Default.DeltaTimeType) {
             case SimulationUpdateTime.Default:
             case SimulationUpdateTime.EngineUnscaledDeltaTime:
-              QuantumRunner.Default.Session.Update(Time.unscaledDeltaTime * SimulationSpeedMultiplier);
+              QuantumRunner.Default.Service(Time.unscaledDeltaTime * SimulationSpeedMultiplier);
               QuantumUnityDB.UpdateGlobal();
               break;
             case SimulationUpdateTime.EngineDeltaTime:
-              QuantumRunner.Default.Session.Update(Time.deltaTime);
+              QuantumRunner.Default.Service(Time.deltaTime);
               QuantumUnityDB.UpdateGlobal();
               break;
           }
@@ -194,13 +231,26 @@ namespace Quantum {
       StartWithFrame(frameNumber, frameData);
     }
 
+    /// <summary>
+    /// Settings used to initialize the dynamic db.
+    /// </summary>
     [Serializable]
     public struct DynamicAssetDBSettings {
+      /// <summary>
+      /// A unity event passing the dynamic asset db.
+      /// </summary>
       [Serializable]
       public class InitialDynamicAssetsRequestedUnityEvent : UnityEvent<DynamicAssetDB> {
       }
-
+      
+      /// <summary>
+      /// A callback called after the dynamic asset db was created.
+      /// </summary>
       public InitialDynamicAssetsRequestedUnityEvent OnInitialDynamicAssetsRequested;
+
+      /// <inheritdoc cref="DynamicAssetDB.IsLegacyModeEnabled"/>
+      [InlineHelp]
+      public bool IsLegacyModeEnabled;
     }
   }
 }
