@@ -1,23 +1,29 @@
 namespace Quantum {
-  using Photon.Deterministic;
-  using UnityEngine;
-
-  /// <summary>
-  /// A Unity script that creates empty input for any Quantum game.
-  /// </summary>
-  public class QuantumDebugInput : MonoBehaviour {
-
-    private void OnEnable() {
-      QuantumCallback.Subscribe(this, (CallbackPollInput callback) => PollInput(callback));
-    }
-
+    using Photon.Deterministic;
+    using UnityEngine;
     /// <summary>
-    /// Set an empty input when polled by the simulation.
+    /// A Unity script that creates empty input for any Quantum game.
     /// </summary>
-    /// <param name="callback"></param>
-    public void PollInput(CallbackPollInput callback) {
-      Quantum.Input i = new Quantum.Input();
-      callback.SetInput(i, DeterministicInputFlags.Repeatable);
+    public class QuantumDebugInput : MonoBehaviour {
+
+        private Vector3 _mouseHitPosition;
+        private void OnEnable() {
+            QuantumCallback.Subscribe(this, (CallbackPollInput callback) => PollInput(callback));
+        }
+
+        public void PollInput(CallbackPollInput callback) {
+
+
+            var ray = Camera.main.ScreenPointToRay(UnityEngine.Input.mousePosition);
+            if (Physics.Raycast(ray, out var hit, 100, 1 << UnityEngine.LayerMask.NameToLayer("Ground")))
+                _mouseHitPosition = hit.point;
+
+            Input i = new Quantum.Input {
+                Movement = new FPVector2(UnityEngine.Input.GetAxis("Horizontal").ToFP(), UnityEngine.Input.GetAxis("Vertical").ToFP()),
+                MousePosition = _mouseHitPosition.ToFPVector3().XZ,
+                Fire = UnityEngine.Input.GetButton("Fire1"),
+            };
+            callback.SetInput(i, DeterministicInputFlags.Repeatable);
+        }
     }
-  }
 }

@@ -1,13 +1,15 @@
 using Photon.Deterministic;
 using Quantum.Collections;
+using UnityEngine.Scripting;
 
 namespace Quantum
 {
+    [Preserve]
     public unsafe class SpawnSystem : SystemSignalsOnly, ISignalOnPlayerAdded, ISignalOnPlayerDisconnected
     {
         public void OnPlayerAdded(Frame f, PlayerRef player, bool firstTime)
         {
-            if(!firstTime) return;
+            Log.Info("Here!");
             var playerEntity = CreatePlayer(f, player);
             f.Events.OnPlayerSpawned(playerEntity, player);
             SpawnPlayerOnRandomSpawnPoint(f, playerEntity);
