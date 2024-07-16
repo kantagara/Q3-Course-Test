@@ -10,8 +10,11 @@ public class PickupItemView : QuantumEntityViewComponent
 
     public override void OnActivate(Frame frame)
     {
-        
-    }
+        #if UNITY_WEBGL && !UNITY_EDITOR
+        var urlReader = FindObjectOfType<URLReader>();
+        urlReader.SendNotification("This is a test notification", "success");
+        #endif
+}
 
     public override void OnLateUpdateView()
     {
