@@ -13,6 +13,12 @@ event OnPlayerSpawned
     PlayerRef Player;
 }
 
+event OnPlayerKilled
+{
+     EntityRef Entity;
+     PlayerRef Player;
+}
+
 input{
     FPVector2 Movement;
     FPVector2 MousePosition;

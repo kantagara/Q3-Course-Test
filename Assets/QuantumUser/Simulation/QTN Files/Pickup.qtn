@@ -11,3 +11,9 @@ component LootDrop
     AssetRef<EntityPrototype> WeaponLoot;
 }
 
+event OnPlayerPickedUpSpecialItem
+{
+   EntityRef Entity;
+   PlayerRef Player;
+}
+

@@ -785,7 +785,7 @@ PlayerSettings:
   webGLDebugSymbols: 0
   webGLEmscriptenArgs: 
   webGLModulesDirectory: 
-  webGLTemplate: APPLICATION:Default
+  webGLTemplate: Web3.Unity
   webGLAnalyzeBuildSize: 0
   webGLUseEmbeddedResources: 0
   webGLCompressionFormat: 2
@@ -811,7 +811,7 @@ PlayerSettings:
     PS5: QUANTUM_LOGLEVEL_DEBUG
     QNX: QUANTUM_LOGLEVEL_DEBUG
     Stadia: QUANTUM_LOGLEVEL_DEBUG
-    Standalone: QUANTUM_LOGLEVEL_DEBUG
+    Standalone: QUANTUM_LOGLEVEL_DEBUG;ENABLE_ANALYTICS
     VisionOS: QUANTUM_LOGLEVEL_DEBUG
     WebGL: QUANTUM_LOGLEVEL_DEBUG
     Windows Store Apps: QUANTUM_LOGLEVEL_DEBUG

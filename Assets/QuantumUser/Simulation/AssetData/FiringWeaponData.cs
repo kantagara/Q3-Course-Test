@@ -51,6 +51,7 @@ namespace Quantum
                 f.Signals.CreateBullet(filter.Entity, weaponData);
                 f.Events.WeaponFired(filter.Entity, weaponData.Offset);
             }
+            
         }
         
         

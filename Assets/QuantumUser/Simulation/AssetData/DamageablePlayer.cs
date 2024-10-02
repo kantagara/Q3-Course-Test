@@ -19,6 +19,7 @@ namespace Quantum
             var weaponLoot = frame.Create(lootDrop.WeaponLoot);
             frame.Unsafe.GetPointer<Transform2D>(weaponLoot)->Position = transform.Position + transform.Left * 2;
             frame.Signals.BeforePlayerKilled(entityTookDamage);
+            frame.Events.OnPlayerKilled(entityTookDamage, frame.Get<PlayerLink>(entityTookDamage).Player);
             frame.Destroy(entityTookDamage);
             frame.Signals.PlayerKilled();
         }

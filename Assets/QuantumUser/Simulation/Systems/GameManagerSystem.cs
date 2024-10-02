@@ -69,7 +69,7 @@ namespace QuantumUser.Simulation.Systems
                 count++;
             }
             
-            return count == 1;
+            return count == 0;
         }
     }
 }

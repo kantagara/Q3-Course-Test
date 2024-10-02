@@ -68,6 +68,8 @@ MonoBehaviour:
       RawValue: 0
     MinAngularIntegration:
       RawValue: 0
+    MinContactInverseMass:
+      RawValue: 35
     SimplexMinBitShift: 0
     SimplexMaxBitShift: 2
     ShapeCastMaxIterations: 16
@@ -188,6 +190,9 @@ MonoBehaviour:
       type: 3}
   - Type: 5
     EntityPrototype: {fileID: 3097001405596171208, guid: 84e2fa5970d90194698270ed23fca240,
+      type: 3}
+  - Type: 6
+    EntityPrototype: {fileID: 3097001405596171208, guid: 20ed77e57b0ed844488d03ac2e6e2b24,
       type: 3}
 --- !u!114 &-7671801800668575351
 MonoBehaviour:

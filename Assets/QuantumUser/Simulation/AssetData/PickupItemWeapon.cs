@@ -6,7 +6,7 @@ namespace Quantum
         public override void PickupItem(Frame f, EntityRef entityBeingPickedUp, EntityRef entityPickingUp)
         {
             var weapon = f.Unsafe.GetPointer<Weapon>(entityPickingUp);
-            
+            var previousWeapon = weapon->Type;
             weapon->WeaponData = WeaponData;
             weapon->CooldownTime = 0;
             weapon->Type = WeaponData.WeaponType;
@@ -16,7 +16,7 @@ namespace Quantum
             lootDrop->WeaponLoot = f.SimulationConfig.WeaponEntityRefByType(weapon->Type).EntityPrototype;
             
             
-            f.Events.OnWeaponChanged(entityPickingUp, WeaponData.WeaponType);
+            f.Events.OnWeaponChanged(entityPickingUp, WeaponData.WeaponType, previousWeapon);
             f.Destroy(entityBeingPickedUp);
         }
     }

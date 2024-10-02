@@ -9,7 +9,6 @@ namespace Quantum
     {
         public void OnPlayerAdded(Frame f, PlayerRef player, bool firstTime)
         {
-            Log.Info("Here!");
             var playerEntity = CreatePlayer(f, player);
             f.Events.OnPlayerSpawned(playerEntity, player);
             SpawnPlayerOnRandomSpawnPoint(f, playerEntity);

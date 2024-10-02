@@ -22,7 +22,8 @@ enum WeaponType
     Revolver,
     Shotgun,
     SMG,
-    Sniper
+    Sniper,
+    Golden_AK
 }
 
 signal CreateBullet(EntityRef Owner,AssetRef<FiringWeaponData> Weapon);
@@ -43,7 +44,9 @@ event OnWeaponChanged
 {
     EntityRef Entity;
     WeaponType Type;
+    WeaponType PreviousWeapon;
 }
+
 
 event BulletHit
 {

@@ -61,6 +61,7 @@ namespace Quantum {
     Shotgun,
     SMG,
     Sniper,
+    Golden_AK,
   }
   [System.FlagsAttribute()]
   public enum InputButtons : int {
@@ -523,6 +524,28 @@ namespace Quantum {
     }
   }
   [StructLayout(LayoutKind.Explicit)]
+  public unsafe partial struct ShrinkingCircleState {
+    public const Int32 SIZE = 24;
+    public const Int32 ALIGNMENT = 8;
+    [FieldOffset(0)]
+    public FP TimeToNextState;
+    [FieldOffset(8)]
+    public CircleStateUnion CircleStateUnion;
+    public override Int32 GetHashCode() {
+      unchecked { 
+        var hash = 19937;
+        hash = hash * 31 + TimeToNextState.GetHashCode();
+        hash = hash * 31 + CircleStateUnion.GetHashCode();
+        return hash;
+      }
+    }
+    public static void Serialize(void* ptr, FrameSerializer serializer) {
+        var p = (ShrinkingCircleState*)ptr;
+        FP.Serialize(&p->TimeToNextState, serializer);
+        Quantum.CircleStateUnion.Serialize(&p->CircleStateUnion, serializer);
+    }
+  }
+  [StructLayout(LayoutKind.Explicit)]
   public unsafe partial struct _globals_ {
     public const Int32 SIZE = 840;
     public const Int32 ALIGNMENT = 8;
@@ -965,28 +988,6 @@ namespace Quantum {
     }
   }
   [StructLayout(LayoutKind.Explicit)]
-  public unsafe partial struct ShrinkingCircleState : Quantum.IComponent {
-    public const Int32 SIZE = 24;
-    public const Int32 ALIGNMENT = 8;
-    [FieldOffset(0)]
-    public FP TimeToNextState;
-    [FieldOffset(8)]
-    public CircleStateUnion CircleStateUnion;
-    public override Int32 GetHashCode() {
-      unchecked { 
-        var hash = 19937;
-        hash = hash * 31 + TimeToNextState.GetHashCode();
-        hash = hash * 31 + CircleStateUnion.GetHashCode();
-        return hash;
-      }
-    }
-    public static void Serialize(void* ptr, FrameSerializer serializer) {
-        var p = (ShrinkingCircleState*)ptr;
-        FP.Serialize(&p->TimeToNextState, serializer);
-        Quantum.CircleStateUnion.Serialize(&p->CircleStateUnion, serializer);
-    }
-  }
-  [StructLayout(LayoutKind.Explicit)]
   public unsafe partial struct SpawnPoint : Quantum.IComponent {
     public const Int32 SIZE = 4;
     public const Int32 ALIGNMENT = 4;
@@ -1143,8 +1144,6 @@ namespace Quantum {
       BuildSignalsArrayOnComponentRemoved<Quantum.PlayerStats>();
       BuildSignalsArrayOnComponentAdded<Quantum.ShrinkingCircle>();
       BuildSignalsArrayOnComponentRemoved<Quantum.ShrinkingCircle>();
-      BuildSignalsArrayOnComponentAdded<Quantum.ShrinkingCircleState>();
-      BuildSignalsArrayOnComponentRemoved<Quantum.ShrinkingCircleState>();
       BuildSignalsArrayOnComponentAdded<Quantum.SpawnPoint>();
       BuildSignalsArrayOnComponentRemoved<Quantum.SpawnPoint>();
       BuildSignalsArrayOnComponentAdded<Quantum.SpawnPointList>();
@@ -1316,7 +1315,7 @@ namespace Quantum {
       typeRegistry.Register(typeof(Quantum._globals_), Quantum._globals_.SIZE);
     }
     static partial void InitComponentTypeIdGen() {
-      ComponentTypeId.Reset(ComponentTypeId.BuiltInComponentCount + 14)
+      ComponentTypeId.Reset(ComponentTypeId.BuiltInComponentCount + 13)
         .AddBuiltInComponents()
         .Add<Quantum.Bullet>(Quantum.Bullet.Serialize, null, null, ComponentFlags.None)
         .Add<Quantum.Damageable>(Quantum.Damageable.Serialize, null, null, ComponentFlags.None)
@@ -1328,7 +1327,6 @@ namespace Quantum {
         .Add<Quantum.PlayerLink>(Quantum.PlayerLink.Serialize, null, null, ComponentFlags.None)
         .Add<Quantum.PlayerStats>(Quantum.PlayerStats.Serialize, null, null, ComponentFlags.None)
         .Add<Quantum.ShrinkingCircle>(Quantum.ShrinkingCircle.Serialize, null, null, ComponentFlags.Singleton)
-        .Add<Quantum.ShrinkingCircleState>(Quantum.ShrinkingCircleState.Serialize, null, null, ComponentFlags.None)
         .Add<Quantum.SpawnPoint>(Quantum.SpawnPoint.Serialize, null, null, ComponentFlags.None)
         .Add<Quantum.SpawnPointList>(Quantum.SpawnPointList.Serialize, null, Quantum.SpawnPointList.OnRemoved, ComponentFlags.Singleton)
         .Add<Quantum.Weapon>(Quantum.Weapon.Serialize, null, null, ComponentFlags.None)

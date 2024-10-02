@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ede98cc0e3be8dc4493d069fa028cafd, type: 3}
+  m_Name: Golden AK
+  m_EditorClassIdentifier: 
+  Identifier:
+    Path: QuantumUser/Simulation/Data/Weapons/Golden AK
+    Guid:
+      Value: 456085211391209598
+  WeaponSprite: {fileID: 21300000, guid: 94d88ac906b982e42a5d32d29e2c8d34, type: 3}
+  WeaponType: 6
+  Offset:
+    X:
+      RawValue: 5571
+    Y:
+      RawValue: 58982
+    Z:
+      RawValue: 131072
+  Cooldown:
+    RawValue: 6554
+  Damage:
+    RawValue: 1966080
+  Ammo: 30
+  BulletData: {fileID: 11400000, guid: 0ab806a574bd49649893f5611430f120, type: 2}

@@ -318,15 +318,10 @@ namespace Quantum.Prototypes {
   }
   [System.SerializableAttribute()]
   [Quantum.Prototypes.Prototype(typeof(Quantum.ShrinkingCircleState))]
-  public unsafe partial class ShrinkingCircleStatePrototype : ComponentPrototype<Quantum.ShrinkingCircleState> {
+  public unsafe partial class ShrinkingCircleStatePrototype : StructPrototype {
     public FP TimeToNextState;
     public Quantum.Prototypes.CircleStateUnionPrototype CircleStateUnion;
     partial void MaterializeUser(Frame frame, ref Quantum.ShrinkingCircleState result, in PrototypeMaterializationContext context);
-    public override Boolean AddToEntity(FrameBase f, EntityRef entity, in PrototypeMaterializationContext context) {
-        Quantum.ShrinkingCircleState component = default;
-        Materialize((Frame)f, ref component, in context);
-        return f.Set(entity, component) == SetResult.ComponentAdded;
-    }
     public void Materialize(Frame frame, ref Quantum.ShrinkingCircleState result, in PrototypeMaterializationContext context = default) {
         result.TimeToNextState = this.TimeToNextState;
         this.CircleStateUnion.Materialize(frame, ref result.CircleStateUnion, in context);
